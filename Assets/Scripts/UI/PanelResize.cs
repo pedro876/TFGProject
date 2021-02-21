@@ -36,26 +36,22 @@ public class PanelResize : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        Debug.Log("pointer enter");
         Cursor.SetCursor(resizeCursorTex, Vector2.zero, CursorMode.Auto);
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        Debug.Log("pointer exit");
         if(!drag)
             Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
     }
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        Debug.Log("pointer down");
         drag = true;
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        Debug.Log("pointer up");
         drag = false;
         Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
     }
