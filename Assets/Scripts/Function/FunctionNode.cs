@@ -2,17 +2,19 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FuncNode
+public class FunctionNode
 {
-    public FuncNode parent;
-    public FuncNode childLeft;
-    public FuncNode childRight;
+    public FunctionNode parent;
+    public FunctionNode childLeft;
+    public FunctionNode childRight;
     public bool isOperator;
     public int operation;
     public float value;
     public bool isVariable;
     public int variable;
     public bool variablePositive = true;
+    public bool woreParenthesis = false;
+    public int parenthesisLevel = 0;
 
     private static List<string> operators = new List<string>()
     {
@@ -43,9 +45,10 @@ public class FuncNode
         "inf",
     };
     
-    public FuncNode(FuncNode parent)
+    public FunctionNode(FunctionNode parent, int level = 0)
     {
         this.parent = parent;
+        parenthesisLevel = 0;
     }
 
     private bool isFloat()
@@ -53,7 +56,7 @@ public class FuncNode
         return !isOperator && !isVariable;
     }
 
-    private void CopyNode(FuncNode node)
+    private void CopyNode(FunctionNode node)
     {
         value = node.value;
         isVariable = node.isVariable;
@@ -100,13 +103,26 @@ public class FuncNode
         return true;
     }
 
+    private bool IsLeaf()
+    {
+        return childLeft == null;
+    }
+
     public void ProcessFunc(string func)
     {
+        
         //Remove external parenthesis
-        if ((func.StartsWith("(") || func.StartsWith(")")) && (func.EndsWith("(") || func.EndsWith(")")))
+        if(func.Length >= 2)
         {
-            func = func.Substring(1, func.Length - 2);
+            woreParenthesis = false;
+            if ((func.StartsWith("(") || func.StartsWith(")")) && (func.EndsWith("(") || func.EndsWith(")")))
+            {
+                func = func.Substring(1, func.Length - 2);
+                woreParenthesis = true;
+                parenthesisLevel++;
+            }
         }
+        
 
         //Find possible breakpoints
         int[] coincidences = new int[operators.Count];
@@ -149,8 +165,8 @@ public class FuncNode
                     right = right.Substring(1, right.Length - 2);
                 }*/
 
-                childLeft = new FuncNode(this);
-                childRight = new FuncNode(this);
+                childLeft = new FunctionNode(this, parenthesisLevel);
+                childRight = new FunctionNode(this, parenthesisLevel);
                 childLeft.ProcessFunc(left);
                 childRight.ProcessFunc(right);
 
@@ -160,7 +176,7 @@ public class FuncNode
 
                 if (operators[operation] == "-")
                 {
-                    if (childRight.NeedsParenthesis())
+                    if (childRight.NeedsParenthesis() && !childRight.woreParenthesis)
                     {
                         if (operators[childRight.operation] == "-")
                         {
@@ -190,8 +206,22 @@ public class FuncNode
         }
     }
 
+    private bool DeepSimplify()
+    {
+        if (IsLeaf())
+        {
+            return true;
+        } else
+        {
+            childLeft.DeepSimplify();
+            childRight.DeepSimplify();
+            return TrySimplify();
+        }
+    }
+
     private bool TrySimplify()
     {
+        if (childLeft == null) return false;
         bool simplified = false;
         string op = operators[operation];
         if (!childLeft.isOperator && !childLeft.isVariable && !childRight.isOperator && !childRight.isVariable)

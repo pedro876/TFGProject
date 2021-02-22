@@ -26,7 +26,6 @@ public class FunctionReader : MonoBehaviour
             yield return new WaitForSeconds(0.3f);
 
         }
-        
     }
 
     /*
@@ -104,9 +103,11 @@ public class FunctionReader : MonoBehaviour
 
         //Check if a multiplication is omitted for parenthesis
         string aux = ""+definition[0];
-        string symbols = "+-*^/";
+        string symbols = "+-*^/()";
+        //string numberSymbols = "0123456789.";
         for(int i = 1; i < definition.Length-1; i++)
         {
+            //if (F.Contains("" + definition[i]) && numberSymbols.Contains("" + definition[i - 1])) aux += '*';
             if (definition[i] == '(' && !symbols.Contains("" + definition[i - 1])) aux += '*';
             aux += definition[i];
             if (definition[i] == ')' && !symbols.Contains("" + definition[i + 1])) aux += "*";
@@ -122,29 +123,35 @@ public class FunctionReader : MonoBehaviour
         aux = "";
         string cutDef = definition;
         bool previousVar = false;
-        while(cutDef.Length > 0)
+        bool previousNumber = false;
+        string numberSymbols = "0123456789.";
+        while (cutDef.Length > 0)
         {
             bool isVariable = false;
-            for (int j = 0; j < FuncNode.variables.Count; j++)
+            for (int j = 0; j < FunctionNode.variables.Count; j++)
             {
-                string variable = FuncNode.variables[j];
+                string variable = FunctionNode.variables[j];
                 if (cutDef.StartsWith(variable))
                 {
                     isVariable = true;
-                    if (previousVar)
+                    if (previousVar || previousNumber)
                     {
-                        aux += "*";
+                        aux += '*';
                     }
                     aux += variable;
+                    previousNumber = false;
                     cutDef = cutDef.Substring(variable.Length);
+                    if(cutDef.Length > 0 && numberSymbols.Contains("" + cutDef[0])) aux += '*';
                     break;
                 }
                 
             }
             previousVar = isVariable;
+            
             if (!previousVar)
             {
                 aux += cutDef[0];
+                previousNumber = numberSymbols.Contains(""+cutDef[0]);
                 cutDef = cutDef.Substring(1);
             }
         }

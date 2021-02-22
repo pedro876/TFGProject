@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Function
 {
-    public FuncNode rootNode;
+    public FunctionNode rootNode;
     public string name;
     public string declaration;
     public string originalDefinition;
@@ -15,9 +15,14 @@ public class Function
         SetData(name, declaration, definition);
     }
 
+    public Function Clone()
+    {
+        return new Function(name, declaration, finalDefinition);
+    }
+
     public void SetData(string name, string declaration, string definition)
     {
-        rootNode = new FuncNode(null);
+        rootNode = new FunctionNode(null);
         this.declaration = declaration;
         rootNode.ProcessFunc(definition);
         originalDefinition = definition;
