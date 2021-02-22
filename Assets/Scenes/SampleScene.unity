@@ -1234,11 +1234,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 1639588111}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 80c2ab9ac205817479f920435c860877, type: 3}
+  m_Script: {fileID: 11500000, guid: 29e325e1bbec79847850952ffbd572b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   inputField: {fileID: 1402906950}
-  processedFuncDisplay: {fileID: 1803921160}
+  displayText: {fileID: 1803921160}
 --- !u!1 &1670882455
 GameObject:
   m_ObjectHideFlags: 0

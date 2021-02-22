@@ -3,21 +3,18 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
-public class FunctionReader : MonoBehaviour
+public class FunctionReader
 {
-    [SerializeField] TMP_InputField inputField;
-    [SerializeField] TextMeshProUGUI processedFuncDisplay;
+    /*[SerializeField] TMP_InputField inputField;
+    [SerializeField] TextMeshProUGUI processedFuncDisplay;*/
 
-    string funcBytecode = "";
-    Function currentFunction;
-
-    private void Start()
+    /*private void Start()
     {
         //ProcessFunc(inputField.text);
         StartCoroutine(UpdateFuncCoroutine());
-    }
+    }*/
 
-    IEnumerator UpdateFuncCoroutine()
+    /*IEnumerator UpdateFuncCoroutine()
     {
         while (true)
         {
@@ -26,25 +23,26 @@ public class FunctionReader : MonoBehaviour
             yield return new WaitForSeconds(0.3f);
 
         }
-    }
+    }*/
 
     /*
      * Processes a function based on human comprehensible text
      */
-    private Function ProcessFunc(string funcText)
+    public Function ProcessFunc(string funcText/*, out int displacement*/)
     {
+        //displacement = 0;
         funcText = funcText.ToLower();
         string rawFunc = GetRawFunc(ref funcText);
         string[] parts = rawFunc.Split('=');
         if (parts.Length < 2) return null;
         string name;
-        int displacement;
-        string declaration = ProcessDeclaration(parts[0], ref parts[1], out name, out displacement);
+        //int displacement;
+        string declaration = ProcessDeclaration(parts[0], ref parts[1], out name/*, out displacement*/);
         string definition = ProcessDefinition(parts[1]);
 
         Function func = new Function(name, declaration, definition);
-        inputField.text = declaration +" = "+ parts[1];
-        if(displacement > 0)
+        //inputField.text = declaration +" = "+ parts[1];
+        /*if(displacement > 0)
         {
             inputField.selectionAnchorPosition += displacement;
             inputField.selectionFocusPosition += displacement;
@@ -62,9 +60,8 @@ public class FunctionReader : MonoBehaviour
     /*
      * Check if some coordinate variable is missing in the declaration and fix it
      */
-    private string ProcessDeclaration(string declaration, ref string definition, out string name, out int displacement)
+    private string ProcessDeclaration(string declaration, ref string definition, out string name/*, out int displacement*/)
     {
-        string originalDeclaration = declaration;
         string funcName = "";
         int i = 0;
         while (i < declaration.Length && declaration[i] != '(')
@@ -90,7 +87,6 @@ public class FunctionReader : MonoBehaviour
         }
         declaration += ')';
         name = funcName;
-        displacement = declaration.Length - originalDeclaration.Length;
         return declaration;
     }
 
@@ -104,10 +100,8 @@ public class FunctionReader : MonoBehaviour
         //Check if a multiplication is omitted for parenthesis
         string aux = ""+definition[0];
         string symbols = "+-*^/()";
-        //string numberSymbols = "0123456789.";
         for(int i = 1; i < definition.Length-1; i++)
         {
-            //if (F.Contains("" + definition[i]) && numberSymbols.Contains("" + definition[i - 1])) aux += '*';
             if (definition[i] == '(' && !symbols.Contains("" + definition[i - 1])) aux += '*';
             aux += definition[i];
             if (definition[i] == ')' && !symbols.Contains("" + definition[i + 1])) aux += "*";

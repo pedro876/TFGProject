@@ -8,7 +8,7 @@ public class FunctionNode
     public FunctionNode childLeft;
     public FunctionNode childRight;
     public bool isOperator;
-    public int operation;
+    //public int operation;
     public float value;
     public bool isVariable;
     public int variable;
@@ -16,15 +16,24 @@ public class FunctionNode
     public bool woreParenthesis = false;
     public int parenthesisLevel = 0;
 
-    private static List<string> operators = new List<string>()
+    public enum Operations
+    {
+        Sub,
+        Add,
+        Mult,
+        Div,
+        Pow,
+    }
+    public Operations operation = Operations.Sub;
+
+    /*private static List<string> operators = new List<string>()
     {
         "-",
         "+",
         "*",
         "/",
         "^",
-        //"(",
-    };
+    };*/
 
     private static List<int> operatorPriorities = new List<int>()
     {
@@ -73,7 +82,7 @@ public class FunctionNode
         if (parent == null) return false;
         if(parent.childRight == this)
         {
-            if (operators[parent.operation] == "-")
+            if (/*parent.operation == Operations.Sub*/operators[parent.operation] == "-")
             {
                 if (isOperator || (!isVariable && value < 0f) || (isVariable && !variablePositive)) return true;
             }
@@ -348,7 +357,7 @@ public class FunctionNode
                     case "z":
                         val = z;
                         break;
-                    case "pi":
+                    /*case "pi":
                         val = Mathf.PI;
                         break;
                     case "e":
@@ -356,9 +365,9 @@ public class FunctionNode
                         break;
                     case "inf":
                         val = Mathf.Infinity * 0.8f;
-                        break;
+                        break;*/
                     default:
-                        val = 0f;
+                        FunctionManager.TryGetVariable(variables[variable], out val);
                         break;
                 }
                 val = variablePositive ? val : -val;

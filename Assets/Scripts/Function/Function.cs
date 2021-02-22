@@ -6,6 +6,7 @@ public class Function
 {
     public FunctionNode rootNode;
     public string name;
+    //public string originalDeclaration;
     public string declaration;
     public string originalDefinition;
     public string finalDefinition;
@@ -22,10 +23,12 @@ public class Function
 
     public void SetData(string name, string declaration, string definition)
     {
+        originalDefinition = definition;
+        this.name = name;
+
         rootNode = new FunctionNode(null);
         this.declaration = declaration;
         rootNode.ProcessFunc(definition);
-        originalDefinition = definition;
         finalDefinition = rootNode.ToString();
     }
 
