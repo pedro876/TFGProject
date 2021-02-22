@@ -1,0 +1,107 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!687078895 &4343727234628468602
+SpriteAtlas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: IconAtlas
+  m_EditorData:
+    serializedVersion: 2
+    textureSettings:
+      serializedVersion: 2
+      anisoLevel: 1
+      compressionQuality: 50
+      maxTextureSize: 2048
+      textureCompression: 0
+      filterMode: 1
+      generateMipMaps: 0
+      readable: 0
+      crunchedCompression: 0
+      sRGB: 1
+    platformSettings:
+    - serializedVersion: 3
+      m_BuildTarget: Android
+      m_MaxTextureSize: 2048
+      m_ResizeAlgorithm: 0
+      m_TextureFormat: 47
+      m_TextureCompression: 1
+      m_CompressionQuality: 50
+      m_CrunchedCompression: 0
+      m_AllowsAlphaSplitting: 0
+      m_Overridden: 0
+      m_AndroidETC2FallbackOverride: 0
+      m_ForceMaximumCompressionQuality_BC6H_BC7: 0
+    - serializedVersion: 3
+      m_BuildTarget: DefaultTexturePlatform
+      m_MaxTextureSize: 2048
+      m_ResizeAlgorithm: 0
+      m_TextureFormat: -1
+      m_TextureCompression: 1
+      m_CompressionQuality: 50
+      m_CrunchedCompression: 1
+      m_AllowsAlphaSplitting: 0
+      m_Overridden: 0
+      m_AndroidETC2FallbackOverride: 0
+      m_ForceMaximumCompressionQuality_BC6H_BC7: 0
+    packingSettings:
+      serializedVersion: 2
+      padding: 8
+      blockOffset: 1
+      allowAlphaSplitting: 0
+      enableRotation: 0
+      enableTightPacking: 0
+    variantMultiplier: 1
+    packables:
+    - {fileID: 2800000, guid: 8d615e75c462c4140a14f43a88768a7a, type: 3}
+    - {fileID: 2800000, guid: 260353225010c8941889fcd826b46809, type: 3}
+    - {fileID: 2800000, guid: 950c216787f57f74e8098eca45ad4021, type: 3}
+    - {fileID: 2800000, guid: 714ff5729e698d6489186a8df9e2c4d3, type: 3}
+    - {fileID: 2800000, guid: 0dfa514cb5809d54f87578e7eebb6914, type: 3}
+    - {fileID: 2800000, guid: eab68242c7e3111428aa02051b99de90, type: 3}
+    - {fileID: 2800000, guid: c4dcb52382542f045b264bf5efc232ed, type: 3}
+    - {fileID: 2800000, guid: ec3dff00d451bc6409450769d1a52bb2, type: 3}
+    - {fileID: 2800000, guid: f1c1acfb503767b49a6b395a3a4b15d5, type: 3}
+    - {fileID: 2800000, guid: 2efbdce920ab1364db5b80e0f2dc5d7e, type: 3}
+    - {fileID: 2800000, guid: 9a51786c23934b44491286c32e0cf654, type: 3}
+    - {fileID: 2800000, guid: 0a71f872b97a14347be630dfd0cff6b4, type: 3}
+    - {fileID: 2800000, guid: 15be0813c9f94ac4d839120097c5d7b1, type: 3}
+    - {fileID: 2800000, guid: 63d1ecc60dce8ae43bf26863a983f445, type: 3}
+    - {fileID: 2800000, guid: 6306f43fc32678d44b8b2a70a7b1f4ae, type: 3}
+    bindAsDefault: 1
+  m_MasterAtlas: {fileID: 0}
+  m_PackedSprites:
+  - {fileID: 21300000, guid: ec3dff00d451bc6409450769d1a52bb2, type: 3}
+  - {fileID: 21300000, guid: 260353225010c8941889fcd826b46809, type: 3}
+  - {fileID: 21300000, guid: eab68242c7e3111428aa02051b99de90, type: 3}
+  - {fileID: 21300000, guid: 714ff5729e698d6489186a8df9e2c4d3, type: 3}
+  - {fileID: 21300000, guid: 0a71f872b97a14347be630dfd0cff6b4, type: 3}
+  - {fileID: 21300000, guid: 15be0813c9f94ac4d839120097c5d7b1, type: 3}
+  - {fileID: 21300000, guid: c4dcb52382542f045b264bf5efc232ed, type: 3}
+  - {fileID: 21300000, guid: 8d615e75c462c4140a14f43a88768a7a, type: 3}
+  - {fileID: 21300000, guid: 63d1ecc60dce8ae43bf26863a983f445, type: 3}
+  - {fileID: 21300000, guid: 950c216787f57f74e8098eca45ad4021, type: 3}
+  - {fileID: 21300000, guid: 2efbdce920ab1364db5b80e0f2dc5d7e, type: 3}
+  - {fileID: 21300000, guid: f1c1acfb503767b49a6b395a3a4b15d5, type: 3}
+  - {fileID: 21300000, guid: 0dfa514cb5809d54f87578e7eebb6914, type: 3}
+  - {fileID: 21300000, guid: 9a51786c23934b44491286c32e0cf654, type: 3}
+  - {fileID: 21300000, guid: 6306f43fc32678d44b8b2a70a7b1f4ae, type: 3}
+  m_PackedSpriteNamesToIndex:
+  - next
+  - box
+  - home
+  - exit
+  - return
+  - tutorial
+  - lock
+  - back
+  - replay
+  - config
+  - play
+  - pause
+  - gyro
+  - ranking
+  - camera
+  m_Tag: IconAtlas
+  m_IsVariant: 0

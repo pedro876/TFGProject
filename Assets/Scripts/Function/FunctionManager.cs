@@ -6,10 +6,7 @@ public class FunctionManager
 {
     private static FunctionReader reader = new FunctionReader();
 
-    public static Dictionary<string, Function> functions = new Dictionary<string, Function>()
-    {
-
-    };
+    public static Dictionary<string, Function> functions = new Dictionary<string, Function>();
 
     private static Dictionary<string, float> variables = new Dictionary<string, float>()
     {
@@ -39,7 +36,7 @@ public class FunctionManager
         Function f = reader.ProcessFunc(func);
         if(f != null)
         {
-            functions[func] = f;
+            functions[f.name] = f;
         }
         return f;
     }
