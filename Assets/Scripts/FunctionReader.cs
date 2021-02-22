@@ -34,6 +34,7 @@ public class FunctionReader : MonoBehaviour
      */
     private Function ProcessFunc(string funcText)
     {
+        funcText = funcText.ToLower();
         string rawFunc = GetRawFunc(ref funcText);
         string[] parts = rawFunc.Split('=');
         if (parts.Length < 2) return null;
@@ -55,7 +56,6 @@ public class FunctionReader : MonoBehaviour
             inputField.selectionAnchorPosition += displacement;
         }*/
         
-        Debug.Log(inputField.selectionAnchorPosition);
         return func;
     }
 

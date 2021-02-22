@@ -14,17 +14,17 @@ public class FuncNode
     public int variable;
     public bool variablePositive = true;
 
-    private static string[] operators = new string[]
+    private static List<string> operators = new List<string>()
     {
-        "+",
         "-",
+        "+",
         "*",
         "/",
         "^",
         //"(",
     };
 
-    private static int[] operatorPriorities = new int[]
+    private static List<int> operatorPriorities = new List<int>()
     {
         0,
         0,
@@ -90,9 +90,12 @@ public class FuncNode
     {
         if(parent != null && isFloat() && value == 0f)
         {
-            string op = operators[parent.operation];
-            if ((value <= 0f && isFloat()) || (isVariable && !variablePositive)) return true;
-            if (op == "+" || op == "-") return false;
+            //if ((value <= 0f && isFloat()) || (isVariable && !variablePositive)) return true;
+            /*if(parent != null)
+            {*/
+                string op = operators[parent.operation];
+                if (op == "+" || op == "-") return false;
+            //}
         }
         return true;
     }
@@ -106,7 +109,7 @@ public class FuncNode
         }
 
         //Find possible breakpoints
-        int[] coincidences = new int[operators.Length];
+        int[] coincidences = new int[operators.Count];
         for (int i = 0; i < coincidences.Length; i++) coincidences[i] = -1;
         int funcLength = func.Length;
         int depth = 0;
@@ -154,6 +157,21 @@ public class FuncNode
                 isOperator = true;
                 operation = cIdx;
                 isVariable = false;
+
+                if (operators[operation] == "-")
+                {
+                    if (childRight.NeedsParenthesis())
+                    {
+                        if (operators[childRight.operation] == "-")
+                        {
+                            childRight.operation = operators.IndexOf("+");
+                        }
+                        else if (operators[childRight.operation] == "+")
+                        {
+                            childRight.operation = operators.IndexOf("-");
+                        }
+                    }
+                }
 
                 TrySimplify();
             }
