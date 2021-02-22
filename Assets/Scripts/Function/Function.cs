@@ -6,10 +6,10 @@ public class Function
 {
     public FunctionNode rootNode;
     public string name;
-    //public string originalDeclaration;
     public string declaration;
     public string originalDefinition;
     public string finalDefinition;
+    
 
     public Function(string name, string declaration, string definition)
     {
@@ -19,6 +19,13 @@ public class Function
     public Function Clone()
     {
         return new Function(name, declaration, finalDefinition);
+    }
+
+    public float Solve(float x = 0f, float y = 0f, float z = 0f)
+    {
+        float result = 0f;
+        if (rootNode != null) result = rootNode.Solve(x, y, z);
+        return result;
     }
 
     public void SetData(string name, string declaration, string definition)

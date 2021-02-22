@@ -5,53 +5,20 @@ using TMPro;
 
 public class FunctionReader
 {
-    /*[SerializeField] TMP_InputField inputField;
-    [SerializeField] TextMeshProUGUI processedFuncDisplay;*/
-
-    /*private void Start()
-    {
-        //ProcessFunc(inputField.text);
-        StartCoroutine(UpdateFuncCoroutine());
-    }*/
-
-    /*IEnumerator UpdateFuncCoroutine()
-    {
-        while (true)
-        {
-            Function func = ProcessFunc(inputField.text);
-            processedFuncDisplay.text = func != null ? func.ToString() : "invalid func";
-            yield return new WaitForSeconds(0.3f);
-
-        }
-    }*/
-
     /*
-     * Processes a function based on human comprehensible text
+     * Creates a function based on a human-comprehensible mathematical function
      */
-    public Function ProcessFunc(string funcText/*, out int displacement*/)
+    public Function ProcessFunc(string funcText)
     {
-        //displacement = 0;
         funcText = funcText.ToLower();
         string rawFunc = GetRawFunc(ref funcText);
         string[] parts = rawFunc.Split('=');
         if (parts.Length < 2) return null;
         string name;
-        //int displacement;
-        string declaration = ProcessDeclaration(parts[0], ref parts[1], out name/*, out displacement*/);
+        string declaration = ProcessDeclaration(parts[0], ref parts[1], out name);
         string definition = ProcessDefinition(parts[1]);
 
         Function func = new Function(name, declaration, definition);
-        //inputField.text = declaration +" = "+ parts[1];
-        /*if(displacement > 0)
-        {
-            inputField.selectionAnchorPosition += displacement;
-            inputField.selectionFocusPosition += displacement;
-        } /*else if (displacement < 0)
-        {
-            Debug.Log("displacement: "+displacement);
-            inputField.selectionFocusPosition += displacement;
-            inputField.selectionAnchorPosition += displacement;
-        }*/
         
         return func;
     }
@@ -60,7 +27,7 @@ public class FunctionReader
     /*
      * Check if some coordinate variable is missing in the declaration and fix it
      */
-    private string ProcessDeclaration(string declaration, ref string definition, out string name/*, out int displacement*/)
+    private string ProcessDeclaration(string declaration, ref string definition, out string name)
     {
         string funcName = "";
         int i = 0;

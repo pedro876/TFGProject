@@ -6,7 +6,7 @@ public class FunctionManager
 {
     private static FunctionReader reader = new FunctionReader();
 
-    private static Dictionary<string, Function> functions = new Dictionary<string, Function>()
+    public static Dictionary<string, Function> functions = new Dictionary<string, Function>()
     {
 
     };
@@ -24,10 +24,14 @@ public class FunctionManager
         return variables.TryGetValue(key, out result);
     }
 
+    public static bool HasVariable(string key)
+    {
+        return variables.ContainsKey(key);
+    }
+
     public static Function AddFunction(Function func)
     {
         functions[func.name] = func;
-        //functions.Add(func.name, func);
         return func;
     }
     public static Function AddFunction(string func)
@@ -36,7 +40,6 @@ public class FunctionManager
         if(f != null)
         {
             functions[func] = f;
-            //functions.Add(f.name, f);
         }
         return f;
     }

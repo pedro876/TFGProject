@@ -36,7 +36,6 @@ public class FunctionPanel : MonoBehaviour
 
                     //Display processed function
                     displayText.text = f.ToString();
-
                 }
             }
 

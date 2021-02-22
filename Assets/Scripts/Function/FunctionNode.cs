@@ -4,44 +4,39 @@ using UnityEngine;
 
 public class FunctionNode
 {
-    public FunctionNode parent;
-    public FunctionNode childLeft;
-    public FunctionNode childRight;
-    public bool isOperator;
-    //public int operation;
-    public float value;
-    public bool isVariable;
-    public int variable;
-    public bool variablePositive = true;
-    public bool woreParenthesis = false;
-    public int parenthesisLevel = 0;
+    private FunctionNode parent;
+    private FunctionNode childLeft;
+    private FunctionNode childRight;
+    private bool isOperator;
+    private string operation = "+";
+    private float value;
+    private bool isVariable;
+    private string variable;
+    private bool variablePositive = true;
+    private bool isSubFunction = false;
+    private string subFunction = "";
 
-    public enum Operations
-    {
-        Sub,
-        Add,
-        Mult,
-        Div,
-        Pow,
-    }
-    public Operations operation = Operations.Sub;
+    private bool woreParenthesis = false;
+    private int parenthesisLevel = 0;
 
-    /*private static List<string> operators = new List<string>()
+    #region static
+
+    private static List<string> operators = new List<string>()
     {
         "-",
         "+",
         "*",
         "/",
         "^",
-    };*/
+    };
 
-    private static List<int> operatorPriorities = new List<int>()
+    private static Dictionary<string, int> operatorPriorities = new Dictionary<string, int>()
     {
-        0,
-        0,
-        1,
-        1,
-        1,
+        { "-", 0 },
+        { "+", 0 },
+        { "*", 1 },
+        { "/", 1 },
+        { "^", 1 },
     };
 
     public static List<string> variables = new List<string>
@@ -49,20 +44,21 @@ public class FunctionNode
         "x",
         "y",
         "z",
-        "pi",
-        "e",
-        "inf",
     };
-    
+
+    public static List<string> subFunctions = new List<string>
+    {
+        "cos",
+        "sin",
+        "abs",
+    };
+
+    #endregion
+
     public FunctionNode(FunctionNode parent, int level = 0)
     {
         this.parent = parent;
         parenthesisLevel = 0;
-    }
-
-    private bool isFloat()
-    {
-        return !isOperator && !isVariable;
     }
 
     private void CopyNode(FunctionNode node)
@@ -77,12 +73,19 @@ public class FunctionNode
         childRight = node.childRight;
     }
 
+    #region complexProperties
+
+    private bool isFloat()
+    {
+        return !isOperator && !isVariable && !isSubFunction;
+    }
+
     private bool NeedsParenthesis()
     {
         if (parent == null) return false;
         if(parent.childRight == this)
         {
-            if (/*parent.operation == Operations.Sub*/operators[parent.operation] == "-")
+            if (parent.operation == "-")
             {
                 if (isOperator || (!isVariable && value < 0f) || (isVariable && !variablePositive)) return true;
             }
@@ -102,24 +105,21 @@ public class FunctionNode
     {
         if(parent != null && isFloat() && value == 0f)
         {
-            //if ((value <= 0f && isFloat()) || (isVariable && !variablePositive)) return true;
-            /*if(parent != null)
-            {*/
-                string op = operators[parent.operation];
-                if (op == "+" || op == "-") return false;
-            //}
+            string op = parent.operation;
+            if (op == "+" || op == "-") return false;
         }
         return true;
     }
 
     private bool IsLeaf()
     {
-        return childLeft == null;
+        return childLeft == null && childRight == null && !isSubFunction;
     }
+
+    #endregion
 
     public void ProcessFunc(string func)
     {
-        
         //Remove external parenthesis
         if(func.Length >= 2)
         {
@@ -165,40 +165,37 @@ public class FunctionNode
                 string left = breakPoint == 0 ? "0.0" : func.Substring(0, breakPoint);
                 string right = breakPoint == func.Length-1 ? "0.0" : func.Substring(breakPoint + 1);
 
-                /*if((left.StartsWith("(") || left.StartsWith(")")) && (left.EndsWith("(") || left.EndsWith(")")))
+                isSubFunction = subFunctions.Contains(left) || FunctionManager.functions.ContainsKey(left);
+                if (isSubFunction)
                 {
-                    left = left.Substring(1, left.Length - 2);
-                }
-                if ((right.StartsWith("(") || right.StartsWith(")")) && (right.EndsWith("(") || right.EndsWith(")")))
+                    subFunction = left;
+                    isVariable = false;
+                    isOperator = false;
+                    childRight = new FunctionNode(this, parenthesisLevel+1);
+                    childRight.ProcessFunc(right);
+                    
+                } else
                 {
-                    right = right.Substring(1, right.Length - 2);
-                }*/
+                    childLeft = new FunctionNode(this, parenthesisLevel);
+                    childRight = new FunctionNode(this, parenthesisLevel);
+                    childLeft.ProcessFunc(left);
+                    childRight.ProcessFunc(right);
 
-                childLeft = new FunctionNode(this, parenthesisLevel);
-                childRight = new FunctionNode(this, parenthesisLevel);
-                childLeft.ProcessFunc(left);
-                childRight.ProcessFunc(right);
+                    isOperator = true;
+                    operation = operators[cIdx];
+                    isVariable = false;
 
-                isOperator = true;
-                operation = cIdx;
-                isVariable = false;
-
-                if (operators[operation] == "-")
-                {
-                    if (childRight.NeedsParenthesis() && !childRight.woreParenthesis)
+                    if (operation == "-")
                     {
-                        if (operators[childRight.operation] == "-")
+                        if (childRight.NeedsParenthesis() && !childRight.woreParenthesis)
                         {
-                            childRight.operation = operators.IndexOf("+");
-                        }
-                        else if (operators[childRight.operation] == "+")
-                        {
-                            childRight.operation = operators.IndexOf("-");
+                            if (childRight.operation == "-") childRight.operation = "+";
+                            else if (childRight.operation == "+") childRight.operation = "-";
                         }
                     }
-                }
 
-                TrySimplify();
+                    TrySimplify();
+                }
             }
             cIdx++;
         }
@@ -206,14 +203,23 @@ public class FunctionNode
         //If it is not an operation (no breakpoint)
         if (!foundBreakPoint)
         {
-            variable = variables.IndexOf(func);
-            isVariable = variable >= 0;
-            variablePositive = true;
+            isVariable = false;
             isOperator = false;
+            variablePositive = true;
+
+            if (variables.Contains(func) || FunctionManager.HasVariable(func))
+            {
+                variable = func;
+                isVariable = true;
+            }
+            
+
             if (isVariable) value = 0.0f;
             else if (!float.TryParse(func, out value)) value = 0.0f;
         }
     }
+
+    #region Simplify
 
     private bool DeepSimplify()
     {
@@ -222,23 +228,24 @@ public class FunctionNode
             return true;
         } else
         {
-            childLeft.DeepSimplify();
-            childRight.DeepSimplify();
+            childLeft?.DeepSimplify();
+            childRight?.DeepSimplify();
             return TrySimplify();
         }
     }
 
     private bool TrySimplify()
     {
-        if (childLeft == null) return false;
+        if (IsLeaf()) return false;
+        if (isSubFunction || (parent != null && parent.isSubFunction)) return false;
         bool simplified = false;
-        string op = operators[operation];
+        string op = operation;
         if (!childLeft.isOperator && !childLeft.isVariable && !childRight.isOperator && !childRight.isVariable)
         {
             value = Solve();
             isOperator = false;
             isVariable = false;
-            operation = 0;
+            operation = "+";
             childLeft = null;
             childRight = null;
             simplified = true;
@@ -261,7 +268,7 @@ public class FunctionNode
                 isOperator = false;
                 simplified = true;
                 isVariable = true;
-                variable = variables.IndexOf("inf");
+                variable = "inf";
                 value = 0f;
                 childLeft = null;
                 childRight = null;
@@ -321,24 +328,41 @@ public class FunctionNode
         return simplified;
     }
 
+    #endregion
+
     public float Solve(float x = 0f, float y = 0f, float z = 0f)
     {
+        if (isSubFunction)
+        {
+            float rightValue = 0f;
+            if(childRight != null)
+            {
+                rightValue = childRight.Solve(x, y, z);
+            }
+            switch (subFunction)
+            {
+                case "sin": return Mathf.Sin(rightValue);
+                case "cos": return Mathf.Cos(rightValue);
+                case "abs": return Mathf.Abs(rightValue);
+                default:
+                    Function subF;
+                    if(FunctionManager.functions.TryGetValue(subFunction, out subF)){
+                        rightValue = subF.rootNode.Solve(x, y, z);
+                    }
+                    return rightValue;
+            }
+        }
         if (isOperator)
         {
             float leftValue = childLeft.Solve(x, y, z);
             float rightValue = childRight.Solve(x, y, z);
-            switch (operators[operation])
+            switch (operation)
             {
-                case "+":
-                    return leftValue + rightValue;
-                case "-":
-                    return leftValue - rightValue;
-                case "*":
-                    return leftValue * rightValue;
-                case "/":
-                    return leftValue / rightValue;
-                case "^":
-                    return Mathf.Pow(leftValue, rightValue);
+                case "+": return leftValue + rightValue;
+                case "-": return leftValue - rightValue;
+                case "*": return leftValue * rightValue;
+                case "/": return leftValue / rightValue;
+                case "^": return Mathf.Pow(leftValue, rightValue);
                 default: goto case "+";
             }
         } else
@@ -346,29 +370,12 @@ public class FunctionNode
             float val;
             if (isVariable)
             {
-                switch (variables[variable])
+                switch (variable)
                 {
-                    case "x":
-                        val = x;
-                        break;
-                    case "y":
-                        val = y;
-                        break;
-                    case "z":
-                        val = z;
-                        break;
-                    /*case "pi":
-                        val = Mathf.PI;
-                        break;
-                    case "e":
-                        val = Mathf.Exp(1f);
-                        break;
-                    case "inf":
-                        val = Mathf.Infinity * 0.8f;
-                        break;*/
-                    default:
-                        FunctionManager.TryGetVariable(variables[variable], out val);
-                        break;
+                    case "x": val = x; break;
+                    case "y": val = y; break;
+                    case "z": val = z; break;
+                    default: FunctionManager.TryGetVariable(variable, out val); break;
                 }
                 val = variablePositive ? val : -val;
             }
@@ -379,15 +386,15 @@ public class FunctionNode
 
     public override string ToString()
     {
+        if (isSubFunction) return subFunction + "(" + childRight.ToString() + ")";
         if (!NeedsRepresentation()) return "";
         string aux = "";
         bool needsParenthesis = NeedsParenthesis();
         if(needsParenthesis) aux += '(';
-        if (isOperator) aux += childLeft.ToString() + operators[operation] + childRight.ToString();
-        else if (isVariable) aux+= (variablePositive ? "":"-")+ variables[variable];
+        if (isOperator) aux += childLeft.ToString() + operation + childRight.ToString();
+        else if (isVariable) aux+= (variablePositive ? "":"-")+ variable;
         else aux += "" + value;
         if (needsParenthesis) aux += ")";
         return aux;
     }
-
 }
