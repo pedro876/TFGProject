@@ -36,9 +36,21 @@ public class OptionsButton : MonoBehaviour
         OnSelected();
     }
 
-    public void Select()
+    public void ChangeSelect()
     {
         selected = !selected;
+        OnSelected();
+    }
+
+    public void Select()
+    {
+        selected = true;
+        OnSelected();
+    }
+
+    public void Deselect()
+    {
+        selected = false;
         OnSelected();
     }
 

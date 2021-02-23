@@ -44,7 +44,7 @@ public class FunctionElement : MonoBehaviour
         func = function;
         if (!IsBeingEdit())
         {
-            inputField.text = func.ToString();
+            inputField.text = func.declaration + " = " + func.originalDefinition;
         }
         
     }

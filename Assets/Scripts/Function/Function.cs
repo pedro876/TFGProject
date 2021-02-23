@@ -7,12 +7,14 @@ public class Function
     public FunctionNode rootNode;
     public string name;
     public string declaration;
+    public List<string> variables;
     public string originalDefinition;
     public string finalDefinition;
     
 
     public Function(string name, string declaration, string definition)
     {
+        variables = new List<string>();
         SetData(name, declaration, definition);
     }
 
@@ -37,6 +39,12 @@ public class Function
         this.declaration = declaration;
         rootNode.ProcessFunc(definition);
         finalDefinition = rootNode.ToString();
+
+        variables = new List<string>();
+        string rawVars = declaration.Split('(')[1];
+        rawVars = rawVars.Substring(0, rawVars.Length - 1);
+        string[] aux = rawVars.Split(',');
+        foreach (string s in aux) variables.Add(s);
     }
 
     public override string ToString()

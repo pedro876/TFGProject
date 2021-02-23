@@ -260,6 +260,16 @@ public class FunctionNode
                 value = 0f;
                 childLeft = null;
                 childRight = null;
+            } else if((childLeft.isFloat() && childLeft.value == 1f) ||
+                (childRight.isFloat() && childRight.value == 1f))
+            {
+                isOperator = false;
+                simplified = true;
+                isVariable = false;
+                //childLeft = null;
+                //childRight = null;
+                if (childLeft.isFloat() && childLeft.value == 1f) CopyNode(childRight);
+                else CopyNode(childLeft);
             }
         } else if (op == "/")
         {
@@ -281,6 +291,14 @@ public class FunctionNode
                 value = 0f;
                 childLeft = null;
                 childRight = null;
+            } else if (childRight.isFloat() && childRight.value == 1f)
+            {
+                isOperator = false;
+                simplified = true;
+                isVariable = false;
+                //childLeft = null;
+                //childRight = null;
+                CopyNode(childLeft);
             }
         } else if (op == "+" || op == "-")
         {
