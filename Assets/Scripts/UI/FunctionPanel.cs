@@ -26,10 +26,14 @@ public class FunctionPanel : MonoBehaviour
             elem = AddFunctionElement();
             elem.SetFunction(f);
         }
-        StartCoroutine(UpdateFunction());
-        StartCoroutine(RemoveUnusedFunctions());
         addBtn.onClick.AddListener(() => AddFunctionElement(true));
         addElement.SetAsLastSibling();
+    }
+
+    private void OnEnable()
+    {
+        StartCoroutine(UpdateFunction());
+        StartCoroutine(RemoveUnusedFunctions());
     }
 
     IEnumerator UpdateFunction()
@@ -38,6 +42,7 @@ public class FunctionPanel : MonoBehaviour
         {
             yield return new WaitForSeconds(updateTime);
             FunctionElement.selectedFunc?.UpdateFunction();
+            //Debug.Log(FunctionElement.selectedFunc.func.ToString());
         }
     }
 

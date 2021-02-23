@@ -18,7 +18,7 @@ public class FunctionElement : MonoBehaviour
     {
         panel = GetComponentInParent<FunctionPanel>();
         selectBtn.onClick.AddListener(() => panel.SelectFunction(this));
-        camImage.enabled = false;
+        camImage.enabled = selectedFunc == this;
     }
 
     private void Update()

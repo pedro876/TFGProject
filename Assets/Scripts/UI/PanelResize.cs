@@ -32,6 +32,8 @@ public class PanelResize : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     
     void Update()
     {
+        if (panel.sizeDelta.x > parent.rect.width - defaultSize) panel.sizeDelta = new Vector2(parent.rect.width - defaultSize, panel.sizeDelta.y);
+
         if (drag)
         {
             if (resizeWidth)
