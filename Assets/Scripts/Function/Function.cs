@@ -51,4 +51,9 @@ public class Function
     {
         return declaration + " = " + finalDefinition;
     }
+
+    public bool Equals(Function f)
+    {
+        return finalDefinition == f.finalDefinition;
+    }
 }

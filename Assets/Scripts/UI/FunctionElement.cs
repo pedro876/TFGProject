@@ -41,6 +41,10 @@ public class FunctionElement : MonoBehaviour
 
     public void SetFunction(Function function)
     {
+        if (func != null && !func.Equals(function))
+        {
+            FunctionPanel.InvokeOnChanged();
+        }
         func = function;
         if (!IsBeingEdit())
         {
@@ -51,6 +55,7 @@ public class FunctionElement : MonoBehaviour
 
     public void UpdateFunction()
     {
+        
         Function f = FunctionManager.AddFunction(inputField.text);
         if(f != null)
         {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System;
 
 public class FunctionPanel : MonoBehaviour
 {
@@ -16,6 +17,8 @@ public class FunctionPanel : MonoBehaviour
     [SerializeField] Button addBtn;
     [SerializeField] Transform addElement;
 
+    public static event Action onChanged;
+
     private void Start()
     {
         allFunctions = new List<FunctionElement>();
@@ -28,6 +31,11 @@ public class FunctionPanel : MonoBehaviour
         }
         addBtn.onClick.AddListener(() => AddFunctionElement(true));
         addElement.SetAsLastSibling();
+    }
+
+    public static void InvokeOnChanged()
+    {
+        onChanged?.Invoke();
     }
 
     private void OnEnable()
@@ -93,6 +101,7 @@ public class FunctionPanel : MonoBehaviour
     public void SelectFunction(FunctionElement func)
     {
         func.OnSelected();
+        onChanged?.Invoke();
         foreach(FunctionElement f in allFunctions)
         {
             if (f != func) f.OnUnselected();

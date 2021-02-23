@@ -8,6 +8,7 @@ using System;
 
 public class ViewController : MonoBehaviour, IPointerDownHandler
 {
+
     [SerializeField] bool DEBUG = true;
     bool focused = false;
 
@@ -21,15 +22,14 @@ public class ViewController : MonoBehaviour, IPointerDownHandler
     [SerializeField] float moveAc = 1f;
     //RawImage image;
 
-    [HideInInspector] public Vector3 nearTopLeft = Vector3.zero;
-    [HideInInspector] public Vector3 nearTopRight = Vector3.zero;
-    [HideInInspector] public Vector3 nearBottomRight = Vector3.zero;
-    [HideInInspector] public Vector3 nearBottomLeft = Vector3.zero;
-    [HideInInspector] public Vector3 farTopLeft = Vector3.zero;
-    [HideInInspector] public Vector3 farTopRight = Vector3.zero;
-    [HideInInspector] public Vector3 farBottomRight = Vector3.zero;
-    [HideInInspector] public Vector3 farBottomLeft = Vector3.zero;
-    [HideInInspector] public Rect farPlane = new Rect();
+    public static Vector3 nearTopLeft = Vector3.zero;
+    public static Vector3 nearTopRight = Vector3.zero;
+    public static Vector3 nearBottomRight = Vector3.zero;
+    public static Vector3 nearBottomLeft = Vector3.zero;
+    public static Vector3 farTopLeft = Vector3.zero;
+    public static Vector3 farTopRight = Vector3.zero;
+    public static Vector3 farBottomRight = Vector3.zero;
+    public static Vector3 farBottomLeft = Vector3.zero;
 
     private float near = 0f;
     private float far = 0f;
@@ -43,7 +43,7 @@ public class ViewController : MonoBehaviour, IPointerDownHandler
     float x, y;
 
     bool changed = false;
-    public event Action onChanged;
+    public static event Action onChanged;
 
     private void Start()
     {
