@@ -34,7 +34,14 @@ public class ViewController : MonoBehaviour, IPointerDownHandler
 
     private void Update()
     {
-        if (focused && (Cursor.visible || Cursor.lockState != CursorLockMode.Locked)) OnChangeFocus();
+        if (focused &&
+            (Cursor.visible || 
+            Cursor.lockState != CursorLockMode.Locked ||
+            Input.GetKeyDown(KeyCode.Space)))
+        {
+            OnChangeFocus(false);
+        }
+            
 
         if (focused)
         {
@@ -60,7 +67,7 @@ public class ViewController : MonoBehaviour, IPointerDownHandler
         camTransform.RotateAround(Vector3.zero, Vector3.up, degreesX);
         float degreesY = -y * orbitSpeed * Time.deltaTime;
 
-        const float limit = 88f;
+        const float limit = 89.99f;
         float currentDegreesY = Vector3.SignedAngle(camTransform.position, Vector3.ProjectOnPlane(camTransform.position, Vector3.up), -camTransform.right);
         //limit view
         if(currentDegreesY + degreesY >= limit && degreesY > 0f)
@@ -80,15 +87,15 @@ public class ViewController : MonoBehaviour, IPointerDownHandler
 
     }
 
-    private void OnChangeFocus()
+    private void OnChangeFocus(bool f = true)
     {
-        focused = !focused;
+        focused = f;
         Cursor.lockState = focused ? CursorLockMode.Locked : CursorLockMode.None;
         Cursor.visible = !focused;
     }
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        if (!focused) OnChangeFocus();
+        if (!focused) OnChangeFocus(!focused);
     }
 }
