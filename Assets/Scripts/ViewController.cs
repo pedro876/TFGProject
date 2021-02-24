@@ -9,7 +9,7 @@ using System;
 public class ViewController : MonoBehaviour, IPointerDownHandler
 {
 
-    [SerializeField] bool DEBUG = true;
+    [SerializeField] bool DEBUG = false;
     bool focused = false;
 
     [SerializeField] Camera cam;

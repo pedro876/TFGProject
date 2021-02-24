@@ -7,9 +7,10 @@ public abstract class Renderer : MonoBehaviour
 {
     [HideInInspector] public RectTransform texTransform;
 
-    private Renderer parent;
     private Renderer[] children;
+    private int childIndex = 0;
 
+    protected Renderer parent;
     protected RawImage image;
     protected int level;
     protected Color[] memory;
@@ -21,17 +22,76 @@ public abstract class Renderer : MonoBehaviour
     protected int height;
     protected int depth;
 
+    protected float[] homogeneities = new float[4];
+    protected const int homogeneityPoints = 20;
+
     private int renderCount = 0;
 
     [SerializeField] protected bool done = false;
     [SerializeField] protected bool rendering = false;
 
+    #region Homogeneity
+
+    protected float GetHomogeneity()
+    {
+        if (parent == null) return 0f;
+        else return parent.homogeneities[childIndex];
+    }
+
+    protected float GetDisparity()
+    {
+        return 1f - GetHomogeneity();
+    }
+
+    protected float GetImportance()
+    {
+        return GetDisparity() + RendererManager.maxLevel - level;
+    }
+
+    protected virtual void CalculateHomogeneity()
+    {
+        /*if(level == RendererManager.setting.Count)
+        {
+            for (int i = 0; i < homogeneities.Length; i++) homogeneities[i] = 1f;
+            return;
+        }*/
+
+        List<float[]> randomDepths = new List<float[]>()
+        {
+            GetRandomDepths(0,0,width/2,height/2),
+            GetRandomDepths(width/2,0,width,height/2),
+            GetRandomDepths(0,height/2,width/2,height),
+            GetRandomDepths(width/2,height/2,width,height),
+        };
+        for (int i = 0; i < homogeneities.Length; i++) homogeneities[i] = 0f;
+
+        float totalDistances = 0f;
+        for (int i = 0; i < homogeneityPoints; i++)
+        {
+            for (int j = 0; j < homogeneityPoints; j++)
+            {
+                homogeneities[0] += Mathf.Abs(randomDepths[0][i] - randomDepths[0][j]);
+                homogeneities[1] += Mathf.Abs(randomDepths[1][i] - randomDepths[1][j]);
+                homogeneities[2] += Mathf.Abs(randomDepths[2][i] - randomDepths[2][j]);
+                homogeneities[3] += Mathf.Abs(randomDepths[3][i] - randomDepths[3][j]);
+                totalDistances++;
+            }
+        }
+
+        for (int i = 0; i < homogeneities.Length; i++) homogeneities[i] = 1f-homogeneities[i]/totalDistances;
+    }
+
+    protected abstract float[] GetRandomDepths(int minX, int minY, int maxX, int maxY);
+
+    #endregion
+
     #region rendering
 
     public virtual void DeepStop()
     {
-        if(level > 0)
-            image.enabled = false;
+        image.enabled = level == 0;
+        /*if(level > 0)
+            image.enabled = false;*/
         if(children != null)
         {
             foreach (var c in children) c.DeepStop();
@@ -59,10 +119,16 @@ public abstract class Renderer : MonoBehaviour
         rendering = true;
         renderCount = 0;
         if (level > 0) image.enabled = false;
+        if (FunctionElement.selectedFunc == null || FunctionElement.selectedFunc.func == null)
+        {
+            done = true;
+            rendering = false;
+        }
     }
 
     protected void RenderChildren()
     {
+        CalculateHomogeneity();
         if (parent != null)
         {
             parent.renderCount++;
@@ -100,7 +166,7 @@ public abstract class Renderer : MonoBehaviour
             image.color = Random.ColorHSV();
         }
 
-        if (level+1 < RendererManager.setting.Count)
+        if (level+1 < RendererManager.maxLevel)
         {
             CreateChildren();
             AdjustChildrenPositions();
@@ -127,6 +193,7 @@ public abstract class Renderer : MonoBehaviour
             obj.name = "renderer" + (level + 1) + "_" + i;
             var r = obj.GetComponent<Renderer>();
             children[i] = r;
+            r.childIndex = i;
             r.Init(level + 1, this, startX+region*positions[i].x, startY+region*positions[i].y, region*0.5f);
         }
     }

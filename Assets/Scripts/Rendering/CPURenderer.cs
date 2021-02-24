@@ -2,27 +2,39 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Threading;
+//using System.Collections.Concurrent;
 
 public class CPURenderer : Renderer
 {
+
     Texture2D renderTex;
     Thread processorThread;
+    float[,] depths;
 
     private const int levelThreadsSleepMs = 50;
+
+    protected override float[] GetRandomDepths(int minX, int minY, int maxX, int maxY)
+    {
+        float[] homogeneityDepths = new float[homogeneityPoints];
+
+        for (int i = 0; i < homogeneityPoints; i++)
+        {
+            int x = Random.Range(minX, maxX);
+            int y = Random.Range(minY, maxY);
+            homogeneityDepths[i] = depths[x, y];
+        }
+        
+        return homogeneityDepths;
+    }
 
     override protected void CreateTexture()
     {
         base.CreateTexture();
-        renderTex = new Texture2D(width, height);
-        renderTex.filterMode = FilterMode.Trilinear;
+        renderTex = new Texture2D(width, height, TextureFormat.RGBA32, false);
+        renderTex.filterMode = FilterMode.Bilinear;
         renderTex.wrapMode = TextureWrapMode.Clamp;
         tex = renderTex;
-    }
-
-    public override void DeepStop()
-    {
-        if (processorThread != null && processorThread.IsAlive) processorThread.Abort();
-        base.DeepStop();
+        depths = new float[width, height];
     }
 
     protected override void MemoryToTex()
@@ -32,16 +44,18 @@ public class CPURenderer : Renderer
         image.enabled = true;
     }
 
+    #region rendering
+
     public override void Render()
     {
         base.Render();
+        if (done) return;
         if(FunctionElement.selectedFunc == null || FunctionElement.selectedFunc.func == null)
         {
             done = true;
             rendering = false;
-            //Debug.Log("No func");
         }
-        else if(level == 0)
+        if(level == 0)
         {
             RenderRegion(0, 0, width, height);
             done = true;
@@ -58,9 +72,14 @@ public class CPURenderer : Renderer
             {
                 Thread.Sleep(time);
                 RenderRegion(0, 0, width, height);
+                lock (RendererManager.currentThreadsLock)
+                {
+                    RendererManager.currentThreads.Remove(Thread.CurrentThread);
+                }
             }
             );
-            processorThread.Start();
+            int priority = Mathf.RoundToInt(GetImportance() * 100);
+            RendererManager.threadsToStart.Add(new KeyValuePair<Thread, int>(processorThread, priority));
         }
     }
 
@@ -75,8 +94,8 @@ public class CPURenderer : Renderer
         Vector3 farStart = Vector3.Lerp(ViewController.farTopLeft, ViewController.farTopRight, startX) - up * (1f - startY) * farSize;
         Function func = FunctionElement.selectedFunc.func;
 
-        Color blankColor = new Color(0f, 0f, 0f, 0f);
-        Color landColor = Color.blue;
+        Color farColor = Color.white;
+        Color nearColor = Color.blue;
 
         for (int y = minY; y < maxY; y++)
         {
@@ -98,10 +117,15 @@ public class CPURenderer : Renderer
                         landed = true;
                     }
                 }
+                depths[x, y] = normDepth;
                 int row = height - y - 1;
-                memory[x+ row*height] = landed ? landColor * (1f - normDepth) : blankColor;
+                memory[x + row * height] = Color.Lerp(nearColor, farColor, normDepth);
             }
         }
         done = true;
     }
+
+   
+
+    #endregion
 }

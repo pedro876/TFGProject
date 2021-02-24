@@ -2,9 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+//using System.Collections.Concurrent;
+using System.Threading;
 
 public class RendererManager : MonoBehaviour
 {
+    public const bool DEBUG = false;
+
     Renderer rootRenderer;
     [SerializeField] GameObject localTexObjProto;
     [SerializeField] GameObject localCpuRendererProto;
@@ -14,14 +18,19 @@ public class RendererManager : MonoBehaviour
     public static GameObject texObjProto;
     public static RectTransform spaceView;
     public static RectTransform functionViewContainer;
+    public static int maxLevel;
 
-    public const bool DEBUG = false;
-
+    [Header("Threading")]
+    public static object currentThreadsLock = new object();
+    public static HashSet<Thread> currentThreads = new HashSet<Thread>();
+    public static List<KeyValuePair<Thread, int>> threadsToStart = new List<KeyValuePair<Thread, int>>();
     public static Queue<Action> orders = new Queue<Action>();
-    private const int ordersPerFrame = 5;
+    [SerializeField] private int ordersPerUpdate = 5;
+    [SerializeField] private int maxParallelThreads = 8;
 
     private void Start()
     {
+        maxLevel = setting.Count;
         texObjProto = localTexObjProto;
         cpuRendererProto = localCpuRendererProto;
         gpuRendererProto = localGpuRendererProto;
@@ -39,12 +48,48 @@ public class RendererManager : MonoBehaviour
 
     private void FixedUpdate()
     {
-        int top = orders.Count;
-        if (top > ordersPerFrame) top = ordersPerFrame;
+        AttendOrders();
+        AttendThreads();
+    }
 
-        for(int i = 0; i < top; i++)
+    private void AttendOrders()
+    {
+        int top = orders.Count;
+        if (top > ordersPerUpdate) top = ordersPerUpdate;
+
+        for (int i = 0; i < top; i++)
         {
             orders.Dequeue().Invoke();
+        }
+    }
+
+    private void AttendThreads()
+    {
+        int top;
+        int currentCount;
+        lock (currentThreadsLock)
+        {
+            currentCount = currentThreads.Count;
+            //Debug.Log(currentCount);
+        }
+        top = maxParallelThreads - currentCount;
+        int toStartCount = threadsToStart.Count;
+        if (top > toStartCount) top = toStartCount;
+        
+        threadsToStart.Sort((a, b) =>  a.Value - b.Value);
+
+        for (int i = 0; i < top; i++)
+        {
+            Thread thread = threadsToStart[toStartCount - i - 1].Key;
+            Debug.Log(threadsToStart[toStartCount - i - 1].Value);
+            threadsToStart.RemoveAt(toStartCount - i - 1);
+
+            //Thread thread = threadsToStart.Dequeue();
+            lock (currentThreadsLock)
+            {
+                currentThreads.Add(thread);
+            }
+            thread.Start();
         }
     }
 
@@ -65,6 +110,16 @@ public class RendererManager : MonoBehaviour
     private void StartRender()
     {
         orders.Clear();
+        threadsToStart.Clear();
+        lock (currentThreadsLock)
+        {
+            foreach(var t in currentThreads)
+            {
+                if (t.IsAlive) t.Abort();
+            }
+            currentThreads.Clear();
+        }
+        
         rootRenderer.DeepStop();
         rootRenderer.Render();
     }
@@ -97,7 +152,8 @@ public class RendererManager : MonoBehaviour
     {
         new RendererQuality(RendererType.CPU, 90, 40),
         new RendererQuality(RendererType.CPU, 64, 90),
-        new RendererQuality(RendererType.CPU, 128, 300),
+        new RendererQuality(RendererType.CPU, 128, 256),
+        new RendererQuality(RendererType.CPU, 128, 1024),
     };
 
     #endregion
