@@ -43,9 +43,9 @@ public class FunctionElement : MonoBehaviour
     {
         if (func != null && !func.Equals(function))
         {
+            func = function;
             FunctionPanel.InvokeOnChanged();
-        }
-        func = function;
+        } else func = function;
         if (!IsBeingEdit())
         {
             inputField.text = func.declaration + " = " + func.originalDefinition;

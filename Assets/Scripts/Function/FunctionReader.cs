@@ -18,7 +18,7 @@ public class FunctionReader
         string declaration = ProcessDeclaration(parts[0], ref parts[1], out name);
         string definition = ProcessDefinition(parts[1]);
 
-        Function func = new Function(name, declaration, definition);
+        Function func = new Function(name, declaration, parts[1], definition);
         
         return func;
     }
@@ -65,18 +65,55 @@ public class FunctionReader
         if (definition.Length == 0) definition = "0";
 
         //Check if a multiplication is omitted for parenthesis
-        string aux = ""+definition[0];
+        string aux = "";
         string symbols = "+-*^/()";
-        for(int i = 1; i < definition.Length-1; i++)
+        string cut = definition;
+        for(int i = 0; i < definition.Length-1; i++)
         {
-            if (definition[i] == '(' && !symbols.Contains("" + definition[i - 1])) aux += '*';
-            aux += definition[i];
-            if (definition[i] == ')' && !symbols.Contains("" + definition[i + 1])) aux += "*";
+            bool startsWithSubFunc = false;
+            string subFunction = "";
+            foreach(var n in FunctionManager.functions.Keys)
+            {
+                if (cut.StartsWith(n))
+                {
+                    startsWithSubFunc = true;
+                    subFunction = n;
+                    break;
+                }
+            }
+            if (!startsWithSubFunc)
+            {
+                foreach (var n in FunctionNode.subFunctions)
+                {
+                    if (cut.StartsWith(n))
+                    {
+                        startsWithSubFunc = true;
+                        subFunction = n;
+                        break;
+                    }
+                }
+            }
+
+            if (startsWithSubFunc)
+            {
+                i += subFunction.Length;
+                aux += subFunction + "(";
+                cut = cut.Substring(subFunction.Length + cut.Length > subFunction.Length ? 1 : 0);
+            } else
+            {
+                if (i > 0 && definition[i] == '(' && !symbols.Contains("" + definition[i - 1])) aux += '*';
+                aux += definition[i];
+                if (definition[i] == ')' && !symbols.Contains("" + definition[i + 1])) aux += "*";
+                cut.Substring(1);
+            }
+
+
+            
         }
-        if(definition.Length > 1)
-        {
+        /*if(definition.Length > 1)
+        {*/
             aux += definition[definition.Length - 1];
-        }
+        //}
         
         definition = aux;
 

@@ -18,11 +18,14 @@ public class FunctionPanel : MonoBehaviour
     [SerializeField] Transform addElement;
 
     public static event Action onChanged;
+    //public static event Action
 
     private void Start()
     {
         allFunctions = new List<FunctionElement>();
         FunctionManager.AddFunction("f(x)=x");
+        //FunctionManager.AddFunction("f(x) = sin(x*20)*0.1");
+        //FunctionManager.AddFunction("f(x) = sin(x*10)*0,4+0,1");
         FunctionElement elem;
         foreach(Function f in FunctionManager.functions.Values)
         {
@@ -101,11 +104,12 @@ public class FunctionPanel : MonoBehaviour
     public void SelectFunction(FunctionElement func)
     {
         func.OnSelected();
-        onChanged?.Invoke();
+        func.UpdateFunction();
         foreach(FunctionElement f in allFunctions)
         {
             if (f != func) f.OnUnselected();
         }
+        onChanged?.Invoke();
     }
 
     //[SerializeField] TMP_InputField inputField;

@@ -12,15 +12,15 @@ public class Function
     public string finalDefinition;
     
 
-    public Function(string name, string declaration, string definition)
+    public Function(string name, string declaration,string originalDefinition, string definition)
     {
         variables = new List<string>();
-        SetData(name, declaration, definition);
+        SetData(name,  declaration, originalDefinition, definition);
     }
 
     public Function Clone()
     {
-        return new Function(name, declaration, finalDefinition);
+        return new Function(name, declaration, originalDefinition, finalDefinition);
     }
 
     public float Solve(float x = 0f, float y = 0f, float z = 0f)
@@ -30,9 +30,9 @@ public class Function
         return result;
     }
 
-    public void SetData(string name, string declaration, string definition)
+    public void SetData(string name, string declaration, string originalDefinition, string definition)
     {
-        originalDefinition = definition;
+        this.originalDefinition = originalDefinition;
         this.name = name;
 
         rootNode = new FunctionNode(null);

@@ -1,26 +1,34 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class RendererManager : MonoBehaviour
 {
     Renderer rootRenderer;
     [SerializeField] GameObject localTexObjProto;
-    [SerializeField] GameObject localRendererProto;
-    public static GameObject rendererProto;
+    [SerializeField] GameObject localCpuRendererProto;
+    [SerializeField] GameObject localGpuRendererProto;
+    public static GameObject cpuRendererProto;
+    public static GameObject gpuRendererProto;
     public static GameObject texObjProto;
     public static RectTransform spaceView;
     public static RectTransform functionViewContainer;
 
     public const bool DEBUG = false;
 
+    public static Queue<Action> orders = new Queue<Action>();
+    private const int ordersPerFrame = 5;
+
     private void Start()
     {
         texObjProto = localTexObjProto;
-        rendererProto = localRendererProto;
+        cpuRendererProto = localCpuRendererProto;
+        gpuRendererProto = localGpuRendererProto;
         spaceView = FindObjectOfType<ViewController>().GetComponent<RectTransform>();
         functionViewContainer = GameObject.FindGameObjectWithTag("FuncContainer").GetComponent<RectTransform>();
-        rootRenderer = GetComponentInChildren<Renderer>();
+        rootRenderer = Instantiate(setting[0].type == RendererType.CPU ? cpuRendererProto : gpuRendererProto, transform).GetComponent<Renderer>();
+        rootRenderer.gameObject.name = "rootRenderer";
 
         rootRenderer.Init(0);
         AdjustPositions();
@@ -29,7 +37,16 @@ public class RendererManager : MonoBehaviour
         StartRender();
     }
 
-    
+    private void FixedUpdate()
+    {
+        int top = orders.Count;
+        if (top > ordersPerFrame) top = ordersPerFrame;
+
+        for(int i = 0; i < top; i++)
+        {
+            orders.Dequeue().Invoke();
+        }
+    }
 
     private void LateUpdate()
     {
@@ -47,23 +64,9 @@ public class RendererManager : MonoBehaviour
 
     private void StartRender()
     {
-        //Debug.Log("Start render");
-        StopCoroutine(RenderCoroutine());
-
+        orders.Clear();
         rootRenderer.DeepStop();
-
-        StartCoroutine(RenderCoroutine());
-    }
-
-    private void Render()
-    {
         rootRenderer.Render();
-    }
-
-    IEnumerator RenderCoroutine()
-    {
-        yield return null;
-        Render();
     }
 
 
@@ -72,14 +75,18 @@ public class RendererManager : MonoBehaviour
 
     #region Quality
 
+    public enum RendererType { CPU, GPU }
+
     public class RendererQuality
     {
+        public readonly RendererType type;
         public readonly int width;
         public readonly int height;
         public readonly int depth;
 
-        public RendererQuality(int size, int depth)
+        public RendererQuality(RendererType type, int size, int depth)
         {
+            this.type = type;
             this.width = size;
             this.height = size;
             this.depth = depth;
@@ -88,12 +95,9 @@ public class RendererManager : MonoBehaviour
 
     public static List<RendererQuality> setting = new List<RendererQuality>()
     {
-        new RendererQuality(32,32),
-        new RendererQuality(32,64),
-        new RendererQuality(32,128),
-        new RendererQuality(32,128),
-        /*new RendererQuality(64,128),
-        new RendererQuality(128,256),*/
+        new RendererQuality(RendererType.CPU, 90, 40),
+        new RendererQuality(RendererType.CPU, 64, 90),
+        new RendererQuality(RendererType.CPU, 128, 300),
     };
 
     #endregion

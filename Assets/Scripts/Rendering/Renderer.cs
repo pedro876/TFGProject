@@ -7,24 +7,28 @@ public abstract class Renderer : MonoBehaviour
 {
     [HideInInspector] public RectTransform texTransform;
 
-    protected Renderer parent;
-    protected Renderer[] children;
+    private Renderer parent;
+    private Renderer[] children;
+
+    protected RawImage image;
+    protected int level;
+    protected Color[] memory;
+    protected Texture tex;
+    protected float startX;
+    protected float startY;
+    protected float region;
     protected int width;
     protected int height;
     protected int depth;
-    protected int level;
-    protected Texture tex;
-    protected RawImage image;
 
-    [SerializeField] protected float startX;
-    [SerializeField] protected float startY;
-    [SerializeField] protected float region;
+    private int renderCount = 0;
 
-    int renderCount = 0;
+    [SerializeField] protected bool done = false;
+    [SerializeField] protected bool rendering = false;
 
     #region rendering
 
-    public void DeepStop()
+    public virtual void DeepStop()
     {
         if(level > 0)
             image.enabled = false;
@@ -34,15 +38,35 @@ public abstract class Renderer : MonoBehaviour
         }
     }
 
-    public void Render()
+    private void Update()
     {
+        if(rendering && done)
+        {
+            MemoryToTex();
+            rendering = false;
+            RenderChildren();
+        }
+    }
+
+    protected virtual void MemoryToTex()
+    {
+        
+    }
+
+    public virtual void Render()
+    {
+        done = false;
+        rendering = true;
         renderCount = 0;
-        RenderRegion();
-        image.enabled = true;
-        if(parent != null)
+        if (level > 0) image.enabled = false;
+    }
+
+    protected void RenderChildren()
+    {
+        if (parent != null)
         {
             parent.renderCount++;
-            if(parent.renderCount >= 4)
+            if (parent.renderCount >= 4)
             {
                 parent.image.enabled = false;
             }
@@ -51,11 +75,6 @@ public abstract class Renderer : MonoBehaviour
         {
             foreach (var c in children) c.Render();
         }
-    }
-
-    protected virtual void RenderRegion()
-    {
-
     }
 
     #endregion
@@ -72,6 +91,7 @@ public abstract class Renderer : MonoBehaviour
         width = RendererManager.setting[level].width;
         height = RendererManager.setting[level].height;
         depth = RendererManager.setting[level].depth;
+        memory = new Color[width*height];
         CreateTexture();
         image.texture = tex;
 
@@ -103,7 +123,7 @@ public abstract class Renderer : MonoBehaviour
         children = new Renderer[4];
         for(int i = 0; i < 4; i++)
         {
-            var obj = Instantiate(RendererManager.rendererProto, transform);
+            var obj = Instantiate(RendererManager.cpuRendererProto, transform);
             obj.name = "renderer" + (level + 1) + "_" + i;
             var r = obj.GetComponent<Renderer>();
             children[i] = r;
@@ -130,10 +150,10 @@ public abstract class Renderer : MonoBehaviour
         {
             for (int i = 0; i < 4; i++)
             {
-                children[i].texTransform.sizeDelta = new Vector2( Mathf.Ceil(texTransform.sizeDelta.x * 0.5f), Mathf.Ceil(texTransform.sizeDelta.y * 0.5f));
+                children[i].texTransform.sizeDelta = new Vector2(texTransform.sizeDelta.x * 0.5f, texTransform.sizeDelta.y * 0.5f);
                 children[i].texTransform.position = new Vector2(
-                    Mathf.Floor(texTransform.position.x+texTransform.sizeDelta.x*positions[i].x),
-                    Mathf.Floor(texTransform.position.y+texTransform.sizeDelta.y * positions[i].y)
+                    texTransform.position.x+texTransform.sizeDelta.x*positions[i].x,
+                    texTransform.position.y+texTransform.sizeDelta.y * positions[i].y
                 );
                 children[i].AdjustChildrenPositions();
             }

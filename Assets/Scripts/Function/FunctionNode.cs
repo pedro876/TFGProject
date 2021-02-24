@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Globalization;
+using System;
 
 public class FunctionNode
 {
@@ -66,6 +68,8 @@ public class FunctionNode
         value = node.value;
         isVariable = node.isVariable;
         isOperator = node.isOperator;
+        isSubFunction = node.isSubFunction;
+        subFunction = node.subFunction;
         operation = node.operation;
         variable = node.variable;
         variablePositive = node.variablePositive;
@@ -164,38 +168,25 @@ public class FunctionNode
                 int breakPoint = coincidences[cIdx];
                 string left = breakPoint == 0 ? "0.0" : func.Substring(0, breakPoint);
                 string right = breakPoint == func.Length-1 ? "0.0" : func.Substring(breakPoint + 1);
+                childLeft = new FunctionNode(this, parenthesisLevel);
+                childRight = new FunctionNode(this, parenthesisLevel);
+                childLeft.ProcessFunc(left);
+                childRight.ProcessFunc(right);
 
-                isSubFunction = subFunctions.Contains(left) || FunctionManager.functions.ContainsKey(left);
-                if (isSubFunction)
+                isOperator = true;
+                operation = operators[cIdx];
+                isVariable = false;
+
+                if (operation == "-")
                 {
-                    subFunction = left;
-                    isVariable = false;
-                    isOperator = false;
-                    childRight = new FunctionNode(this, parenthesisLevel+1);
-                    childRight.ProcessFunc(right);
-                    
-                } else
-                {
-                    childLeft = new FunctionNode(this, parenthesisLevel);
-                    childRight = new FunctionNode(this, parenthesisLevel);
-                    childLeft.ProcessFunc(left);
-                    childRight.ProcessFunc(right);
-
-                    isOperator = true;
-                    operation = operators[cIdx];
-                    isVariable = false;
-
-                    if (operation == "-")
+                    if (childRight.NeedsParenthesis() && !childRight.woreParenthesis)
                     {
-                        if (childRight.NeedsParenthesis() && !childRight.woreParenthesis)
-                        {
-                            if (childRight.operation == "-") childRight.operation = "+";
-                            else if (childRight.operation == "+") childRight.operation = "-";
-                        }
+                        if (childRight.operation == "-") childRight.operation = "+";
+                        else if (childRight.operation == "+") childRight.operation = "-";
                     }
-
-                    TrySimplify();
                 }
+
+                TrySimplify();
             }
             cIdx++;
         }
@@ -206,16 +197,71 @@ public class FunctionNode
             isVariable = false;
             isOperator = false;
             variablePositive = true;
-
-            if (variables.Contains(func) || FunctionManager.HasVariable(func))
+            isSubFunction = false;
+            value = 0f;
+            foreach (var n in FunctionManager.functions.Keys)
             {
-                variable = func;
-                isVariable = true;
+                if (func.StartsWith(n))
+                {
+                    isSubFunction = true;
+                    subFunction = n;
+                    break;
+                }
             }
-            
+            if (!isSubFunction)
+            {
+                foreach (var n in subFunctions)
+                {
+                    if (func.StartsWith(n))
+                    {
+                        isSubFunction = true;
+                        subFunction = n;
+                        break;
+                    }
+                }
+            }
+            if (isSubFunction)
+            {
+                string content = "";
+                bool insideContent = false;
+                for(int i = 0; i < func.Length; i++)
+                {
+                    if (!insideContent)
+                    {
+                        insideContent = func[i] == '(';
+                    } else
+                    {
+                        if (func[i] == ')') insideContent = false;
+                        else
+                        {
+                            content += func[i];
+                        }
+                    }
+                    
+                }
+                childLeft = null;
+                childRight = new FunctionNode(this, parenthesisLevel + 1);
+                childRight.ProcessFunc(content);
+            }
 
-            if (isVariable) value = 0.0f;
-            else if (!float.TryParse(func, out value)) value = 0.0f;
+            else
+            {
+                if (variables.Contains(func) || FunctionManager.HasVariable(func))
+                {
+                    variable = func;
+                    isVariable = true;
+                }
+
+                if (isVariable) value = 0.0f;
+
+                try
+                {
+                    value = float.Parse(func.Replace(",", "."), CultureInfo.InvariantCulture);
+                } catch(Exception e)
+                {
+                    value = 0f;
+                }
+            }
         }
     }
 
@@ -240,7 +286,7 @@ public class FunctionNode
         if (isSubFunction || (parent != null && parent.isSubFunction)) return false;
         bool simplified = false;
         string op = operation;
-        if (!childLeft.isOperator && !childLeft.isVariable && !childRight.isOperator && !childRight.isVariable)
+        if (/*!childLeft.isOperator && !childLeft.isVariable && !childRight.isOperator && !childRight.isVariable*/childLeft.isFloat() && childRight.isFloat())
         {
             value = Solve();
             isOperator = false;
