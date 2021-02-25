@@ -81,7 +81,7 @@ public class RendererManager : MonoBehaviour
         for (int i = 0; i < top; i++)
         {
             Thread thread = threadsToStart[toStartCount - i - 1].Key;
-            Debug.Log(threadsToStart[toStartCount - i - 1].Value);
+            //Debug.Log(threadsToStart[toStartCount - i - 1].Value);
             threadsToStart.RemoveAt(toStartCount - i - 1);
 
             //Thread thread = threadsToStart.Dequeue();

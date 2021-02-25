@@ -11,18 +11,24 @@ public class CPURenderer : Renderer
     Thread processorThread;
     float[,] depths;
 
-    private const int levelThreadsSleepMs = 50;
+    //private const int levelThreadsSleepMs = 50;
 
     protected override float[] GetRandomDepths(int minX, int minY, int maxX, int maxY)
     {
         float[] homogeneityDepths = new float[homogeneityPoints];
 
-        for (int i = 0; i < homogeneityPoints; i++)
+        homogeneityDepths[0] = depths[minX, minY];
+        homogeneityDepths[1] = depths[minX, maxY-1];
+        homogeneityDepths[2] = depths[maxX-1, minY];
+        homogeneityDepths[3] = depths[maxX-1, maxY-1];
+
+        for (int i = 4; i < homogeneityPoints; i++)
         {
             int x = Random.Range(minX, maxX);
             int y = Random.Range(minY, maxY);
             homogeneityDepths[i] = depths[x, y];
         }
+        
         
         return homogeneityDepths;
     }
@@ -67,10 +73,10 @@ public class CPURenderer : Renderer
             });
         } else
         {
-            int time = Random.Range(10,levelThreadsSleepMs);
+            //int time = Random.Range(10,levelThreadsSleepMs);
             processorThread = new Thread(() =>
             {
-                Thread.Sleep(time);
+                //Thread.Sleep(time);
                 RenderRegion(0, 0, width, height);
                 lock (RendererManager.currentThreadsLock)
                 {

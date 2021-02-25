@@ -23,7 +23,7 @@ public abstract class Renderer : MonoBehaviour
     protected int depth;
 
     protected float[] homogeneities = new float[4];
-    protected const int homogeneityPoints = 20;
+    protected const int homogeneityPoints = 10;
 
     private int renderCount = 0;
 
