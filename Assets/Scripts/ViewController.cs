@@ -57,13 +57,13 @@ public class ViewController : MonoBehaviour, IPointerDownHandler
         changed = false;
         CheckFocus();
         CheckCamInfo();
-        CalculatePlanes();
 
         if (focused)
         {
             GetInput();
             MoveCamera();
         }
+        CalculatePlanes();
 
         if (changed) onChanged?.Invoke();
     }

@@ -17,6 +17,7 @@ public class FunctionNode
     private bool variablePositive = true;
     private bool isSubFunction = false;
     private string subFunction = "";
+    private FunctionNode[] subFunctionInputs = null;
 
     private bool woreParenthesis = false;
     private int parenthesisLevel = 0;
@@ -75,6 +76,7 @@ public class FunctionNode
         variablePositive = node.variablePositive;
         childLeft = node.childLeft;
         childRight = node.childRight;
+        subFunctionInputs = node.subFunctionInputs;
     }
 
     #region complexProperties
@@ -222,28 +224,28 @@ public class FunctionNode
             }
             if (isSubFunction)
             {
-                string content = "";
-                bool insideContent = false;
-                depth = 0;
-                for(int i = 0; i < func.Length; i++)
-                {
-                    if (!insideContent && func[i] == '(')
+                string content = "0";
+                //bool insideContent = false;
+                for (int i = 0; i < func.Length; i++) {
+                    if (func[i] == '(')
                     {
-                        insideContent = true;
-                        depth++;
-                    } else
-                    {
-                        if (func[i] == '(') depth++;
-                        if (func[i] == ')') depth--;
-
-                        if (depth > 0) content += func[i];
-                        else insideContent = false;
+                        content = func.Substring(i + 1, func.Length-i-2);
+                        break;
                     }
-                    
                 }
+
+                string[] inputs = content.Split(',');
+
                 childLeft = null;
-                childRight = new FunctionNode(this, parenthesisLevel + 1);
-                childRight.ProcessFunc(content);
+                childRight = null;
+                subFunctionInputs = new FunctionNode[inputs.Length];
+                for(int i = 0; i < inputs.Length; i++)
+                {
+                    subFunctionInputs[i] = new FunctionNode(this, parenthesisLevel + 1);
+                    subFunctionInputs[i].ProcessFunc(inputs[i]);
+                }
+                //childRight = new FunctionNode(this, parenthesisLevel + 1);
+                //childRight.ProcessFunc(content);
             }
 
             else
@@ -278,6 +280,10 @@ public class FunctionNode
         {
             childLeft?.DeepSimplify();
             childRight?.DeepSimplify();
+            if (subFunctionInputs != null)
+            {
+                foreach (FunctionNode fn in subFunctionInputs) fn.DeepSimplify();
+            }
             return TrySimplify();
         }
     }
@@ -400,22 +406,30 @@ public class FunctionNode
     {
         if (isSubFunction)
         {
-            float rightValue = 0f;
-            if(childRight != null)
+            float[] values = new float[subFunctionInputs.Length];
+
+            for (int i = 0; i < values.Length; i++)
             {
-                rightValue = childRight.Solve(x, y, z);
+                values[i] = subFunctionInputs[i].Solve(x, y, z);
             }
+
+            float GetValue(int i)
+            {
+                if (i < values.Length) return values[i];
+                else return 0f;
+            }
+            
             switch (subFunction)
             {
-                case "sin": return Mathf.Sin(rightValue);
-                case "cos": return Mathf.Cos(rightValue);
-                case "abs": return Mathf.Abs(rightValue);
+                case "sin": return Mathf.Sin(GetValue(0));
+                case "cos": return Mathf.Cos(GetValue(0));
+                case "abs": return Mathf.Abs(GetValue(0));
                 default:
                     Function subF;
                     if(FunctionManager.functions.TryGetValue(subFunction, out subF)){
-                        rightValue = subF.rootNode.Solve(x, y, z);
+                        return subF.rootNode.Solve(GetValue(0), GetValue(1), GetValue(2));
                     }
-                    return rightValue;
+                    else return 0f;
             }
         }
         if (isOperator)
@@ -452,9 +466,20 @@ public class FunctionNode
 
     public override string ToString()
     {
-        if (isSubFunction) return subFunction + "(" + childRight.ToString() + ")";
-        if (!NeedsRepresentation()) return "";
         string aux = "";
+        if (isSubFunction)
+        {
+            aux += subFunction + '(';
+            for(int i = 0; i < subFunctionInputs.Length; i++)
+            {
+                aux += subFunctionInputs[i].ToString();
+                if (i < subFunctionInputs.Length - 1) aux += ',';
+            }
+            aux += ")";
+            return aux;
+        }
+        if (!NeedsRepresentation()) return "";
+        
         bool needsParenthesis = NeedsParenthesis();
         if(needsParenthesis) aux += '(';
         if (isOperator) aux += childLeft.ToString() + operation + childRight.ToString();

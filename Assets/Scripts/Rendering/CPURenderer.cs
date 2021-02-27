@@ -85,6 +85,13 @@ public class CPURenderer : Renderer
             }
             );
             int priority = Mathf.RoundToInt(GetImportance() * 100);
+            //if(GetDisparity() > 0.01f) processorThread.Priority = System.Threading.ThreadPriority.AboveNormal;
+            /*switch (priority / 33)
+            {
+                case 0: processorThread.Priority = System.Threading.ThreadPriority.Normal; break;
+                case 1: processorThread.Priority = System.Threading.ThreadPriority.AboveNormal; break;
+                default: processorThread.Priority = System.Threading.ThreadPriority.Highest; break;
+            }*/
             RendererManager.threadsToStart.Add(new KeyValuePair<Thread, int>(processorThread, priority));
         }
     }
