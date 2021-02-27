@@ -19,6 +19,7 @@ public class FunctionElement : MonoBehaviour
         panel = GetComponentInParent<FunctionPanel>();
         selectBtn.onClick.AddListener(() => panel.SelectFunction(this));
         camImage.enabled = selectedFunc == this;
+        inputField.onValueChanged.AddListener((str)=>UpdateFunction());
     }
 
     private void Update()
@@ -44,18 +45,20 @@ public class FunctionElement : MonoBehaviour
         if (func != null && !func.Equals(function))
         {
             func = function;
+            //if(selectedFunc == this)
             FunctionPanel.InvokeOnChanged();
         } else func = function;
         if (!IsBeingEdit())
         {
+            inputField.onValueChanged.RemoveAllListeners();
             inputField.text = func.declaration + " = " + func.originalDefinition;
+            inputField.onValueChanged.AddListener((str) => UpdateFunction());
         }
         
     }
 
     public void UpdateFunction()
     {
-        
         Function f = FunctionManager.AddFunction(inputField.text);
         if(f != null)
         {

@@ -224,15 +224,12 @@ public class FunctionNode
             }
             if (isSubFunction)
             {
-                string content = "0";
-                //bool insideContent = false;
-                for (int i = 0; i < func.Length; i++) {
-                    if (func[i] == '(')
-                    {
-                        content = func.Substring(i + 1, func.Length-i-2);
-                        break;
-                    }
+                string content = func.Substring(subFunction.Length);
+                if (content.Length > 2 && content[0] == '(' && content[content.Length - 1] == ')')
+                {
+                    content = content.Substring(1, content.Length - 2);
                 }
+                else content = "0";
 
                 string[] inputs = content.Split(',');
 
@@ -244,8 +241,6 @@ public class FunctionNode
                     subFunctionInputs[i] = new FunctionNode(this, parenthesisLevel + 1);
                     subFunctionInputs[i].ProcessFunc(inputs[i]);
                 }
-                //childRight = new FunctionNode(this, parenthesisLevel + 1);
-                //childRight.ProcessFunc(content);
             }
 
             else
