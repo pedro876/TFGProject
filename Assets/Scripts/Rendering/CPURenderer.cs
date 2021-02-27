@@ -47,7 +47,7 @@ public class CPURenderer : Renderer
     {
         renderTex.SetPixels(memory);
         renderTex.Apply();
-        image.enabled = true;
+        base.MemoryToTex();
     }
 
     #region rendering
@@ -73,10 +73,10 @@ public class CPURenderer : Renderer
             });
         } else
         {
-            //int time = Random.Range(10,levelThreadsSleepMs);
+            queued = true;
             processorThread = new Thread(() =>
             {
-                //Thread.Sleep(time);
+                queued = false;
                 RenderRegion(0, 0, width, height);
                 lock (RendererManager.currentThreadsLock)
                 {

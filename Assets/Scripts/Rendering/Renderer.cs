@@ -7,7 +7,7 @@ public abstract class Renderer : MonoBehaviour
 {
     [HideInInspector] public RectTransform texTransform;
 
-    private Renderer[] children;
+    [HideInInspector] public Renderer[] children;
     private int childIndex = 0;
 
     protected Renderer parent;
@@ -27,8 +27,22 @@ public abstract class Renderer : MonoBehaviour
 
     private int renderCount = 0;
 
-    [SerializeField] protected bool done = false;
-    [SerializeField] protected bool rendering = false;
+    protected bool done = false;
+    protected bool rendering = false;
+    protected bool queued = false;
+    private bool renderingChildren = false;
+    protected bool texApplied = false;
+    public bool deepFinished = false;
+
+    #region State
+
+    public bool IsQueued { get => queued; }
+    public bool IsRendering { get => rendering && !queued; }
+    public bool IsDone { get => done; }
+    public bool IsRenderingChildren { get => renderingChildren; }
+    public bool IsTextureApplied { get => texApplied; }
+
+    #endregion
 
     #region Homogeneity
 
@@ -50,11 +64,6 @@ public abstract class Renderer : MonoBehaviour
 
     protected virtual void CalculateHomogeneity()
     {
-        /*if(level == RendererManager.setting.Count)
-        {
-            for (int i = 0; i < homogeneities.Length; i++) homogeneities[i] = 1f;
-            return;
-        }*/
 
         List<float[]> randomDepths = new List<float[]>()
         {
@@ -90,9 +99,13 @@ public abstract class Renderer : MonoBehaviour
     public virtual void DeepStop()
     {
         image.enabled = level == 0;
-        /*if(level > 0)
-            image.enabled = false;*/
-        if(children != null)
+        done = false;
+        renderingChildren = false;
+        queued = false;
+        rendering = false;
+        texApplied = false;
+        deepFinished = false;
+        if (children != null)
         {
             foreach (var c in children) c.DeepStop();
         }
@@ -110,7 +123,8 @@ public abstract class Renderer : MonoBehaviour
 
     protected virtual void MemoryToTex()
     {
-        
+        image.enabled = true;
+        texApplied = true;
     }
 
     public virtual void Render()
@@ -118,6 +132,7 @@ public abstract class Renderer : MonoBehaviour
         done = false;
         rendering = true;
         renderCount = 0;
+
         if (level > 0) image.enabled = false;
         if (FunctionElement.selectedFunc == null || FunctionElement.selectedFunc.func == null)
         {
@@ -135,12 +150,30 @@ public abstract class Renderer : MonoBehaviour
             if (parent.renderCount >= 4)
             {
                 parent.image.enabled = false;
+                
             }
         }
         if (children != null)
         {
+            renderingChildren = true;
             foreach (var c in children) c.Render();
+        } else
+        {
+            RenderFinishedSignal();
         }
+    }
+
+    protected void RenderFinishedSignal()
+    {
+        deepFinished = true;
+        if(children != null)
+        {
+            foreach (Renderer r in children)
+                if (!r.deepFinished)
+                    deepFinished = false;
+        }
+        
+        if (deepFinished && level > 0) parent.RenderFinishedSignal();
     }
 
     #endregion
@@ -149,6 +182,7 @@ public abstract class Renderer : MonoBehaviour
 
     public void Init(int level = 0, Renderer parent = null, float startX = 0f, float startY = 1f, float region = 1f)
     {
+        children = null;
         this.startX = startX;
         this.startY = startY;
         this.region = region;

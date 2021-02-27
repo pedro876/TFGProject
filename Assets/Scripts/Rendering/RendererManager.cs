@@ -9,7 +9,7 @@ public class RendererManager : MonoBehaviour
 {
     public const bool DEBUG = false;
 
-    Renderer rootRenderer;
+    public static Renderer rootRenderer = null;
     [SerializeField] GameObject localTexObjProto;
     [SerializeField] GameObject localCpuRendererProto;
     [SerializeField] GameObject localGpuRendererProto;
@@ -27,6 +27,11 @@ public class RendererManager : MonoBehaviour
     public static Queue<Action> orders = new Queue<Action>();
     [SerializeField] private int ordersPerUpdate = 5;
     [SerializeField] private int maxParallelThreads = 8;
+
+    //events
+    public static event Action renderStarted;
+    public static event Action renderFinished;
+    private bool rendering = false;
 
     private void Start()
     {
@@ -96,6 +101,7 @@ public class RendererManager : MonoBehaviour
     private void LateUpdate()
     {
         AdjustPositions();
+        CheckIfRenderFinished();
     }
 
     private void AdjustPositions()
@@ -109,6 +115,8 @@ public class RendererManager : MonoBehaviour
 
     private void StartRender()
     {
+        renderStarted?.Invoke();
+        rendering = true;
         orders.Clear();
         threadsToStart.Clear();
         lock (currentThreadsLock)
@@ -124,7 +132,14 @@ public class RendererManager : MonoBehaviour
         rootRenderer.Render();
     }
 
-
+    private void CheckIfRenderFinished()
+    {
+        if(rendering && rootRenderer != null && rootRenderer.deepFinished/* && orders.Count == 0*/)
+        {
+            rendering = false;
+            renderFinished?.Invoke();
+        }
+    }
 
     #endregion
 
