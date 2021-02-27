@@ -7,6 +7,9 @@ using TMPro;
 public class RenderPanel : MonoBehaviour
 {
     [Header("Process info")]
+    [SerializeField] Button restartBtn;
+    [SerializeField] TextMeshProUGUI finalResText;
+    [SerializeField] TextMeshProUGUI finalDepthText;
     [SerializeField] TextMeshProUGUI timeText;
     [SerializeField] TextMeshProUGUI liveThreadsText;
     [SerializeField] TextMeshProUGUI queuedThreadsText;
@@ -21,20 +24,39 @@ public class RenderPanel : MonoBehaviour
     [SerializeField] RawImage processImg;
     private Texture2D processTex;
     private int imgSize;
-    float renderTime = 0f;
+    private float renderTime = 0f;
+
+    [Header("Homogeneity")]
+    [SerializeField] RawImage homogeneityImg;
+    [SerializeField] Color minHomogeneityColor = Color.red;
+    [SerializeField] Color maxHomogeneityColor = Color.black;
+    private Texture2D homogeneityTex;
 
     bool mustUpdate = false;
 
     private void Start()
     {
+        restartBtn.onClick.AddListener(RendererManager.StartRender);
+
         imgSize = Mathf.RoundToInt(Mathf.Pow(2, RendererManager.setting.Count - 1));
+        int lastLevelRes = imgSize * RendererManager.setting[RendererManager.setting.Count - 1].width;
+        finalResText.text = "" + lastLevelRes + "x" + lastLevelRes;
+        finalDepthText.text = "" + RendererManager.setting[RendererManager.setting.Count - 1].depth;
+
         processTex = new Texture2D(imgSize, imgSize, TextureFormat.RGB24, false)
+        {
+            wrapMode = TextureWrapMode.Clamp,
+            filterMode = FilterMode.Point,
+        };
+        homogeneityTex = new Texture2D(imgSize, imgSize, TextureFormat.RGB24, false)
         {
             wrapMode = TextureWrapMode.Clamp,
             filterMode = FilterMode.Point,
         };
         processImg.texture = processTex;
         processImg.color = Color.white;
+        homogeneityImg.texture = homogeneityTex;
+        homogeneityImg.color = Color.white;
 
         RendererManager.renderStarted += () =>
         {
@@ -44,11 +66,11 @@ public class RenderPanel : MonoBehaviour
         RendererManager.renderFinished += () =>
         {
             mustUpdate = false;
-            UpdateProcessInfo();
-            UpdateProcessTex(0, 0, imgSize, imgSize, RendererManager.rootRenderer);
-            processTex.Apply();
+            UpdateAllInfo();
         };
     }
+
+    #region Update
 
     private void Update()
     {
@@ -66,14 +88,25 @@ public class RenderPanel : MonoBehaviour
         {
             if(RendererManager.rootRenderer != null && mustUpdate)
             {
-                UpdateProcessInfo();
-                UpdateProcessTex(0, 0, imgSize, imgSize, RendererManager.rootRenderer);
-                processTex.Apply();
+                UpdateAllInfo();
             }
             
             yield return new WaitForSeconds(processTime);
         }
     }
+
+    private void UpdateAllInfo()
+    {
+        UpdateProcessInfo();
+        UpdateProcessTex(0, 0, imgSize, imgSize, RendererManager.rootRenderer);
+        UpdateHomogeneityTex(0, 0, imgSize, imgSize, RendererManager.rootRenderer);
+        processTex.Apply();
+        homogeneityTex.Apply();
+    }
+
+    #endregion
+
+    #region process
 
     private void UpdateProcessInfo()
     {
@@ -112,5 +145,35 @@ public class RenderPanel : MonoBehaviour
         }
     }
 
+    #endregion
+
+    #region Homogeneity
+
+    private void UpdateHomogeneityTex(int minX, int minY, int maxX, int maxY, Renderer renderer)
+    {
+
+        if (renderer.IsRenderingChildren && renderer.children != null)
+        {
+            int halfSize = (maxX - minX) / 2;
+            UpdateHomogeneityTex(minX, minY, maxX - halfSize, maxY - halfSize, renderer.children[0]);
+            UpdateHomogeneityTex(minX + halfSize, minY, maxX, maxY - halfSize, renderer.children[1]);
+            UpdateHomogeneityTex(minX, minY + halfSize, maxX - halfSize, maxY, renderer.children[2]);
+            UpdateHomogeneityTex(minX + halfSize, minY + halfSize, maxX, maxY, renderer.children[3]);
+        }
+        else
+        {
+            Color col = Color.Lerp(minHomogeneityColor, maxHomogeneityColor, Mathf.Pow(renderer.GetHomogeneity(), 4f));
+
+            for (int x = minX; x < maxX; x++)
+            {
+                for (int y = minY; y < maxY; y++)
+                {
+                    homogeneityTex.SetPixel(x, homogeneityTex.height - y - 1, col);
+                }
+            }
+        }
+    }
+
+    #endregion
 
 }

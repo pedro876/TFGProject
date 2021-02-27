@@ -31,7 +31,7 @@ public class RendererManager : MonoBehaviour
     //events
     public static event Action renderStarted;
     public static event Action renderFinished;
-    private bool rendering = false;
+    private static bool rendering = false;
 
     private void Start()
     {
@@ -50,6 +50,8 @@ public class RendererManager : MonoBehaviour
         ViewController.onChanged += StartRender;
         StartRender();
     }
+
+    #region ordersAndThreads
 
     private void FixedUpdate()
     {
@@ -98,6 +100,8 @@ public class RendererManager : MonoBehaviour
         }
     }
 
+    #endregion
+
     private void LateUpdate()
     {
         AdjustPositions();
@@ -113,7 +117,7 @@ public class RendererManager : MonoBehaviour
 
     #region rendering
 
-    private void StartRender()
+    public static void StartRender()
     {
         renderStarted?.Invoke();
         rendering = true;

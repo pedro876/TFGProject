@@ -46,7 +46,7 @@ public abstract class Renderer : MonoBehaviour
 
     #region Homogeneity
 
-    protected float GetHomogeneity()
+    public float GetHomogeneity()
     {
         if (parent == null) return 0f;
         else return parent.homogeneities[childIndex];

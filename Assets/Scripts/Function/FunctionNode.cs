@@ -224,18 +224,20 @@ public class FunctionNode
             {
                 string content = "";
                 bool insideContent = false;
+                depth = 0;
                 for(int i = 0; i < func.Length; i++)
                 {
-                    if (!insideContent)
+                    if (!insideContent && func[i] == '(')
                     {
-                        insideContent = func[i] == '(';
+                        insideContent = true;
+                        depth++;
                     } else
                     {
-                        if (func[i] == ')') insideContent = false;
-                        else
-                        {
-                            content += func[i];
-                        }
+                        if (func[i] == '(') depth++;
+                        if (func[i] == ')') depth--;
+
+                        if (depth > 0) content += func[i];
+                        else insideContent = false;
                     }
                     
                 }
