@@ -25,8 +25,8 @@ public class RendererManager : MonoBehaviour
     public static HashSet<Thread> currentThreads = new HashSet<Thread>();
     public static List<KeyValuePair<Thread, int>> threadsToStart = new List<KeyValuePair<Thread, int>>();
     public static Queue<Action> orders = new Queue<Action>();
-    [SerializeField] private int ordersPerUpdate = 5;
-    [SerializeField] private int maxParallelThreads = 8;
+    [SerializeField] private int ordersPerUpdate = 3;
+    [SerializeField] private int maxParallelThreads = 10;
 
     //events
     public static event Action renderStarted;
@@ -72,6 +72,9 @@ public class RendererManager : MonoBehaviour
 
     private void AttendThreads()
     {
+        int toStartCount = threadsToStart.Count;
+        
+
         int top;
         int currentCount;
         lock (currentThreadsLock)
@@ -80,7 +83,7 @@ public class RendererManager : MonoBehaviour
             //Debug.Log(currentCount);
         }
         top = maxParallelThreads - currentCount;
-        int toStartCount = threadsToStart.Count;
+        
         if (top > toStartCount) top = toStartCount;
         
         threadsToStart.Sort((a, b) =>  a.Value - b.Value);
