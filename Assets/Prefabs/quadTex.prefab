@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &5548294425146031195
+--- !u!1 &5548087982357149704
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,23 +8,23 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 5548294425146031192}
-  - component: {fileID: 5548294425146031190}
-  - component: {fileID: 5548294425146031193}
-  m_Layer: 5
+  - component: {fileID: 6821615616173014872}
+  - component: {fileID: 241148365997789982}
+  - component: {fileID: 9193602843615447121}
+  m_Layer: 8
   m_Name: quadTex
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!224 &5548294425146031192
+--- !u!224 &6821615616173014872
 RectTransform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5548294425146031195}
+  m_GameObject: {fileID: 5548087982357149704}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -35,23 +35,23 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 1540, y: 1540}
+  m_SizeDelta: {x: 256, y: 256}
   m_Pivot: {x: 0, y: 1}
---- !u!222 &5548294425146031190
+--- !u!222 &241148365997789982
 CanvasRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5548294425146031195}
+  m_GameObject: {fileID: 5548087982357149704}
   m_CullTransparentMesh: 0
---- !u!114 &5548294425146031193
+--- !u!114 &9193602843615447121
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5548294425146031195}
+  m_GameObject: {fileID: 5548087982357149704}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1344c3c82d62a2a41a3576d8abb8e3ea, type: 3}

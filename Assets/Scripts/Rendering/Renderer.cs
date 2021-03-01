@@ -211,10 +211,16 @@ public abstract class Renderer : MonoBehaviour
 
     protected virtual void CreateTexture()
     {
-        GameObject obj = Instantiate(RendererManager.texObjProto, parent != null ? parent.texTransform : RendererManager.functionViewContainer);
+        GameObject obj = Instantiate(RendererManager.texObjProto, parent != null ? parent.texTransform : RendererManager.quadContainer);
         if (parent == null) obj.transform.SetAsFirstSibling();
         obj.name = "tex" + level + "_"+ (parent != null ? ""+parent.texTransform.childCount : "");
         texTransform = obj.GetComponent<RectTransform>();
+        if (level == 0)
+        {
+            texTransform.position = RendererManager.quadContainer.position;
+            texTransform.sizeDelta = RendererManager.quadContainer.sizeDelta;
+        }
+
         image = obj.GetComponent<RawImage>();
     }
 
@@ -252,9 +258,10 @@ public abstract class Renderer : MonoBehaviour
             for (int i = 0; i < 4; i++)
             {
                 children[i].texTransform.sizeDelta = new Vector2(texTransform.sizeDelta.x * 0.5f, texTransform.sizeDelta.y * 0.5f);
-                children[i].texTransform.position = new Vector2(
+                children[i].texTransform.position = new Vector3(
                     texTransform.position.x+texTransform.sizeDelta.x*positions[i].x,
-                    texTransform.position.y+texTransform.sizeDelta.y * positions[i].y
+                    texTransform.position.y+texTransform.sizeDelta.y * positions[i].y,
+                    texTransform.position.z
                 );
                 children[i].AdjustChildrenPositions();
             }

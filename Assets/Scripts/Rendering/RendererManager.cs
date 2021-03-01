@@ -17,7 +17,7 @@ public class RendererManager : MonoBehaviour
     public static GameObject gpuRendererProto;
     public static GameObject texObjProto;
     public static RectTransform spaceView;
-    public static RectTransform functionViewContainer;
+    public static RectTransform quadContainer;
     public static int maxLevel;
 
     [Header("Threading")]
@@ -40,7 +40,7 @@ public class RendererManager : MonoBehaviour
         cpuRendererProto = localCpuRendererProto;
         gpuRendererProto = localGpuRendererProto;
         spaceView = FindObjectOfType<ViewController>().GetComponent<RectTransform>();
-        functionViewContainer = GameObject.FindGameObjectWithTag("FuncContainer").GetComponent<RectTransform>();
+        quadContainer = GameObject.FindGameObjectWithTag("QuadContainer").GetComponent<RectTransform>();
         rootRenderer = Instantiate(setting[0].type == RendererType.CPU ? cpuRendererProto : gpuRendererProto, transform).GetComponent<Renderer>();
         rootRenderer.gameObject.name = "rootRenderer";
 
@@ -113,8 +113,8 @@ public class RendererManager : MonoBehaviour
 
     private void AdjustPositions()
     {
-        rootRenderer.texTransform.position = spaceView.position+new Vector3(-spaceView.sizeDelta.x*0.5f, spaceView.sizeDelta.y*0.5f, 0f);
-        rootRenderer.texTransform.sizeDelta = spaceView.sizeDelta;
+        //rootRenderer.texTransform.position = spaceView.position+new Vector3(-spaceView.sizeDelta.x*0.5f, spaceView.sizeDelta.y*0.5f, 0f);
+        //rootRenderer.texTransform.sizeDelta = spaceView.sizeDelta;
         rootRenderer.AdjustChildrenPositions();
     }
 

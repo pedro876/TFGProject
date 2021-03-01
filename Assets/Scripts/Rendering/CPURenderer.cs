@@ -108,7 +108,7 @@ public class CPURenderer : Renderer
         Function func = FunctionElement.selectedFunc.func;
 
         Color farColor = Color.white;
-        Color nearColor = Color.blue;
+        Color nearColor = Color.black;
 
         for (int y = minY; y < maxY; y++)
         {
