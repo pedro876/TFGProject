@@ -6,6 +6,7 @@ TagManager:
   tags:
   - FuncContainer
   - QuadContainer
+  - FunctionView
   layers:
   - Default
   - TransparentFX
