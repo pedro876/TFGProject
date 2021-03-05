@@ -13,14 +13,19 @@ public abstract class Renderer : MonoBehaviour
     protected Renderer parent;
     protected RawImage image;
     protected int level;
-    protected Color[] memory;
-    protected Texture tex;
+    protected Color[] depthMemory;
+    protected Color[] normalMemory;
+    protected Texture depthTex;
+    protected Texture normalTex;
     protected float startX;
     protected float startY;
     protected float region;
     protected int width;
     protected int height;
     protected int depth;
+    protected float normalExplorationRadius;
+    public static int normalExplorationDepth = 10;
+    public static float normalExplorationDepthMultiplier = 2f;
 
     protected float[] homogeneities = new float[4];
     protected const int homogeneityPoints = 10;
@@ -96,6 +101,39 @@ public abstract class Renderer : MonoBehaviour
 
     #region rendering
 
+    /*private static readonly Vector3[] dirsExplored = new Vector3[]
+    {
+        new Vector3(1,0,0),
+        new Vector3(-1,0,0),
+        new Vector3(0,1,0),
+        new Vector3(0,-1,0),
+        new Vector3(0,0,1),
+        new Vector3(0,0,-1),
+    };*/
+
+    protected readonly Vector3[] dirsExplored = new Vector3[6];
+
+    private void UpdateNormalExplorationRadius()
+    {
+        /*dirsExplored[0] =  ViewController.camTransform.forward;
+        dirsExplored[1] = -ViewController.camTransform.forward;
+        dirsExplored[2] =  ViewController.camTransform.right;
+        dirsExplored[3] = -ViewController.camTransform.right;
+        dirsExplored[4] =  ViewController.camTransform.up;
+        dirsExplored[5] = -ViewController.camTransform.up;*/
+
+        dirsExplored[0] =  Vector3.up;
+        dirsExplored[1] = -Vector3.up;
+        dirsExplored[2] =  Vector3.right;
+        dirsExplored[3] = -Vector3.right;
+        dirsExplored[4] =  Vector3.forward;
+        dirsExplored[5] = -Vector3.forward;
+
+        normalExplorationRadius = (Vector3.Distance(ViewController.nearTopLeft, ViewController.farTopLeft) / depth) * normalExplorationDepthMultiplier;
+
+
+    }
+
     public virtual void DeepStop()
     {
         image.enabled = level == 0;
@@ -129,6 +167,8 @@ public abstract class Renderer : MonoBehaviour
 
     public virtual void Render()
     {
+        UpdateNormalExplorationRadius();
+
         done = false;
         rendering = true;
         renderCount = 0;
@@ -191,9 +231,11 @@ public abstract class Renderer : MonoBehaviour
         width = RendererManager.setting[level].width;
         height = RendererManager.setting[level].height;
         depth = RendererManager.setting[level].depth;
-        memory = new Color[width*height];
-        CreateTexture();
-        image.texture = tex;
+        depthMemory = new Color[width*height];
+        normalMemory = new Color[width * height];
+        CreateTextures();
+
+        image.texture = normalTex;
 
         if (RendererManager.DEBUG)
         {
@@ -209,7 +251,7 @@ public abstract class Renderer : MonoBehaviour
         image.enabled = false;
     }
 
-    protected virtual void CreateTexture()
+    protected virtual void CreateTextures()
     {
         GameObject obj = Instantiate(RendererManager.texObjProto, parent != null ? parent.texTransform : RendererManager.quadContainer);
         if (parent == null) obj.transform.SetAsFirstSibling();

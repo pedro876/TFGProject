@@ -1344,8 +1344,8 @@ RectTransform:
   m_Father: {fileID: 1887216714}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 176.74, y: 0}
   m_SizeDelta: {x: 353.48, y: 0}
   m_Pivot: {x: 0.5, y: 1}
@@ -1467,6 +1467,8 @@ MonoBehaviour:
   localGpuRendererProto: {fileID: 0}
   ordersPerUpdate: 3
   maxParallelThreads: 10
+  normalExplorationDepth: 10
+  normalExplorationDepthMultiplier: 2.5
 --- !u!114 &296807349
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3605,13 +3607,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
-  m_LocalRotation: {x: 0.15796115, y: 0.33364716, z: -0.056814887, w: 0.9276314}
-  m_LocalPosition: {x: -0.42, y: 0.33, z: -0.5}
+  m_LocalRotation: {x: 0.5, y: 0.5, z: -0.5, w: 0.5}
+  m_LocalPosition: {x: 0, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 537136842}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 19.328001, y: 39.565002, z: 0}
+  m_LocalEulerAnglesHint: {x: 90, y: 90, z: 0}
 --- !u!1 &1032444729
 GameObject:
   m_ObjectHideFlags: 0
@@ -6003,7 +6005,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 838ff2a11e8befd4ca77e842608b31c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DEBUG: 1
+  DEBUG: 0
   cam: {fileID: 963194227}
   orbitSpeed: 100
   rotSpeed: 1

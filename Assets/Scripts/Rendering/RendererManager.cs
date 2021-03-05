@@ -9,6 +9,7 @@ public class RendererManager : MonoBehaviour
 {
     public const bool DEBUG = false;
 
+    [Header("Prototypes")]
     public static Renderer rootRenderer = null;
     [SerializeField] GameObject localTexObjProto;
     [SerializeField] GameObject localCpuRendererProto;
@@ -28,6 +29,10 @@ public class RendererManager : MonoBehaviour
     [SerializeField] private int ordersPerUpdate = 3;
     [SerializeField] private int maxParallelThreads = 10;
 
+    [Header("Render settings")]
+    [SerializeField] int normalExplorationDepth = 10;
+    [SerializeField] float normalExplorationDepthMultiplier = 3f;
+
     //events
     public static event Action renderStarted;
     public static event Action renderFinished;
@@ -35,6 +40,8 @@ public class RendererManager : MonoBehaviour
 
     private void Start()
     {
+        Renderer.normalExplorationDepth = normalExplorationDepth;
+        Renderer.normalExplorationDepthMultiplier = normalExplorationDepthMultiplier;
         maxLevel = setting.Count;
         texObjProto = localTexObjProto;
         cpuRendererProto = localCpuRendererProto;
@@ -46,9 +53,9 @@ public class RendererManager : MonoBehaviour
 
         rootRenderer.Init(0);
         AdjustPositions();
+        StartRender();
         FunctionPanel.onChanged += StartRender;
         ViewController.onChanged += StartRender;
-        StartRender();
     }
 
     #region ordersAndThreads
@@ -172,7 +179,8 @@ public class RendererManager : MonoBehaviour
 
     public static List<RendererQuality> setting = new List<RendererQuality>()
     {
-        new RendererQuality(RendererType.CPU, 90, 40),
+        //new RendererQuality(RendererType.CPU, 256, 50)
+        new RendererQuality(RendererType.CPU, 64, 40),
         new RendererQuality(RendererType.CPU, 64, 90),
         new RendererQuality(RendererType.CPU, 128, 256),
         new RendererQuality(RendererType.CPU, 128, 1024),

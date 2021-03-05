@@ -7,7 +7,9 @@ using System.Threading;
 public class CPURenderer : Renderer
 {
 
-    Texture2D renderTex;
+    Texture2D depthTex2D;
+    Texture2D normalTex2D;
+
     Thread processorThread;
     float[,] depths;
 
@@ -33,20 +35,30 @@ public class CPURenderer : Renderer
         return homogeneityDepths;
     }
 
-    override protected void CreateTexture()
+    override protected void CreateTextures()
     {
-        base.CreateTexture();
-        renderTex = new Texture2D(width, height, TextureFormat.RGBA32, false);
-        renderTex.filterMode = FilterMode.Bilinear;
-        renderTex.wrapMode = TextureWrapMode.Clamp;
-        tex = renderTex;
+        base.CreateTextures();
+
+        depthTex2D = new Texture2D(width, height, TextureFormat.RGBA32, false);
+        depthTex2D.filterMode = FilterMode.Bilinear;
+        depthTex2D.wrapMode = TextureWrapMode.Clamp;
+        depthTex = depthTex2D;
+
+        normalTex2D = new Texture2D(width, height, TextureFormat.RGBA32, false);
+        normalTex2D.filterMode = FilterMode.Bilinear;
+        normalTex2D.wrapMode = TextureWrapMode.Clamp;
+        normalTex = normalTex2D;
+
         depths = new float[width, height];
     }
 
     protected override void MemoryToTex()
     {
-        renderTex.SetPixels(memory);
-        renderTex.Apply();
+        depthTex2D.SetPixels(depthMemory);
+        depthTex2D.Apply();
+
+        normalTex2D.SetPixels(normalMemory);
+        normalTex2D.Apply();
         base.MemoryToTex();
     }
 
@@ -119,26 +131,105 @@ public class CPURenderer : Renderer
 
                 bool landed = false;
                 float normDepth = 0f;
+                Vector3 pos = Vector3.zero;
                 for (int z = 0; z < depth && !landed; z++)
                 {
                     normDepth = (float)z / (depth-1);
-                    Vector3 pos = Vector3.Lerp(nearPos, farPos, normDepth);
-                    if (pos.x < -0.5f || pos.x > 0.5f || pos.y < -0.5f || pos.y > 0.5f || pos.z < -0.5f || pos.z > 0.5f) continue;
-                    float eval = func.Solve(pos.x, pos.z, pos.y);
+                    pos = Vector3.Lerp(nearPos, farPos, normDepth);
+                    if (!IsOutOfRegion(ref pos))
+                    {
+                        landed = func.IsMass(ref pos);
+                    }
+                    
+                    /*float eval = func.Solve(pos.x, pos.z, pos.y);
                     if (pos.y <= eval)
                     {
                         landed = true;
-                    }
+                    }*/
                 }
                 depths[x, y] = normDepth;
                 int row = height - y - 1;
-                memory[x + row * height] = Color.Lerp(nearColor, farColor, normDepth);
+                depthMemory[x + row * height] = new Color(Mathf.Lerp(0f, 1f, normDepth), landed ? 1f : 0f, 0f, 1f); /*Color.Lerp(nearColor, farColor, normDepth);*/
+                Color normalColor = Color.white;
+                if (landed)
+                {
+                    Vector3 normal = CalculateNormal(pos, func);
+                    normalColor = new Color(normal.x, normal.y, normal.z, 1f);
+                    //Vector3 normal = CalculateNormal(pos, func) * 0.5f;
+                    //normalColor = new Color(normal.x+0.5f, normal.y+0.5f, normal.z+0.5f, 1f);
+                }
+
+
+                normalMemory[x + row * height] = normalColor;//new Color(normal.x/*+0.5f*/, /*normal.y+0.5f*/0f, /*normal.z+0.5f*/0f, 1f);
             }
         }
         done = true;
     }
 
-   
+    private Vector3 CalculateNormal(Vector3 pos, Function func)
+    {
+        //Vector3 n = Vector3.zero;
+        float totalMag = 0f;
+
+        Vector3[] dirsOut = new Vector3[dirsExplored.Length];
+        float[] mags = new float[dirsExplored.Length];
+
+        for(int i = 0; i < dirsExplored.Length; i++)
+        {
+            Vector3 destiny = pos + dirsExplored[i] * normalExplorationRadius;
+            Vector3 surface = ExploreDirectionLinear(pos, destiny, func);
+            dirsOut[i] = surface - pos;
+            mags[i] = dirsOut[i].magnitude;
+            totalMag += mags[i];
+            //n += (destiny - ExploreDirectionLinear(pos, destiny, func));
+            //n += (destiny - ExploreDirectionLinear(pos, destiny, func));
+        }
+        Vector3 n = Vector3.zero;
+        for(int i = 0; i < dirsOut.Length; i++)
+        {
+            n += dirsOut[i].normalized * (1f - mags[i] / totalMag);
+            //dirs[i] = dirs[i].normalized * (1f - mags[i] / totalMag);
+        }
+        n.Normalize();
+
+        return n;
+    }
+
+    private bool IsOutOfRegion(ref Vector3 pos)
+    {
+        return pos.x < -0.5f || pos.x > 0.5f || pos.y < -0.5f || pos.y > 0.5f || pos.z < -0.5f || pos.z > 0.5f;
+    }
+
+    private Vector3 ExploreDirectionDAC(Vector3 origin, Vector3 destiny, Function func)
+    {
+
+        for(int i = 0; i < normalExplorationDepth; i++)
+        {
+            Vector3 middle = Vector3.Lerp(origin, destiny, 0.5f);
+            if(!IsOutOfRegion(ref middle) && func.IsMass(ref middle))
+            {
+                origin = middle;
+            } else
+            {
+                destiny = middle;
+            }
+        }
+        return destiny;
+    }
+
+    private Vector3 ExploreDirectionLinear(Vector3 origin, Vector3 destiny, Function func)
+    {
+        Vector3 pos = Vector3.zero;
+        for (float i = 0f; i < normalExplorationDepth; i++)
+        {
+            pos = Vector3.Lerp(origin, destiny, i / normalExplorationDepth);
+            if(IsOutOfRegion(ref pos) || !func.IsMass(ref pos))
+            {
+                return pos;
+            }
+        }
+        return pos;
+    }
 
     #endregion
 }

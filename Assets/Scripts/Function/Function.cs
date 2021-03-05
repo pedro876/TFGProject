@@ -30,6 +30,12 @@ public class Function
         return result;
     }
 
+    public bool IsMass(ref Vector3 pos)
+    {
+        float eval = Solve(pos.x, pos.z, pos.y);
+        return (pos.y <= eval);
+    }
+
     public void SetData(string name, string declaration, string originalDefinition, string definition)
     {
         this.originalDefinition = originalDefinition;

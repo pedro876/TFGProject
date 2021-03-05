@@ -13,7 +13,7 @@ public class ViewController : MonoBehaviour, IPointerDownHandler
     bool focused = false;
 
     [SerializeField] Camera cam;
-    Transform camTransform;
+    public static Transform camTransform;
 
     [Header("Move variables")]
     [SerializeField] float orbitSpeed = 1f;
@@ -45,10 +45,14 @@ public class ViewController : MonoBehaviour, IPointerDownHandler
     bool changed = false;
     public static event Action onChanged;
 
-    private void Start()
+    bool firstFrame = true;
+
+    private void Awake()
     {
         camTransform = cam.transform;
         camTransform.LookAt(Vector3.zero);
+        CheckCamInfo();
+        MoveCamera();
         CalculatePlanes();
     }
 
@@ -65,7 +69,8 @@ public class ViewController : MonoBehaviour, IPointerDownHandler
         }
         CalculatePlanes();
 
-        if (changed) onChanged?.Invoke();
+        if (changed || firstFrame) onChanged?.Invoke();
+        firstFrame = false;
     }
 
     #region CameraInfo

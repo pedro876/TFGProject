@@ -20,7 +20,7 @@ public class PostProcess : MonoBehaviour
         normalTex.enableRandomWrite = true;
         normalTex.Create();
         functionView = GameObject.FindGameObjectWithTag("FunctionView").GetComponent<RawImage>();
-        functionView.texture = normalTex;
+        //functionView.texture = normalTex;
 
 
         normalKernel = normalShader.FindKernel("Normals");
@@ -39,7 +39,7 @@ public class PostProcess : MonoBehaviour
     {
         depthCam.Render();
 
-        normalShader.Dispatch(normalKernel, normalTex.width / numThreads[0], normalTex.height / numThreads[1], numThreads[2]);
+        //normalShader.Dispatch(normalKernel, normalTex.width / numThreads[0], normalTex.height / numThreads[1], numThreads[2]);
 
     }
 }

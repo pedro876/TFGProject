@@ -14,7 +14,7 @@ void Normals (uint3 id : SV_DispatchThreadID)
     float4 depthColor = DepthTex[id.xy];
     float center = depthColor.x;
     //float2 size = float2(2, 0);
-    float3 off = float3(-30, 0, 30);
+    float3 off = float3(-10, 0, 10);
     float left = DepthTex[id.xy + off.xy].x;
     float right = DepthTex[id.xy + off.zy].x;
     float down = DepthTex[id.xy + off.yx].x;
