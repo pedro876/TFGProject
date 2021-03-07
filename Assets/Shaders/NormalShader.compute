@@ -26,9 +26,10 @@ void Normals (uint3 id : SV_DispatchThreadID)
     float3 rightV = float3(diffX, 0, 0);
     float3 upV = float3(0, diffY, 0);
 
-    float3 normal = normalize(cross(upV, rightV))*0.5f+0.5f;
+    float3 normal = normalize(float3(diffX, diffY, 1.0f));// 1.0f - abs(diffX) - abs(diffY));
+    //float3 normal = normalize(cross(upV, rightV))/**0.5f+0.5f*/;
 
-    float4 finalColor = float4(normal,1);
+    float4 finalColor = float4(normal*0.5f+0.5f,1);
     /*if (diffX == 0.0f) {
         finalColor = float4(1, 1, 1, 1);
     }

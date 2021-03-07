@@ -30,8 +30,10 @@ public class RendererManager : MonoBehaviour
     [SerializeField] private int maxParallelThreads = 10;
 
     [Header("Render settings")]
-    [SerializeField] int normalExplorationDepth = 10;
-    [SerializeField] float normalExplorationDepthMultiplier = 3f;
+    [SerializeField] int explorationSamples = 10;
+    [SerializeField] float depthExplorationMultiplier = 1.05f;
+    [SerializeField] float normalExplorationMultiplier = 1.05f;
+    [SerializeField] float normalPlaneMultiplier = 1.05f;
 
     //events
     public static event Action renderStarted;
@@ -40,8 +42,10 @@ public class RendererManager : MonoBehaviour
 
     private void Start()
     {
-        Renderer.normalExplorationDepth = normalExplorationDepth;
-        Renderer.normalExplorationDepthMultiplier = normalExplorationDepthMultiplier;
+        Renderer.explorationSamples = explorationSamples;
+        Renderer.depthExplorationMultiplier = depthExplorationMultiplier;
+        Renderer.normalExplorationMultiplier = normalExplorationMultiplier;
+        Renderer.normalPlaneMultiplier = normalPlaneMultiplier;
         maxLevel = setting.Count;
         texObjProto = localTexObjProto;
         cpuRendererProto = localCpuRendererProto;
@@ -180,10 +184,10 @@ public class RendererManager : MonoBehaviour
     public static List<RendererQuality> setting = new List<RendererQuality>()
     {
         //new RendererQuality(RendererType.CPU, 256, 50)
-        new RendererQuality(RendererType.CPU, 64, 40),
-        new RendererQuality(RendererType.CPU, 64, 90),
-        new RendererQuality(RendererType.CPU, 128, 256),
-        new RendererQuality(RendererType.CPU, 128, 1024),
+        new RendererQuality(RendererType.CPU, 90, 40),
+        new RendererQuality(RendererType.CPU, 64, 80),
+        new RendererQuality(RendererType.CPU, 128, 200),
+        new RendererQuality(RendererType.CPU, 128, 700),
     };
 
     #endregion

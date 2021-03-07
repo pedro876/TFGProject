@@ -23,9 +23,11 @@ public abstract class Renderer : MonoBehaviour
     protected int width;
     protected int height;
     protected int depth;
-    protected float normalExplorationRadius;
-    public static int normalExplorationDepth = 10;
-    public static float normalExplorationDepthMultiplier = 2f;
+    //protected float normalExplorationRadius;
+    public static int explorationSamples = 10;
+    public static float depthExplorationMultiplier = 1.05f;
+    public static float normalExplorationMultiplier = 1f;
+    public static float normalPlaneMultiplier = 0.2f;
 
     protected float[] homogeneities = new float[4];
     protected const int homogeneityPoints = 10;
@@ -111,28 +113,28 @@ public abstract class Renderer : MonoBehaviour
         new Vector3(0,0,-1),
     };*/
 
-    protected readonly Vector3[] dirsExplored = new Vector3[6];
+    //protected readonly Vector3[] dirsExplored = new Vector3[6];
 
-    private void UpdateNormalExplorationRadius()
-    {
-        /*dirsExplored[0] =  ViewController.camTransform.forward;
-        dirsExplored[1] = -ViewController.camTransform.forward;
-        dirsExplored[2] =  ViewController.camTransform.right;
-        dirsExplored[3] = -ViewController.camTransform.right;
-        dirsExplored[4] =  ViewController.camTransform.up;
-        dirsExplored[5] = -ViewController.camTransform.up;*/
-
-        dirsExplored[0] =  Vector3.up;
-        dirsExplored[1] = -Vector3.up;
-        dirsExplored[2] =  Vector3.right;
-        dirsExplored[3] = -Vector3.right;
-        dirsExplored[4] =  Vector3.forward;
-        dirsExplored[5] = -Vector3.forward;
-
-        normalExplorationRadius = (Vector3.Distance(ViewController.nearTopLeft, ViewController.farTopLeft) / depth) * normalExplorationDepthMultiplier;
-
-
-    }
+    //private void UpdateNormalExplorationRadius()
+    //{
+    //    /*dirsExplored[0] =  ViewController.camTransform.forward;
+    //    dirsExplored[1] = -ViewController.camTransform.forward;
+    //    dirsExplored[2] =  ViewController.camTransform.right;
+    //    dirsExplored[3] = -ViewController.camTransform.right;
+    //    dirsExplored[4] =  ViewController.camTransform.up;
+    //    dirsExplored[5] = -ViewController.camTransform.up;*/
+    //
+    //    dirsExplored[0] =  Vector3.up;
+    //    dirsExplored[1] = -Vector3.up;
+    //    dirsExplored[2] =  Vector3.right;
+    //    dirsExplored[3] = -Vector3.right;
+    //    dirsExplored[4] =  Vector3.forward;
+    //    dirsExplored[5] = -Vector3.forward;
+    //
+    //    normalExplorationRadius = (Vector3.Distance(ViewController.nearTopLeft, ViewController.farTopLeft) / depth) * explorationRadiusMultiplier;
+    //
+    //
+    //}
 
     public virtual void DeepStop()
     {
@@ -167,7 +169,7 @@ public abstract class Renderer : MonoBehaviour
 
     public virtual void Render()
     {
-        UpdateNormalExplorationRadius();
+        //UpdateNormalExplorationRadius();
 
         done = false;
         rendering = true;

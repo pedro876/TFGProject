@@ -1344,8 +1344,8 @@ RectTransform:
   m_Father: {fileID: 1887216714}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 176.74, y: 0}
   m_SizeDelta: {x: 353.48, y: 0}
   m_Pivot: {x: 0.5, y: 1}
@@ -1467,8 +1467,10 @@ MonoBehaviour:
   localGpuRendererProto: {fileID: 0}
   ordersPerUpdate: 3
   maxParallelThreads: 10
-  normalExplorationDepth: 10
-  normalExplorationDepthMultiplier: 2.5
+  explorationSamples: 12
+  depthExplorationMultiplier: 1.05
+  normalExplorationMultiplier: 1
+  normalPlaneMultiplier: 0.2
 --- !u!114 &296807349
 MonoBehaviour:
   m_ObjectHideFlags: 0
