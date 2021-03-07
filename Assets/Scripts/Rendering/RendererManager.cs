@@ -184,7 +184,7 @@ public class RendererManager : MonoBehaviour
     public static List<RendererQuality> setting = new List<RendererQuality>()
     {
         //new RendererQuality(RendererType.CPU, 256, 50)
-        new RendererQuality(RendererType.CPU, 90, 40),
+        new RendererQuality(RendererType.CPU, 64, 32),
         new RendererQuality(RendererType.CPU, 64, 80),
         new RendererQuality(RendererType.CPU, 128, 200),
         new RendererQuality(RendererType.CPU, 128, 700),

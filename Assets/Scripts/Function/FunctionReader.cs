@@ -98,13 +98,13 @@ public class FunctionReader
             {
                 i += subFunction.Length;
                 aux += subFunction + "(";
-                cut = cut.Substring(subFunction.Length + cut.Length > subFunction.Length ? 1 : 0);
+                cut = cut.Substring(subFunction.Length + (cut.Length > subFunction.Length ? 1 : 0));
             } else
             {
                 if (i > 0 && definition[i] == '(' && !symbols.Contains("" + definition[i - 1])) aux += '*';
                 aux += definition[i];
                 if (definition[i] == ')' && !symbols.Contains("" + definition[i + 1])) aux += "*";
-                cut.Substring(1);
+                cut = cut.Substring(1);
             }
 
 

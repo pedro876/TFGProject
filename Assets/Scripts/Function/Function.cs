@@ -32,8 +32,9 @@ public class Function
 
     public bool IsMass(ref Vector3 pos)
     {
-        float eval = Solve(pos.x, pos.z, pos.y);
-        return (pos.y <= eval);
+        Vector3 p = ViewController.TransformToRegion(ref pos);
+        float eval = Solve(p.x, p.y, p.z);
+        return (p.z <= eval);
     }
 
     public void SetData(string name, string declaration, string originalDefinition, string definition)

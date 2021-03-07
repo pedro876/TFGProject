@@ -20,7 +20,12 @@ public class ViewController : MonoBehaviour, IPointerDownHandler
     [SerializeField] float rotSpeed = 1f;
     [SerializeField] float moveSpeed = 1f;
     [SerializeField] float moveAc = 1f;
-    //RawImage image;
+
+    private static Vector2 regionX = new Vector2(-0.5f, 0.5f);
+    private static Vector2 regionY = new Vector2(-0.5f, 0.5f);
+    private static Vector2 regionZ = new Vector2(-0.5f, 0.5f);
+    private static Vector3 regionScale = Vector3.one;
+    private static Vector3 regionCenter = Vector3.zero;
 
     public static Vector3 nearTopLeft = Vector3.zero;
     public static Vector3 nearTopRight = Vector3.zero;
@@ -168,7 +173,7 @@ public class ViewController : MonoBehaviour, IPointerDownHandler
         camTransform.RotateAround(Vector3.zero, Vector3.up, degreesX);
         float degreesY = -y * orbitSpeed * Time.deltaTime;
 
-        const float limit = 89.99f;
+        const float limit = 89.5f;
         float currentDegreesY = Vector3.SignedAngle(camTransform.position, Vector3.ProjectOnPlane(camTransform.position, Vector3.up), -camTransform.right);
         //limit view
         if(currentDegreesY + degreesY >= limit && degreesY > 0f)
@@ -177,10 +182,9 @@ public class ViewController : MonoBehaviour, IPointerDownHandler
         } else if(currentDegreesY + degreesY <= -limit && degreesY < 0f)
         {
             degreesY = -limit - currentDegreesY;
-        } else
-        {
-            camTransform.RotateAround(Vector3.zero, camTransform.right, degreesY);
-        }
+        } 
+        camTransform.RotateAround(Vector3.zero, camTransform.right, degreesY);
+
     }
 
     private void FlyMove()
@@ -213,6 +217,26 @@ public class ViewController : MonoBehaviour, IPointerDownHandler
     public void OnPointerDown(PointerEventData eventData)
     {
         if (!focused) OnChangeFocus(!focused);
+    }
+
+    #endregion
+
+    #region Region
+
+    public static void SetRegion(float minX, float maxX, float minY, float maxY, float minZ, float maxZ)
+    {
+        regionX = new Vector2(Mathf.Min(minX, maxX), Mathf.Max(minX, maxX));
+        regionY = new Vector2(Mathf.Min(minY, maxY), Mathf.Max(minY, maxY));
+        regionZ = new Vector2(Mathf.Min(minZ, maxZ), Mathf.Max(minZ, maxZ));
+
+        regionScale = new Vector3(regionX.y - regionX.x, regionY.y - regionY.x, regionZ.y - regionZ.x);
+        regionCenter = new Vector3((regionX.x + regionX.y) * 0.5f, (regionY.x + regionY.y) * 0.5f, (regionZ.x + regionZ.y) * 0.5f);
+        onChanged?.Invoke();
+    }
+
+    public static Vector3 TransformToRegion(ref Vector3 pos)
+    {
+        return (new Vector3(pos.x * regionScale.x, pos.z * regionScale.y, pos.y * regionScale.z)) + regionCenter;
     }
 
     #endregion
