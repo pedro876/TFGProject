@@ -47,7 +47,7 @@ void CSMain (uint3 id : SV_DispatchThreadID)
             uint ry = clamp(id.y + (y - 1) * gaussianRadius, 0, maxRes);
             int index = x + y * 3;
             float weight = gaussianMask[index];
-            float value = InputTex[uint2(rx, ry)].xyz;
+            float3 value = InputTex[uint2(rx, ry)].xyz;
             gaussianColor += weight * value;
         }
     }

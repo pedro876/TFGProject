@@ -2941,7 +2941,7 @@ MonoBehaviour:
   quadTreeCam: {fileID: 862683982}
   depthTex: {fileID: 8400000, guid: 01d280cfdb866ba479d7c6f437e07c40, type: 2}
   normalTex: {fileID: 8400000, guid: 8a769e1ae4393e746aa06426eff79355, type: 2}
-  fog: 0
+  fog: 1
   antialiasing: 1
   display: 2
 --- !u!1 &302631718

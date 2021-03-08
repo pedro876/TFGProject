@@ -62,10 +62,10 @@ public class PostProcess : MonoBehaviour
         UpdateDisplay();
     }
 
-    private void Update()
+    /*private void Update()
     {
         UpdateDisplay();
-    }
+    }*/
 
     private void CreateTextures()
     {
@@ -97,6 +97,7 @@ public class PostProcess : MonoBehaviour
 
     private void PrepareLightShader()
     {
+        pp_light.shader.SetFloat("fog", fog ? 1f : 0f);
         pp_light.shader.SetTexture(pp_light.kernel, "ResultTex", lightTex);
         pp_light.shader.SetTexture(pp_light.kernel, "DepthTex", depthTex);
         pp_light.shader.SetTexture(pp_light.kernel, "NormalTex", normalTex);
@@ -104,7 +105,6 @@ public class PostProcess : MonoBehaviour
 
     private void UpdateDisplay()
     {
-
         switch (display)
         {
             case Display.depth: functionView.texture = depthTex; break;
