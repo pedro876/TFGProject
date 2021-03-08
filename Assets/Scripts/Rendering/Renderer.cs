@@ -313,4 +313,22 @@ public abstract class Renderer : MonoBehaviour
     }
 
     #endregion
+
+    #region Display
+
+    public void DisplayDepth()
+    {
+        image.texture = depthTex;
+        if(children != null)
+            foreach (var c in children) c.DisplayDepth();
+    }
+
+    public void DisplayNormal()
+    {
+        image.texture = normalTex;
+        if (children != null)
+            foreach (var c in children) c.DisplayNormal();
+    }
+
+    #endregion
 }

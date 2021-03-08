@@ -62,6 +62,16 @@ public class RendererManager : MonoBehaviour
         ViewController.onChanged += StartRender;
     }
 
+    public static void DisplayDepth()
+    {
+        rootRenderer.DisplayDepth();
+    }
+
+    public static void DisplayNormal()
+    {
+        rootRenderer.DisplayNormal();
+    }
+
     #region ordersAndThreads
 
     private void FixedUpdate()

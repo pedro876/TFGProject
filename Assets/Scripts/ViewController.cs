@@ -10,6 +10,7 @@ public class ViewController : MonoBehaviour, IPointerDownHandler
 {
 
     [SerializeField] bool DEBUG = false;
+    [SerializeField] GameObject pressSpaceText;
     bool focused = false;
 
     [SerializeField] Camera cam;
@@ -21,9 +22,9 @@ public class ViewController : MonoBehaviour, IPointerDownHandler
     [SerializeField] float moveSpeed = 1f;
     [SerializeField] float moveAc = 1f;
 
-    private static Vector2 regionX = new Vector2(-0.5f, 0.5f);
-    private static Vector2 regionY = new Vector2(-0.5f, 0.5f);
-    private static Vector2 regionZ = new Vector2(-0.5f, 0.5f);
+    public static Vector2 regionX = new Vector2(-5f, 5f);
+    public static Vector2 regionY = new Vector2(-5f, 5f);
+    public static Vector2 regionZ = new Vector2(-5f, 5f);
     private static Vector3 regionScale = Vector3.one;
     private static Vector3 regionCenter = Vector3.zero;
 
@@ -54,11 +55,13 @@ public class ViewController : MonoBehaviour, IPointerDownHandler
 
     private void Awake()
     {
+        pressSpaceText.SetActive(false);
         camTransform = cam.transform;
         camTransform.LookAt(Vector3.zero);
         CheckCamInfo();
         MoveCamera();
         CalculatePlanes();
+        SetRegion(regionX.x, regionX.y, regionY.x, regionY.y, regionZ.x, regionZ.y);
     }
 
     private void LateUpdate()
@@ -210,6 +213,7 @@ public class ViewController : MonoBehaviour, IPointerDownHandler
     private void OnChangeFocus(bool f = true)
     {
         focused = f;
+        pressSpaceText.SetActive(focused);
         Cursor.lockState = focused ? CursorLockMode.Locked : CursorLockMode.None;
         Cursor.visible = !focused;
     }

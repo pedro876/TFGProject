@@ -1,0 +1,33 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel SunLight
+
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+Texture2D<float4> DepthTex;
+Texture2D<float4> NormalTex;
+RWTexture2D<float4> ResultTex;
+
+[numthreads(8,8,1)]
+void SunLight (uint3 id : SV_DispatchThreadID)
+{
+    float4 depthColor = DepthTex[id.xy];
+    float4 normalColor = NormalTex[id.xy];
+
+    /*float landed = depthColor.y > 0.5f;
+    float4 finalColor = float4(normalColor.xyz * depthColor.x, 1.0f);
+    finalColor = finalColor * landed + float4(1, 1, 1, 1) * (1 - landed);*/
+
+    float landed = depthColor.y > 0.5f;
+
+    float3 normal = normalize(normalColor.xyz * 2 - 1);
+    float3 sunDir = normalize(float3(1,-1,0.5));
+
+    float dotValue = clamp(pow(dot(-normal, sunDir),4)*0.8, 0.1, 1);
+
+    float4 finalColor = float4(dotValue, dotValue, dotValue, 1);
+
+    finalColor = lerp(finalColor, float4(1, 1, 1, 1), pow(depthColor.x,3));
+
+    finalColor = finalColor * landed + float4(1, 1, 1, 1) * (1 - landed);
+    ResultTex[id.xy] = finalColor;
+}

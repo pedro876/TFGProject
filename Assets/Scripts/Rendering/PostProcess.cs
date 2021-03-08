@@ -5,41 +5,49 @@ using UnityEngine.UI;
 
 public class PostProcess : MonoBehaviour
 {
-    [SerializeField] Camera depthCam;
+    [SerializeField] Camera quadTreeCam;
     private RawImage functionView;
 
+    [SerializeField] ComputeShader postProcessShader;
     int[] numThreads = new int[3];
-    [SerializeField] ComputeShader normalShader;
     int normalKernel;
-    private RenderTexture normalTex;
+    private RenderTexture postprocessTex;
+
+    [SerializeField] RenderTexture depthTex;
+    [SerializeField] RenderTexture normalTex;
 
     private void Start()
     {
-        normalTex = new RenderTexture(depthCam.pixelWidth, depthCam.pixelHeight, 24);
-        normalTex.name = "normalTex";
-        normalTex.enableRandomWrite = true;
-        normalTex.Create();
+        postprocessTex = new RenderTexture(depthTex.width, depthTex.height, 24);
+        postprocessTex.name = "postProcessTex";
+        postprocessTex.enableRandomWrite = true;
+        postprocessTex.Create();
         functionView = GameObject.FindGameObjectWithTag("FunctionView").GetComponent<RawImage>();
-        //functionView.texture = normalTex;
+        functionView.texture = postprocessTex;
 
 
-        normalKernel = normalShader.FindKernel("Normals");
+        normalKernel = postProcessShader.FindKernel("SunLight");
         uint x, y, z;
-        normalShader.GetKernelThreadGroupSizes(normalKernel, out x, out y, out z);
+        postProcessShader.GetKernelThreadGroupSizes(normalKernel, out x, out y, out z);
         numThreads[0] = (int) x;
         numThreads[1] = (int) y;
         numThreads[2] = (int) z;
 
-        normalShader.SetTexture(normalKernel, "ResultTex", normalTex);
-        normalShader.SetTexture(normalKernel, "DepthTex", depthCam.targetTexture);
-        normalShader.SetFloat("maxRes", normalTex.width);
+        postProcessShader.SetTexture(normalKernel, "ResultTex", postprocessTex);
+        postProcessShader.SetTexture(normalKernel, "DepthTex", depthTex);
+        postProcessShader.SetTexture(normalKernel, "NormalTex", normalTex);
     }
 
     private void Update()
     {
-        depthCam.Render();
+        RendererManager.DisplayDepth();
+        quadTreeCam.targetTexture = depthTex;
+        quadTreeCam.Render();
+        RendererManager.DisplayNormal();
+        quadTreeCam.targetTexture = normalTex;
+        quadTreeCam.Render();
 
-        //normalShader.Dispatch(normalKernel, normalTex.width / numThreads[0], normalTex.height / numThreads[1], numThreads[2]);
+        postProcessShader.Dispatch(normalKernel, postprocessTex.width / numThreads[0], postprocessTex.height / numThreads[1], numThreads[2]);
 
     }
 }
