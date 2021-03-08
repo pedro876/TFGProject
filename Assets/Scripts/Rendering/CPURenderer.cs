@@ -137,16 +137,7 @@ public class CPURenderer : Renderer
                 {
                     normDepth = (float)z / (depth-1);
                     pos = Vector3.Lerp(nearPos, farPos, normDepth);
-                    if (!IsOutOfRegion(ref pos))
-                    {
-                        landed = func.IsMass(ref pos);
-                    }
-                    
-                    /*float eval = func.Solve(pos.x, pos.z, pos.y);
-                    if (pos.y <= eval)
-                    {
-                        landed = true;
-                    }*/
+                    landed = IsMass(ref pos, func);
                 }
                 
                 Color normalColor = Color.white;
@@ -163,11 +154,8 @@ public class CPURenderer : Renderer
 
                     normDepth = Vector3.Distance(nearPos, surface) / rayDirMag;
                     
-                    Vector3 normal = CalculateNormal(surface, rayDir, rayStep, func);
-                    normalColor = new Color(normal.x, normal.y, normal.z, 1f);
-
-                    //Vector3 normal = CalculateNormal(pos, func) * 0.5f;
-                    //normalColor = new Color(normal.x+0.5f, normal.y+0.5f, normal.z+0.5f, 1f);
+                    Vector3 normal = CalculateNormal(surface, rayDir, rayStep, func) * 0.5f;
+                    normalColor = new Color(normal.x+0.5f, normal.y+0.5f, normal.z+0.5f, 1f);
                 }
                 depths[x, y] = normDepth;
                 int row = height - y - 1;
@@ -218,7 +206,9 @@ public class CPURenderer : Renderer
         {
             bool pointInside = IsMass(ref points[i], func);
             bool reachedSurface;
-            points[i] = (ExploreDirectionDAC(points[i], points[i] + (pointInside ? up : -up), func, pointInside, out reachedSurface) - pos).normalized;
+            Vector3 s = ExploreDirectionDAC(points[i], points[i] + (pointInside ? up : -up), func, pointInside, out reachedSurface);
+            points[i] = (s - pos).normalized;
+
 
             //dirs[i] = (points[i] - pos).normalized;
         }

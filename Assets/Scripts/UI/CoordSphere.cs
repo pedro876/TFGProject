@@ -37,7 +37,6 @@ public class CoordSphere : MonoBehaviour
         {
             text.text = "" + Mathf.RoundToInt(finalPos.x * mult) / mult + " " + Mathf.RoundToInt(finalPos.y * mult) / mult + " " + Mathf.RoundToInt(finalPos.z * mult) / mult;
         }
-        Debug.Log(transform.name + " " + text.text);
     }
 
     private void LookAtCam()

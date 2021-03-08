@@ -2764,10 +2764,10 @@ MonoBehaviour:
   localGpuRendererProto: {fileID: 0}
   ordersPerUpdate: 3
   maxParallelThreads: 10
-  explorationSamples: 12
+  explorationSamples: 10
   depthExplorationMultiplier: 1.05
   normalExplorationMultiplier: 1
-  normalPlaneMultiplier: 0.2
+  normalPlaneMultiplier: 0.25
 --- !u!114 &296807349
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7437,13 +7437,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
-  m_LocalRotation: {x: 0.25059116, y: -0.39807695, z: 0.11399632, w: 0.87506783}
-  m_LocalPosition: {x: 0.74, y: 0.582, z: -0.657}
+  m_LocalRotation: {x: 0.23911765, y: -0.3696438, z: 0.09904577, w: 0.89239913}
+  m_LocalPosition: {x: 0.75, y: 0.582, z: -0.75}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 537136842}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 31.960001, y: -48.922, z: 0}
+  m_LocalEulerAnglesHint: {x: 30, y: -45, z: 0}
 --- !u!1 &1022086213
 GameObject:
   m_ObjectHideFlags: 0
@@ -12463,7 +12463,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.69803923}
   m_RaycastTarget: 1
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -14388,7 +14388,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   panel: {fileID: 1741005348}
-  selected: 1
+  selected: 0
   selectedTextColor: {r: 0.3803922, g: 0.4431373, b: 0.7254902, a: 1}
   selectedNormalColor: {r: 1, g: 1, b: 1, a: 1}
   selectedHightlightedColor: {r: 0.9622642, g: 0.9622642, b: 0.9622642, a: 1}
@@ -15030,7 +15030,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   panel: {fileID: 289590724}
-  selected: 0
+  selected: 1
   selectedTextColor: {r: 0.3803922, g: 0.4431373, b: 0.7254902, a: 1}
   selectedNormalColor: {r: 1, g: 1, b: 1, a: 1}
   selectedHightlightedColor: {r: 0.9622642, g: 0.9622642, b: 0.9622642, a: 1}

@@ -23,7 +23,7 @@ public class FunctionPanel : MonoBehaviour
     private void Start()
     {
         allFunctions = new List<FunctionElement>();
-        FunctionManager.AddFunction("f(x)=sin(x)+sin(y)");
+        FunctionManager.AddFunction("f(x)=7xy");
         //FunctionManager.AddFunction("f(x) = sin(x*20)*0.1");
         //FunctionManager.AddFunction("f(x) = sin(x*10)*0,4+0,1");
         FunctionElement elem;
