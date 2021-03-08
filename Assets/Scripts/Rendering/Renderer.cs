@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System;
 
 public abstract class Renderer : MonoBehaviour
 {
@@ -40,6 +41,8 @@ public abstract class Renderer : MonoBehaviour
     private bool renderingChildren = false;
     protected bool texApplied = false;
     public bool deepFinished = false;
+
+    public static event Action onTexApplied;
 
     #region State
 
@@ -153,9 +156,10 @@ public abstract class Renderer : MonoBehaviour
 
     private void Update()
     {
-        if(rendering && done)
+        if(rendering && done && level > 0)
         {
             MemoryToTex();
+
             rendering = false;
             RenderChildren();
         }
@@ -169,8 +173,6 @@ public abstract class Renderer : MonoBehaviour
 
     public virtual void Render()
     {
-        //UpdateNormalExplorationRadius();
-
         done = false;
         rendering = true;
         renderCount = 0;
@@ -185,6 +187,7 @@ public abstract class Renderer : MonoBehaviour
 
     protected void RenderChildren()
     {
+        onTexApplied?.Invoke();
         CalculateHomogeneity();
         if (parent != null)
         {
@@ -241,7 +244,7 @@ public abstract class Renderer : MonoBehaviour
 
         if (RendererManager.DEBUG)
         {
-            image.color = Random.ColorHSV();
+            image.color = UnityEngine.Random.ColorHSV();
         }
 
         if (level+1 < RendererManager.maxLevel)

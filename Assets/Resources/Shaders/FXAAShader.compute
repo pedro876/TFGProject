@@ -1,0 +1,57 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+#define edgeRadius 2
+#define gaussianRadius 1
+
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+Texture2D<float4> InputTex;
+RWTexture2D<float4> ResultTex;
+int maxRes;
+
+[numthreads(8,8,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    const static float edgeMask[] = {
+        -1,-1,-1,
+        -1,8,-1,
+        -1,-1,-1
+    };
+
+    const static float gaussianMask[] = {
+        1.0 / 16.0, 2.0 / 16.0, 1.0 / 16.0,
+        2.0 / 16.0, 4.0 / 16.0, 2.0 / 16.0,
+        1.0 / 16.0, 2.0 / 16.0, 1.0 / 16.0
+    };
+    float inputEdge = float3(0, 0, 0);
+
+    for(uint x = 0; x < 3; x++) {
+        for (uint y = 0; y < 3; y++) {
+            uint rx = clamp(id.x+(x-1)* edgeRadius, 0, maxRes);
+            uint ry = clamp(id.y+(y-1)* edgeRadius, 0, maxRes);
+            int index = x + y * 3;
+            float weight = edgeMask[index];
+            float3 inputValue = InputTex[uint2(rx, ry)].xyz;
+            inputEdge += weight * inputValue;
+        }
+    }
+
+    float edge = clamp(length(inputEdge), 0,1);
+
+    float3 originalColor = InputTex[id.xy].xyz;
+    float3 gaussianColor = float3(0, 0, 0);
+
+    for (uint x = 0; x < 3; x++) {
+        for (uint y = 0; y < 3; y++) {
+            uint rx = clamp(id.x + (x - 1) * gaussianRadius, 0, maxRes);
+            uint ry = clamp(id.y + (y - 1) * gaussianRadius, 0, maxRes);
+            int index = x + y * 3;
+            float weight = gaussianMask[index];
+            float value = InputTex[uint2(rx, ry)].xyz;
+            gaussianColor += weight * value;
+        }
+    }
+
+    float3 finalColor = lerp(originalColor, gaussianColor, edge);
+    ResultTex[id.xy] = float4(finalColor, 1);
+}

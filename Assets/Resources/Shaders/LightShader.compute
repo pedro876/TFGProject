@@ -1,5 +1,5 @@
 ﻿// Each #kernel tells which function to compile; you can have many kernels
-#pragma kernel SunLight
+#pragma kernel CSMain
 
 // Create a RenderTexture with enableRandomWrite flag and set it
 // with cs.SetTexture
@@ -8,7 +8,7 @@ Texture2D<float4> NormalTex;
 RWTexture2D<float4> ResultTex;
 
 [numthreads(8,8,1)]
-void SunLight (uint3 id : SV_DispatchThreadID)
+void CSMain (uint3 id : SV_DispatchThreadID)
 {
     float4 depthColor = DepthTex[id.xy];
     float4 normalColor = NormalTex[id.xy];
