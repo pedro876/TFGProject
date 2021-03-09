@@ -23,7 +23,7 @@ public class LightPanel : MonoBehaviour
         pp = FindObjectOfType<PostProcess>();
         lightDirCam = GameObject.FindGameObjectWithTag("lightDirCam").GetComponent<Camera>();
         lightDirImg.texture = lightDirCam.targetTexture;
-        lightDirImg.color = new Color(0.9f,0.9f,0.9f,1f);
+        lightDirImg.color = Color.white;
 
         powerField.text = ""+PostProcess.fogPower;
         powerField.onValueChanged.AddListener((val) =>

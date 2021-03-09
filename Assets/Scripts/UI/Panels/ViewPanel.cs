@@ -16,7 +16,9 @@ public class ViewPanel : MonoBehaviour
 
     [Header("Axes")]
     [SerializeField] Transform axes;
+    private RawImage axesImage;
     [SerializeField] Toggle showAxes;
+    [SerializeField] Slider axesOpacity;
 
     [Header("Camera")]
     [SerializeField] Toggle perspectiveView;
@@ -51,7 +53,11 @@ public class ViewPanel : MonoBehaviour
         minZField.onValueChanged.AddListener((s) => UpdateRegion());
         maxZField.onValueChanged.AddListener((s) => UpdateRegion());
 
+        axesImage = axes.GetComponentInChildren<RawImage>();
+        showAxes.isOn = axes.gameObject.activeSelf;
         showAxes.onValueChanged.AddListener((val) => axes.gameObject.SetActive(val));
+        axesOpacity.value = axesImage.color.a;
+        axesOpacity.onValueChanged.AddListener((val) => axesImage.color = new Color(axesImage.color.r, axesImage.color.g, axesImage.color.b, val));
         perspectiveView.onValueChanged.AddListener((val) => ViewController.cam.orthographic = !val);
         nearField.text = ""+ViewController.cam.nearClipPlane;
         nearField.onValueChanged.AddListener((val) =>
