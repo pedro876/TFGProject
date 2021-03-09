@@ -7,6 +7,8 @@ Texture2D<float4> DepthTex;
 Texture2D<float4> NormalTex;
 RWTexture2D<float4> ResultTex;
 float fog;
+float power;
+float3 lightDir;
 
 [numthreads(8,8,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
@@ -21,13 +23,12 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     float landed = depthColor.y > 0.5f;
 
     float3 normal = normalize(normalColor.xyz * 2 - 1);
-    float3 sunDir = normalize(float3(1,-1,0.5));
 
-    float dotValue = clamp(pow(dot(-normal, sunDir),4)*0.8+0.1, 0, 1);
+    float dotValue = pow(clamp(dot(-normal, lightDir), 0, 1), 2) * 0.8 + 0.1;
 
     float4 finalColor = float4(dotValue, dotValue, dotValue, 1);
 
-    finalColor = finalColor * (1-fog) + lerp(finalColor, float4(1, 1, 1, 1), pow(depthColor.x,3)) * fog;
+    finalColor = finalColor * (1-fog) + lerp(finalColor, float4(1, 1, 1, 1), pow(depthColor.x, power)) * fog;
 
     finalColor = finalColor* (float4(0.48, 0.54, 0.82, 1)+0.5) * landed + float4(1, 1, 1, 1) * (1 - landed);
 

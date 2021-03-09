@@ -13,7 +13,8 @@ public class ViewController : MonoBehaviour, IPointerDownHandler
     [SerializeField] GameObject pressSpaceText;
     bool focused = false;
 
-    [SerializeField] Camera cam;
+    [SerializeField] Camera Cam3D;
+    public static Camera cam;
     public static Transform camTransform;
 
     [Header("Move variables")]
@@ -55,6 +56,7 @@ public class ViewController : MonoBehaviour, IPointerDownHandler
 
     private void Awake()
     {
+        cam = Cam3D;
         pressSpaceText.SetActive(false);
         camTransform = cam.transform;
         camTransform.LookAt(Vector3.zero);

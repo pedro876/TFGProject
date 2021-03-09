@@ -39,9 +39,10 @@ public class PostProcess : MonoBehaviour
     private RenderTexture lightTex;
     private RenderTexture fxaaTex;
 
-    [Header("Visualization Options")]
-    [SerializeField] bool fog;
-    [SerializeField] bool antialiasing;
+    public static bool antialiasing = true;
+    public static bool fog = true;
+    public static float fogPower = 3f;
+    private static Vector3 lightDir = new Vector3(1, -1, 0.5f).normalized;
 
     public enum Display
     {
@@ -49,7 +50,7 @@ public class PostProcess : MonoBehaviour
         normals,
         light,
     }
-    [SerializeField] Display display = Display.normals;
+    public static Display display = Display.light;
 
     private void Start()
     {
@@ -61,11 +62,6 @@ public class PostProcess : MonoBehaviour
         Renderer.onTexApplied += Render;
         UpdateDisplay();
     }
-
-    /*private void Update()
-    {
-        UpdateDisplay();
-    }*/
 
     private void CreateTextures()
     {
@@ -98,12 +94,14 @@ public class PostProcess : MonoBehaviour
     private void PrepareLightShader()
     {
         pp_light.shader.SetFloat("fog", fog ? 1f : 0f);
+        pp_light.shader.SetFloat("power", fogPower);
+        pp_light.shader.SetFloats("lightDir", new float[] { lightDir.x, lightDir.y, lightDir.z });
         pp_light.shader.SetTexture(pp_light.kernel, "ResultTex", lightTex);
         pp_light.shader.SetTexture(pp_light.kernel, "DepthTex", depthTex);
         pp_light.shader.SetTexture(pp_light.kernel, "NormalTex", normalTex);
     }
 
-    private void UpdateDisplay()
+    public void UpdateDisplay()
     {
         switch (display)
         {
@@ -115,7 +113,7 @@ public class PostProcess : MonoBehaviour
         Render();
     }
 
-    private void Render()
+    public void Render()
     {
         if (display == Display.light || display == Display.depth)
         {
@@ -141,7 +139,28 @@ public class PostProcess : MonoBehaviour
                 pp_fxaa.Render(fxaaTex.width, fxaaTex.height);
             }
         }
-
-        
     }
+
+    #region LightDir
+
+    public static void SetLightDir(float rotation, float inclination)
+    {
+        lightDir = Vector3.right;
+        lightDir = Quaternion.AngleAxis(inclination, Vector3.forward) * lightDir;
+        lightDir = Quaternion.AngleAxis(rotation, Vector3.up) * lightDir;
+        lightDir.Normalize();
+    }
+
+    public static Vector2 GetLightDir()
+    {
+        lightDir.Normalize();
+        Vector3 projUp = Vector3.ProjectOnPlane(lightDir, Vector3.up).normalized;
+        float rotation = Vector3.SignedAngle(Vector3.right, projUp, Vector3.up);
+
+        Vector3 axis = Vector3.Cross(lightDir, projUp);
+        float inclination = Vector3.SignedAngle(projUp, lightDir, axis);
+        return new Vector2(rotation, inclination);
+    }
+
+    #endregion
 }

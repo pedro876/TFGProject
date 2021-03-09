@@ -34,6 +34,7 @@ public class RenderPanel : MonoBehaviour
 
     bool mustUpdate = false;
 
+
     private void Start()
     {
         restartBtn.onClick.AddListener(RendererManager.StartRender);
@@ -68,6 +69,11 @@ public class RenderPanel : MonoBehaviour
             mustUpdate = false;
             UpdateAllInfo();
         };
+        if (RendererManager.rendering)
+        {
+            renderTime = 0f;
+            mustUpdate = true;
+        }
     }
 
     #region Update

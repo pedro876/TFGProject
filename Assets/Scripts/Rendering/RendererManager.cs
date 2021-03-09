@@ -38,7 +38,7 @@ public class RendererManager : MonoBehaviour
     //events
     public static event Action renderStarted;
     public static event Action renderFinished;
-    private static bool rendering = false;
+    public static bool rendering = false;
 
     private void Start()
     {
