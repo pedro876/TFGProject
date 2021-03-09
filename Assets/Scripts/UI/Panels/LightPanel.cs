@@ -12,12 +12,18 @@ public class LightPanel : MonoBehaviour
     [SerializeField] TextMeshProUGUI inclinationText;
     [SerializeField] Slider rotationSlider;
     [SerializeField] Slider inclinationSlider;
+    [SerializeField] RawImage lightDirImg;
+
+    private Camera lightDirCam;
 
     private PostProcess pp;
 
     private void Start()
     {
         pp = FindObjectOfType<PostProcess>();
+        lightDirCam = GameObject.FindGameObjectWithTag("lightDirCam").GetComponent<Camera>();
+        lightDirImg.texture = lightDirCam.targetTexture;
+        lightDirImg.color = new Color(0.9f,0.9f,0.9f,1f);
 
         powerField.text = ""+PostProcess.fogPower;
         powerField.onValueChanged.AddListener((val) =>
@@ -41,6 +47,8 @@ public class LightPanel : MonoBehaviour
         Vector2 lightDir = PostProcess.GetLightDir();
         rotationText.text = "" + Mathf.RoundToInt(lightDir.x);
         inclinationText.text = "" + Mathf.RoundToInt(lightDir.y);
+        rotationSlider.value = Mathf.RoundToInt(lightDir.x);
+        inclinationSlider.value = Mathf.RoundToInt(lightDir.y);
         rotationSlider.onValueChanged.AddListener((val) =>
         {
             float inclination = inclinationSlider.value;

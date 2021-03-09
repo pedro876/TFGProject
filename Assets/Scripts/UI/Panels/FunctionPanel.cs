@@ -7,7 +7,7 @@ using System;
 
 public class FunctionPanel : MonoBehaviour
 {
-    [SerializeField] float updateTime = 0.2f;
+    //[SerializeField] float updateTime = 0.2f;
     [SerializeField] float removeTime = 3f;
 
     List<FunctionElement> allFunctions;

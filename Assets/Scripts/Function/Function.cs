@@ -34,7 +34,8 @@ public class Function
     {
         Vector3 p = ViewController.TransformToRegion(ref pos);
         float eval = Solve(p.x, p.y, p.z);
-        return (p.z <= eval);
+        return VolumeInterpreter.Interpretate(ref p, eval);
+        //return (eval >= p.z);
     }
 
     public void SetData(string name, string declaration, string originalDefinition, string definition)

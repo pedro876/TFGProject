@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System;
 
 public class PostProcess : MonoBehaviour
 {
@@ -42,7 +43,9 @@ public class PostProcess : MonoBehaviour
     public static bool antialiasing = true;
     public static bool fog = true;
     public static float fogPower = 3f;
-    private static Vector3 lightDir = new Vector3(1, -1, 0.5f).normalized;
+    private static Vector3 lightDir = new Vector3(-0.5f, -1.3f, 0f).normalized;
+
+    public static event Action onLightDirChanged;
 
     public enum Display
     {
@@ -149,6 +152,7 @@ public class PostProcess : MonoBehaviour
         lightDir = Quaternion.AngleAxis(inclination, Vector3.forward) * lightDir;
         lightDir = Quaternion.AngleAxis(rotation, Vector3.up) * lightDir;
         lightDir.Normalize();
+        onLightDirChanged?.Invoke();
     }
 
     public static Vector2 GetLightDir()
@@ -156,10 +160,19 @@ public class PostProcess : MonoBehaviour
         lightDir.Normalize();
         Vector3 projUp = Vector3.ProjectOnPlane(lightDir, Vector3.up).normalized;
         float rotation = Vector3.SignedAngle(Vector3.right, projUp, Vector3.up);
+        rotation = rotation % 360f;
+        while (rotation < 0f) rotation += 360f;
 
         Vector3 axis = Vector3.Cross(lightDir, projUp);
         float inclination = Vector3.SignedAngle(projUp, lightDir, axis);
+        while (inclination > 90f) inclination -= 180f;
+        while (inclination < -90f) inclination += 180f;
         return new Vector2(rotation, inclination);
+    }
+
+    public static Vector3 GetLightDirVec()
+    {
+        return lightDir;
     }
 
     #endregion

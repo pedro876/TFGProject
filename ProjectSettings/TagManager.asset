@@ -8,6 +8,7 @@ TagManager:
   - QuadContainer
   - FunctionView
   - 3dCam
+  - lightDirCam
   layers:
   - Default
   - TransparentFX
@@ -18,7 +19,7 @@ TagManager:
   - 
   - 
   - Tex
-  - 
+  - LightDir
   - 
   - 
   - 

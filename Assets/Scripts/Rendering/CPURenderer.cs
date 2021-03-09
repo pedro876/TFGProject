@@ -159,7 +159,7 @@ public class CPURenderer : Renderer
                 }
                 depths[x, y] = normDepth;
                 int row = height - y - 1;
-                depthMemory[x + row * height] = new Color(Mathf.Lerp(0f, 1f, normDepth), landed ? 1f : 0f, reachedSurface ? 1f:0f, 1f); //Color.Lerp(Color.black, Color.white, normDepth);
+                depthMemory[x + row * height] = new Color(Mathf.Lerp(0f, 1f, normDepth), landed ? 1f : 0f, 0f,1f); //Color.Lerp(Color.black, Color.white, normDepth);
                 normalMemory[x + row * height] = normalColor;//new Color(normal.x/*+0.5f*/, /*normal.y+0.5f*/0f, /*normal.z+0.5f*/0f, 1f);
             }
         }
