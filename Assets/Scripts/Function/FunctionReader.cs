@@ -53,6 +53,7 @@ public class FunctionReader
             }
         }
         declaration += ')';
+        if (firstVar) declaration = funcName;
         name = funcName;
         return declaration;
     }

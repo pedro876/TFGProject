@@ -119,7 +119,7 @@ public class RenderPanel : MonoBehaviour
         timeText.text = "" + (Mathf.RoundToInt(renderTime * 1000f) / 1000f) + "s";
         liveThreadsText.text = "" + RendererManager.currentThreads.Count;
         queuedThreadsText.text = "" + RendererManager.threadsToStart.Count;
-        queuedDisplaysText.text = "" + RendererManager.orders.Count;
+        queuedDisplaysText.text = "" + RendererManager.displayOrders.Count;
     }
 
     private void UpdateProcessTex(int minX, int minY, int maxX, int maxY, Renderer renderer)

@@ -11,16 +11,20 @@ public class FunctionNode
     private FunctionNode childRight;
     private bool isOperator;
     private string operation = "+";
+    private int operationIndex = 0;
     private float value;
     private bool isVariable;
     private string variable;
     private bool variablePositive = true;
     private bool isSubFunction = false;
     private string subFunction = "";
+    private int subFunctionIndex = -1;
     private FunctionNode[] subFunctionInputs = null;
 
     private bool woreParenthesis = false;
     private int parenthesisLevel = 0;
+
+    //public int memoryIndex;
 
     #region static
 
@@ -32,6 +36,8 @@ public class FunctionNode
         "/",
         "^",
     };
+
+    public static int GetMaxOperatorIndex { get => operators.Count; }
 
     private static Dictionary<string, int> operatorPriorities = new Dictionary<string, int>()
     {
@@ -58,6 +64,8 @@ public class FunctionNode
 
     #endregion
 
+    #region classCreation
+
     public FunctionNode(FunctionNode parent, int level = 0)
     {
         this.parent = parent;
@@ -71,7 +79,9 @@ public class FunctionNode
         isOperator = node.isOperator;
         isSubFunction = node.isSubFunction;
         subFunction = node.subFunction;
+        subFunctionIndex = node.subFunctionIndex;
         operation = node.operation;
+        operationIndex = node.operationIndex;
         variable = node.variable;
         variablePositive = node.variablePositive;
         childLeft = node.childLeft;
@@ -79,11 +89,18 @@ public class FunctionNode
         subFunctionInputs = node.subFunctionInputs;
     }
 
+    #endregion
+
     #region complexProperties
 
-    private bool isFloat()
+    public bool IsFloat()
     {
-        return !isOperator && !isVariable && !isSubFunction;
+        return IsLeaf() && !isVariable;
+    }
+
+    public float GetValue()
+    {
+        return value;
     }
 
     private bool NeedsParenthesis()
@@ -109,7 +126,7 @@ public class FunctionNode
 
     private bool NeedsRepresentation()
     {
-        if(parent != null && isFloat() && value == 0f)
+        if(parent != null && IsFloat() && value == 0f)
         {
             string op = parent.operation;
             if (op == "+" || op == "-") return false;
@@ -177,6 +194,7 @@ public class FunctionNode
 
                 isOperator = true;
                 operation = operators[cIdx];
+                operationIndex = cIdx;
                 isVariable = false;
 
                 if (operation == "-")
@@ -207,6 +225,7 @@ public class FunctionNode
                 {
                     isSubFunction = true;
                     subFunction = n;
+                    subFunctionIndex = -1;
                     break;
                 }
             }
@@ -218,6 +237,7 @@ public class FunctionNode
                     {
                         isSubFunction = true;
                         subFunction = n;
+                        subFunctionIndex = subFunctions.IndexOf(subFunction);
                         break;
                     }
                 }
@@ -235,8 +255,9 @@ public class FunctionNode
 
                 childLeft = null;
                 childRight = null;
-                subFunctionInputs = new FunctionNode[inputs.Length];
-                for(int i = 0; i < inputs.Length; i++)
+                int maxInput = inputs.Length > 3 ? 3 : inputs.Length;
+                subFunctionInputs = new FunctionNode[maxInput];
+                for(int i = 0; i < maxInput; i++)
                 {
                     subFunctionInputs[i] = new FunctionNode(this, parenthesisLevel + 1);
                     subFunctionInputs[i].ProcessFunc(inputs[i]);
@@ -289,7 +310,7 @@ public class FunctionNode
         if (isSubFunction || (parent != null && parent.isSubFunction)) return false;
         bool simplified = false;
         string op = operation;
-        if (/*!childLeft.isOperator && !childLeft.isVariable && !childRight.isOperator && !childRight.isVariable*/childLeft.isFloat() && childRight.isFloat())
+        if (/*!childLeft.isOperator && !childLeft.isVariable && !childRight.isOperator && !childRight.isVariable*/childLeft.IsFloat() && childRight.IsFloat())
         {
             value = Solve();
             isOperator = false;
@@ -300,8 +321,8 @@ public class FunctionNode
             simplified = true;
         } else if(op == "*")
         {
-            if ((childLeft.isFloat() && childLeft.value == 0f) || 
-                (childRight.isFloat() && childRight.value == 0f)) //Mult por 0
+            if ((childLeft.IsFloat() && childLeft.value == 0f) || 
+                (childRight.IsFloat() && childRight.value == 0f)) //Mult por 0
             {
                 isOperator = false;
                 simplified = true;
@@ -309,20 +330,20 @@ public class FunctionNode
                 value = 0f;
                 childLeft = null;
                 childRight = null;
-            } else if((childLeft.isFloat() && childLeft.value == 1f) ||
-                (childRight.isFloat() && childRight.value == 1f))
+            } else if((childLeft.IsFloat() && childLeft.value == 1f) ||
+                (childRight.IsFloat() && childRight.value == 1f))
             {
                 isOperator = false;
                 simplified = true;
                 isVariable = false;
                 //childLeft = null;
                 //childRight = null;
-                if (childLeft.isFloat() && childLeft.value == 1f) CopyNode(childRight);
+                if (childLeft.IsFloat() && childLeft.value == 1f) CopyNode(childRight);
                 else CopyNode(childLeft);
             }
         } else if (op == "/")
         {
-            if (childRight.isFloat() && childRight.value == 0f) //denominador 0
+            if (childRight.IsFloat() && childRight.value == 0f) //denominador 0
             {
                 isOperator = false;
                 simplified = true;
@@ -332,7 +353,7 @@ public class FunctionNode
                 childLeft = null;
                 childRight = null;
             }
-            else if (childLeft.isFloat() && childLeft.value == 0f) //numerador 0
+            else if (childLeft.IsFloat() && childLeft.value == 0f) //numerador 0
             {
                 isOperator = false;
                 simplified = true;
@@ -340,7 +361,7 @@ public class FunctionNode
                 value = 0f;
                 childLeft = null;
                 childRight = null;
-            } else if (childRight.isFloat() && childRight.value == 1f)
+            } else if (childRight.IsFloat() && childRight.value == 1f)
             {
                 isOperator = false;
                 simplified = true;
@@ -351,14 +372,14 @@ public class FunctionNode
             }
         } else if (op == "+" || op == "-")
         {
-            if (childRight.isFloat() && childRight.value == 0f)
+            if (childRight.IsFloat() && childRight.value == 0f)
             {
                 CopyNode(childLeft);
                 if (childLeft != null) childLeft.parent = this;
                 if (childRight != null) childRight.parent = this;
                 simplified = true;
             }
-            else if(childLeft.isFloat() && childLeft.value == 0f && !childRight.isOperator)
+            else if(childLeft.IsFloat() && childLeft.value == 0f && !childRight.isOperator)
             {
                 CopyNode(childRight);
                 
@@ -373,7 +394,7 @@ public class FunctionNode
             }
         } else if (op == "^")
         {
-            if (childRight.isFloat() && childRight.value == 0f)
+            if (childRight.IsFloat() && childRight.value == 0f)
             {
                 simplified = true;
                 isOperator = false;
@@ -382,7 +403,7 @@ public class FunctionNode
                 childLeft = null;
                 childRight = null;
             }
-            else if (childLeft.isFloat() && childLeft.value == 0f)
+            else if (childLeft.IsFloat() && childLeft.value == 0f)
             {
                 simplified = true;
                 isOperator = false;
@@ -401,45 +422,30 @@ public class FunctionNode
     {
         if (isSubFunction)
         {
-            float[] values = new float[subFunctionInputs.Length];
-
-            for (int i = 0; i < values.Length; i++)
+            float[] values = new float[3];
+            for (int i = 0; i < subFunctionInputs.Length; i++)
             {
                 values[i] = subFunctionInputs[i].Solve(x, y, z);
             }
 
-            float GetValue(int i)
+            if (subFunctionIndex >= 0)
             {
-                if (i < values.Length) return values[i];
+                return SolveSubFunction(subFunctionIndex, values[0], values[1], values[2]);
+            } else
+            {
+                Function subF;
+                if (FunctionManager.functions.TryGetValue(subFunction, out subF))
+                {
+                    return subF.Solve(values[0], values[1], values[2]);
+                }
                 else return 0f;
             }
-            
-            switch (subFunction)
-            {
-                case "sin": return Mathf.Sin(GetValue(0));
-                case "cos": return Mathf.Cos(GetValue(0));
-                case "abs": return Mathf.Abs(GetValue(0));
-                default:
-                    Function subF;
-                    if(FunctionManager.functions.TryGetValue(subFunction, out subF)){
-                        return subF.rootNode.Solve(GetValue(0), GetValue(1), GetValue(2));
-                    }
-                    else return 0f;
-            }
-        }
+        } 
         if (isOperator)
         {
             float leftValue = childLeft.Solve(x, y, z);
             float rightValue = childRight.Solve(x, y, z);
-            switch (operation)
-            {
-                case "+": return leftValue + rightValue;
-                case "-": return leftValue - rightValue;
-                case "*": return leftValue * rightValue;
-                case "/": return leftValue / rightValue;
-                case "^": return Mathf.Pow(leftValue, rightValue);
-                default: goto case "+";
-            }
+            return SolveOperator(operationIndex, leftValue, rightValue);
         } else
         {
             float val;
@@ -459,13 +465,111 @@ public class FunctionNode
         }
     }
 
+    public static float SolveSubFunction(int op, float v0, float v1, float v2)
+    {
+        if (op == 0) return Mathf.Cos(v0);
+        else if (op == 1) return Mathf.Sin(v0);
+        else if (op == 2) return Mathf.Abs(v0);
+        return 0f;
+    }
+
+    public static float SolveOperator(int op, float v0, float v1)
+    {
+        if (op == 0) return v0 - v1;
+        else if (op == 1) return v0 + v1;
+        else if (op == 2) return v0 * v1;
+        else if (op == 3) return v0 / v1;
+        else if (op == 4) return Mathf.Pow(v0, v1);
+        return 0f;
+    }
+
+    public int CalculateBytecode(Dictionary<FunctionNode, int> memoryNodes, List<int> bytecode, HashSet<string> subFuncs, int lastMemoryIndex = 4, int max = 1024, int[] varIdx = null)
+    {
+        if (varIdx == null) varIdx = new int[] { 1, 2, 3 };
+        int memoryIndex;
+        if(lastMemoryIndex == max)
+        {
+            return lastMemoryIndex;
+        }
+        else if (IsLeaf())
+        {
+            if (isVariable)
+            {
+                switch (variable)
+                {
+                    case "x": memoryIndex = varIdx[0]; break;
+                    case "y": memoryIndex = varIdx[1]; break;
+                    case "z": memoryIndex = varIdx[2]; break;
+                    default: memoryIndex = 0; break;
+                }
+                if (!variablePositive) memoryIndex = -memoryIndex;
+            } else
+            {
+                memoryIndex = lastMemoryIndex;
+                lastMemoryIndex++; ;
+            }
+        } else
+        {
+            if (isSubFunction)
+            {
+                int[] subFuncVarIdx = new int[3];
+                for(int i = 0; i < subFunctionInputs.Length; i++)
+                {
+                    lastMemoryIndex = subFunctionInputs[i].CalculateBytecode(memoryNodes, bytecode, subFuncs, lastMemoryIndex, max, varIdx);
+                    subFuncVarIdx[i] = memoryNodes[subFunctionInputs[i]];
+                }
+                if (!subFunctions.Contains(subFunction))
+                {
+                    Function subF;
+                    if (FunctionManager.functions.TryGetValue(subFunction, out subF))
+                    {
+                        if (!subFuncs.Contains(subF.name))
+                        {
+                            subFuncs.Add(subF.name);
+                            lastMemoryIndex = subF.rootNode.CalculateBytecode(memoryNodes, bytecode, subFuncs, lastMemoryIndex, max, subFuncVarIdx);
+                            subFuncs.Remove(subF.name);
+                            memoryIndex = memoryNodes[subF.rootNode];
+                        }
+                        else memoryIndex = 0;
+                    } else memoryIndex = 0;
+                }
+                else
+                {
+                    bytecode.Add(operators.Count + subFunctions.IndexOf(subFunction));
+                    bytecode.Add(subFuncVarIdx[0]); //x value index
+                    bytecode.Add(subFuncVarIdx[1]); //y value index
+                    bytecode.Add(subFuncVarIdx[2]); //z value index
+                    memoryIndex = lastMemoryIndex;
+                    lastMemoryIndex += 1;
+                    bytecode.Add(memoryIndex); //Where the result will be stored
+                }
+            }
+            else
+            {
+                lastMemoryIndex = childLeft.CalculateBytecode(memoryNodes, bytecode, subFuncs, lastMemoryIndex, max, varIdx);
+                lastMemoryIndex = childRight.CalculateBytecode(memoryNodes, bytecode, subFuncs, lastMemoryIndex, max, varIdx);
+
+                bytecode.Add(operators.IndexOf(operation)); //operation index
+                bytecode.Add(memoryNodes[childLeft]); //Left value
+                bytecode.Add(memoryNodes[childRight]); //Right value
+
+                memoryIndex = /*memoryNodes[childLeft]*/lastMemoryIndex;
+                lastMemoryIndex++;
+                bytecode.Add(memoryIndex); //Where the result will be stored
+            }
+            
+        }
+        memoryNodes[this] = memoryIndex;
+        return lastMemoryIndex;
+    }
+
     public override string ToString()
     {
         string aux = "";
         if (isSubFunction)
         {
             aux += subFunction + '(';
-            for(int i = 0; i < subFunctionInputs.Length; i++)
+            for (int i = 0; i < subFunctionInputs.Length; i++)
             {
                 aux += subFunctionInputs[i].ToString();
                 if (i < subFunctionInputs.Length - 1) aux += ',';
@@ -474,11 +578,11 @@ public class FunctionNode
             return aux;
         }
         if (!NeedsRepresentation()) return "";
-        
+
         bool needsParenthesis = NeedsParenthesis();
-        if(needsParenthesis) aux += '(';
+        if (needsParenthesis) aux += '(';
         if (isOperator) aux += childLeft.ToString() + operation + childRight.ToString();
-        else if (isVariable) aux+= (variablePositive ? "":"-")+ variable;
+        else if (isVariable) aux += (variablePositive ? "" : "-") + variable;
         else aux += "" + value;
         if (needsParenthesis) aux += ")";
         return aux;

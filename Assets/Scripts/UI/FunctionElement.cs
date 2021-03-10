@@ -20,6 +20,18 @@ public class FunctionElement : MonoBehaviour
         selectBtn.onClick.AddListener(() => panel.SelectFunction(this));
         camImage.enabled = selectedFunc == this;
         inputField.onValueChanged.AddListener((str)=>UpdateFunction());
+        inputField.onDeselect.AddListener((str)=>
+        {
+            if (func != null) inputField.text = func.ToString();
+        });
+        inputField.onSubmit.AddListener((str) =>
+        {
+            if (func != null) inputField.text = func.ToString();
+        });
+        inputField.onEndEdit.AddListener((str) =>
+        {
+            if (func != null) inputField.text = func.ToString();
+        });
     }
 
     private void Update()
@@ -51,7 +63,7 @@ public class FunctionElement : MonoBehaviour
         if (!IsBeingEdit())
         {
             inputField.onValueChanged.RemoveAllListeners();
-            inputField.text = func.declaration + " = " + func.originalDefinition;
+            inputField.text = func.ToString();
             inputField.onValueChanged.AddListener((str) => UpdateFunction());
         }
         
@@ -77,5 +89,6 @@ public class FunctionElement : MonoBehaviour
     {
         selectBtn.interactable = true;
         camImage.enabled = false;
+        if (func != null) inputField.text = func.ToString();
     }
 }

@@ -13,6 +13,7 @@ public class ViewPanel : MonoBehaviour
     [SerializeField] TMP_InputField maxYField;
     [SerializeField] TMP_InputField minZField;
     [SerializeField] TMP_InputField maxZField;
+    [SerializeField] Toggle clampToRegion;
 
     [Header("Axes")]
     [SerializeField] Transform axes;
@@ -52,6 +53,9 @@ public class ViewPanel : MonoBehaviour
         maxYField.onValueChanged.AddListener((s) => UpdateRegion());
         minZField.onValueChanged.AddListener((s) => UpdateRegion());
         maxZField.onValueChanged.AddListener((s) => UpdateRegion());
+
+        clampToRegion.isOn = ViewController.GetClampToRegion();
+        clampToRegion.onValueChanged.AddListener(ViewController.SetClampToRegion);
 
         axesImage = axes.GetComponentInChildren<RawImage>();
         showAxes.isOn = axes.gameObject.activeSelf;

@@ -1,16 +1,23 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class Function
 {
     public FunctionNode rootNode;
     public string name;
-    public string declaration;
+    private string originalDeclaration;
+    private string finalDeclaration;
     public List<string> variables;
     public string originalDefinition;
-    public string finalDefinition;
-    
+    private string processedDefinition;
+    private string finalDefinition;
+    private int[] bytecode;
+    private int memorySize;
+    private Dictionary<FunctionNode, int> memoryNodes;
+    private int maxOperatorIndex;
+    private int resultIndex;
 
     public Function(string name, string declaration,string originalDefinition, string definition)
     {
@@ -20,7 +27,7 @@ public class Function
 
     public Function Clone()
     {
-        return new Function(name, declaration, originalDefinition, finalDefinition);
+        return new Function(name, originalDeclaration, originalDefinition, finalDefinition);
     }
 
     public float Solve(float x = 0f, float y = 0f, float z = 0f)
@@ -30,34 +37,139 @@ public class Function
         return result;
     }
 
-    public bool IsMass(ref Vector3 pos)
+    public bool IsMass(ref Vector3 pos, float[] memory)
     {
+        bool outOfRegion = ViewController.IsOutOfRegion(ref pos);
+        if (outOfRegion) return false;
+
         Vector3 p = ViewController.TransformToRegion(ref pos);
-        float eval = Solve(p.x, p.y, p.z);
+        float eval = SolveByteCode(memory, p.x, p.y, p.z);
+        //float eval = Solve(p.x, p.y, p.z);
         return VolumeInterpreter.Interpretate(ref p, eval);
-        //return (eval >= p.z);
     }
 
-    public void SetData(string name, string declaration, string originalDefinition, string definition)
+    #region data processing
+
+    private void SetData(string name, string declaration, string originalDefinition, string definition)
     {
         this.originalDefinition = originalDefinition;
+        this.processedDefinition = definition;
         this.name = name;
 
         rootNode = new FunctionNode(null);
-        this.declaration = declaration;
+        this.originalDeclaration = declaration;
         rootNode.ProcessFunc(definition);
         finalDefinition = rootNode.ToString();
 
         variables = new List<string>();
-        string rawVars = declaration.Split('(')[1];
-        rawVars = rawVars.Substring(0, rawVars.Length - 1);
-        string[] aux = rawVars.Split(',');
-        foreach (string s in aux) variables.Add(s);
+        string[] parts = declaration.Split('(');
+        if(parts.Length > 1)
+        {
+            string rawVars = declaration.Split('(')[1];
+            rawVars = rawVars.Substring(0, rawVars.Length - 1);
+            string[] aux = rawVars.Split(',');
+            finalDeclaration = name + "(";
+            for (int i = 0; i < aux.Length; i++)
+            {
+                variables.Add(aux[i]);
+                finalDeclaration += aux[i];
+                if (i < aux.Length - 1) finalDeclaration += ",";
+            }
+
+            if (variables.Count == 0) finalDeclaration = name;
+            else finalDeclaration += ")";
+        } else
+        {
+            finalDeclaration = name;
+        }
+
+        CreateByteCode();
     }
+
+    public void ResetData()
+    {
+        SetData(name, originalDeclaration, originalDefinition, processedDefinition);
+    }
+
+    public bool UsesSubFunction(string subFunc)
+    {
+        return originalDefinition.Contains(subFunc);
+    }
+
+    #endregion
+
+    #region bytecode
+
+    private void CreateByteCode()
+    {
+        maxOperatorIndex = FunctionNode.GetMaxOperatorIndex;
+        memoryNodes = new Dictionary<FunctionNode, int>();
+        List<int> operations = new List<int>();
+        HashSet<string> subFuncs = new HashSet<string>();
+        memorySize = rootNode.CalculateBytecode(memoryNodes, operations, subFuncs);
+        resultIndex =memoryNodes[rootNode];
+        bytecode = operations.ToArray();
+    }
+
+    public float[] GetBytecodeMemoryArr()
+    {
+        float[] memory = new float[memorySize];
+
+        foreach(KeyValuePair<FunctionNode, int> node in memoryNodes)
+        {
+            if (node.Key.IsFloat()) memory[node.Value] = node.Key.GetValue();
+        }
+
+        return memory;
+    }
+
+    public float SolveByteCode(float[] memory, float x = 0f, float y = 0f, float z = 0f)
+    {
+        memory[0] = 0;
+        memory[1] = x;
+        memory[2] = y;
+        memory[3] = z;
+
+        int i = 0;
+        int length = bytecode.Length;
+        while (i < length)
+        {
+            int op = bytecode[i];
+            i++;
+            float v0 = memory[Math.Abs(bytecode[i])] * (bytecode[i] >= 0 ? 1f : -1f);
+            i++;
+            float v1 = memory[Math.Abs(bytecode[i])] * (bytecode[i] >= 0 ? 1f : -1f);
+
+            float result;
+            if (op >= maxOperatorIndex-1) //is sub function
+            {
+                i++;
+                float v2 = memory[Math.Abs(bytecode[i])] * (bytecode[i] >= 0 ? 1f : -1f);
+                result = FunctionNode.SolveSubFunction(op-maxOperatorIndex, v0, v1, v2);
+            }
+            else //is operator
+            {
+                result = FunctionNode.SolveOperator(op, v0, v1);
+            }
+            i++;
+            int rIdx = bytecode[i];
+            memory[rIdx] = result;
+            i++;
+        }
+        int absIdx = Math.Abs(resultIndex);
+        return memory[absIdx] * (resultIndex >= 0 ? 1f : -1f);
+    }
+
+    #endregion
 
     public override string ToString()
     {
-        return declaration + " = " + finalDefinition;
+        return finalDeclaration + " = " + finalDefinition;
+    }
+
+    public string ToOriginalString()
+    {
+        return originalDeclaration + " = " + originalDeclaration;
     }
 
     public bool Equals(Function f)

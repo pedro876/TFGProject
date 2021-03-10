@@ -37,6 +37,14 @@ public class FunctionManager
         if(f != null)
         {
             functions[f.name] = f;
+            foreach(var other in functions.Values)
+            {
+                if(other != f && other.UsesSubFunction(f.name))
+                {
+                    AddFunction(other.ToOriginalString());
+                    break;
+                }
+            }
         }
         return f;
     }

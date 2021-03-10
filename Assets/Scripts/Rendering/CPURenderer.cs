@@ -13,6 +13,8 @@ public class CPURenderer : Renderer
     Thread processorThread;
     float[,] depths;
 
+    float[] bytecodeMemory;
+
     //private const int levelThreadsSleepMs = 50;
 
     protected override float[] GetRandomDepths(int minX, int minY, int maxX, int maxY)
@@ -30,7 +32,6 @@ public class CPURenderer : Renderer
             int y = Random.Range(minY, maxY);
             homogeneityDepths[i] = depths[x, y];
         }
-        
         
         return homogeneityDepths;
     }
@@ -78,7 +79,7 @@ public class CPURenderer : Renderer
             RenderRegion(0, 0, width, height);
             done = true;
             rendering = false;
-            RendererManager.orders.Enqueue(() =>
+            RendererManager.displayOrders.Enqueue(() =>
             {
                 MemoryToTex();
                 RenderChildren();
@@ -110,6 +111,7 @@ public class CPURenderer : Renderer
 
     private void RenderRegion(int minX, int minY, int maxX, int maxY)
     {
+        
         Vector3 right = (ViewController.nearTopRight - ViewController.nearTopLeft).normalized;
         Vector3 up = (ViewController.nearTopLeft - ViewController.nearBottomLeft).normalized;
 
@@ -118,6 +120,7 @@ public class CPURenderer : Renderer
         Vector3 nearStart = Vector3.Lerp(ViewController.nearTopLeft, ViewController.nearTopRight, startX) - up * (1f - startY) * nearSize;
         Vector3 farStart = Vector3.Lerp(ViewController.farTopLeft, ViewController.farTopRight, startX) - up * (1f - startY) * farSize;
         Function func = FunctionElement.selectedFunc.func;
+        bytecodeMemory = func.GetBytecodeMemoryArr();
 
         //Color farColor = Color.white;
         //Color nearColor = Color.black;
@@ -137,7 +140,7 @@ public class CPURenderer : Renderer
                 {
                     normDepth = (float)z / (depth-1);
                     pos = Vector3.Lerp(nearPos, farPos, normDepth);
-                    landed = IsMass(ref pos, func);
+                    landed = func.IsMass(ref pos, bytecodeMemory);
                 }
                 
                 Color normalColor = Color.white;
@@ -157,7 +160,7 @@ public class CPURenderer : Renderer
                     Vector3 normal = CalculateNormal(surface, rayDir, rayStep, func) * 0.5f;
                     normalColor = new Color(normal.x+0.5f, normal.y+0.5f, normal.z+0.5f, 1f);
                 }
-                depths[x, y] = normDepth;
+                depths[x, y] = landed ? normDepth : 2f;
                 int row = height - y - 1;
                 depthMemory[x + row * height] = new Color(Mathf.Lerp(0f, 1f, normDepth), landed ? 1f : 0f, 0f,1f); //Color.Lerp(Color.black, Color.white, normDepth);
                 normalMemory[x + row * height] = normalColor;//new Color(normal.x/*+0.5f*/, /*normal.y+0.5f*/0f, /*normal.z+0.5f*/0f, 1f);
@@ -165,21 +168,6 @@ public class CPURenderer : Renderer
         }
         done = true;
     }
-
-    private bool IsMass(ref Vector3 pos, Function func)
-    {
-        return !IsOutOfRegion(ref pos) && func.IsMass(ref pos);
-    }
-
-    private bool IsOutOfRegion(ref Vector3 pos)
-    {
-        return pos.x < -0.5f || pos.x > 0.5f || pos.y < -0.5f || pos.y > 0.5f || pos.z < -0.5f || pos.z > 0.5f;
-    }
-
-    /*private Vector3 ReachSurface(Vector3 pos, ref Vector3 rayDir, float explorationRadius, Function func, out bool reachedSurface)
-    {
-        return ExploreDirectionDAC(pos, pos - rayDir * explorationRadius, func, true, out reachedSurface);
-    }*/
 
     private Vector3 CalculateNormal(Vector3 pos, Vector3 up, float explorationRadius, Function func)
     {
@@ -204,7 +192,7 @@ public class CPURenderer : Renderer
 
         for(int i = 0; i < points.Length; i++)
         {
-            bool pointInside = IsMass(ref points[i], func);
+            bool pointInside = func.IsMass(ref points[i], bytecodeMemory);
             bool reachedSurface;
             Vector3 s = ExploreDirectionDAC(points[i], points[i] + (pointInside ? up : -up), func, pointInside, out reachedSurface);
             points[i] = (s - pos).normalized;
@@ -227,13 +215,13 @@ public class CPURenderer : Renderer
     {
         Vector3 middle = destiny;
 
-        reachedSurface = IsMass(ref destiny, func) != originInside;
+        reachedSurface = func.IsMass(ref destiny, bytecodeMemory) != originInside;
         if (reachedSurface)
         {
             for (int i = 0; i < explorationSamples; i++)
             {
                 middle = Vector3.Lerp(origin, destiny, 0.5f);
-                if (IsMass(ref middle, func) == originInside)
+                if (func.IsMass(ref middle, bytecodeMemory) == originInside)
                 {
                     origin = middle;
                 }

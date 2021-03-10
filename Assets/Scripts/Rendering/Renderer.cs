@@ -97,7 +97,7 @@ public abstract class Renderer : MonoBehaviour
             }
         }
 
-        for (int i = 0; i < homogeneities.Length; i++) homogeneities[i] = 1f-homogeneities[i]/totalDistances;
+        for (int i = 0; i < homogeneities.Length; i++) homogeneities[i] = 1f-Mathf.Clamp(homogeneities[i]/totalDistances,0f,1f);
     }
 
     protected abstract float[] GetRandomDepths(int minX, int minY, int maxX, int maxY);
@@ -154,7 +154,7 @@ public abstract class Renderer : MonoBehaviour
         }
     }
 
-    private void Update()
+    private void LateUpdate()
     {
         if(rendering && done && level > 0)
         {

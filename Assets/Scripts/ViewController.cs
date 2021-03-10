@@ -28,6 +28,7 @@ public class ViewController : MonoBehaviour, IPointerDownHandler
     public static Vector2 regionZ = new Vector2(-5f, 5f);
     private static Vector3 regionScale = Vector3.one;
     private static Vector3 regionCenter = Vector3.zero;
+    private static bool clampToRegion = true;
 
     public static Vector3 nearTopLeft = Vector3.zero;
     public static Vector3 nearTopRight = Vector3.zero;
@@ -229,6 +230,17 @@ public class ViewController : MonoBehaviour, IPointerDownHandler
 
     #region Region
 
+    public static void SetClampToRegion(bool t)
+    {
+        clampToRegion = t;
+        onChanged?.Invoke();
+    }
+
+    public static bool GetClampToRegion()
+    {
+        return clampToRegion;
+    }
+
     public static void SetRegion(float minX, float maxX, float minY, float maxY, float minZ, float maxZ)
     {
         regionX = new Vector2(Mathf.Min(minX, maxX), Mathf.Max(minX, maxX));
@@ -243,6 +255,12 @@ public class ViewController : MonoBehaviour, IPointerDownHandler
     public static Vector3 TransformToRegion(ref Vector3 pos)
     {
         return (new Vector3(pos.x * regionScale.x, pos.z * regionScale.y, pos.y * regionScale.z)) + regionCenter;
+    }
+
+    public static bool IsOutOfRegion(ref Vector3 pos)
+    {
+        if (!clampToRegion) return false;
+        else return pos.x < -0.5f || pos.x > 0.5f || pos.y < -0.5f || pos.y > 0.5f || pos.z < -0.5f || pos.z > 0.5f;
     }
 
     #endregion

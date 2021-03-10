@@ -25,8 +25,8 @@ public class RendererManager : MonoBehaviour
     public static object currentThreadsLock = new object();
     public static HashSet<Thread> currentThreads = new HashSet<Thread>();
     public static List<KeyValuePair<Thread, int>> threadsToStart = new List<KeyValuePair<Thread, int>>();
-    public static Queue<Action> orders = new Queue<Action>();
-    [SerializeField] private int ordersPerUpdate = 3;
+    public static Queue<Action> displayOrders = new Queue<Action>();
+    [SerializeField] private int displayOrdersPerFrame = 3;
     [SerializeField] private int maxParallelThreads = 10;
 
     [Header("Render settings")]
@@ -74,7 +74,7 @@ public class RendererManager : MonoBehaviour
 
     #region ordersAndThreads
 
-    private void FixedUpdate()
+    private void Update()
     {
         AttendOrders();
         AttendThreads();
@@ -82,12 +82,12 @@ public class RendererManager : MonoBehaviour
 
     private void AttendOrders()
     {
-        int top = orders.Count;
-        if (top > ordersPerUpdate) top = ordersPerUpdate;
+        int top = displayOrders.Count;
+        if (top > displayOrdersPerFrame) top = displayOrdersPerFrame;
 
         for (int i = 0; i < top; i++)
         {
-            orders.Dequeue().Invoke();
+            displayOrders.Dequeue().Invoke();
         }
     }
 
@@ -145,7 +145,7 @@ public class RendererManager : MonoBehaviour
     {
         renderStarted?.Invoke();
         rendering = true;
-        orders.Clear();
+        displayOrders.Clear();
         threadsToStart.Clear();
         lock (currentThreadsLock)
         {
@@ -193,11 +193,10 @@ public class RendererManager : MonoBehaviour
 
     public static List<RendererQuality> setting = new List<RendererQuality>()
     {
-        //new RendererQuality(RendererType.CPU, 256, 50)
         new RendererQuality(RendererType.CPU, 64, 32),
-        new RendererQuality(RendererType.CPU, 64, 80),
-        new RendererQuality(RendererType.CPU, 128, 200),
-        new RendererQuality(RendererType.CPU, 128, 700),
+        new RendererQuality(RendererType.CPU, 64, 128),
+        new RendererQuality(RendererType.CPU, 128, 256),
+        new RendererQuality(RendererType.CPU, 128, 800),
     };
 
     #endregion
