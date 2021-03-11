@@ -4706,13 +4706,16 @@ MonoBehaviour:
     type: 3}
   localCpuRendererProto: {fileID: 7554824410387282167, guid: b4a25ed834582c845beda4ee6eddcfb5,
     type: 3}
-  localGpuRendererProto: {fileID: 0}
-  ordersPerUpdate: 3
+  localGpuRendererProto: {fileID: 8246636911185074625, guid: 8f552df62494e6245aa960eacfda9686,
+    type: 3}
+  displayOrdersPerFrame: 1
+  renderOrdersPerFrame: 1
   maxParallelThreads: 10
-  explorationSamples: 11
+  gpuHomogeneityDepth: 256
+  explorationSamples: 9
   depthExplorationMultiplier: 1.05
-  normalExplorationMultiplier: 1.1
-  normalPlaneMultiplier: 0.3
+  normalExplorationMultiplier: 0.25
+  normalPlaneMultiplier: 0.05
 --- !u!114 &296807349
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9071,7 +9074,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 190, y: 0}
-  m_SizeDelta: {x: 1220, y: 0}
+  m_SizeDelta: {x: 0, y: 678.0001}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &602339304
 MonoBehaviour:
@@ -9098,7 +9101,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 86710e43de46f6f4bac7c8e50813a599, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_AspectMode: 1
+  m_AspectMode: 2
   m_AspectRatio: 1
 --- !u!114 &602339306
 MonoBehaviour:

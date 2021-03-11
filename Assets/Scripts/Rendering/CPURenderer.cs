@@ -7,18 +7,24 @@ using System.Threading;
 public class CPURenderer : Renderer
 {
 
-    Texture2D depthTex2D;
-    Texture2D normalTex2D;
+    private Texture2D depthTex2D;
+    private Texture2D normalTex2D;
 
-    Thread processorThread;
-    float[,] depths;
+    private Thread processorThread;
+    private float[,] depths;
 
-    float[] bytecodeMemory;
+    private float[] bytecodeMemory;
+
+    protected Color[] depthMemory;
+    protected Color[] normalMemory;
 
     //private const int levelThreadsSleepMs = 50;
 
-    protected override float[] GetRandomDepths(int minX, int minY, int maxX, int maxY)
+    protected override float[] GetRandomDepths(int r)
     {
+        int minX, minY, maxX, maxY;
+        GetSubRegion(r, out minX, out minY, out maxX, out maxY);
+
         float[] homogeneityDepths = new float[homogeneityPoints];
 
         homogeneityDepths[0] = depths[minX, minY];
@@ -50,6 +56,8 @@ public class CPURenderer : Renderer
         normalTex2D.wrapMode = TextureWrapMode.Clamp;
         normalTex = normalTex2D;
 
+        depthMemory = new Color[width * height];
+        normalMemory = new Color[width * height];
         depths = new float[width, height];
     }
 
@@ -91,6 +99,7 @@ public class CPURenderer : Renderer
             {
                 queued = false;
                 RenderRegion(0, 0, width, height);
+                done = true;
                 lock (RendererManager.currentThreadsLock)
                 {
                     RendererManager.currentThreads.Remove(Thread.CurrentThread);
@@ -98,13 +107,6 @@ public class CPURenderer : Renderer
             }
             );
             int priority = Mathf.RoundToInt(GetImportance() * 100);
-            //if(GetDisparity() > 0.01f) processorThread.Priority = System.Threading.ThreadPriority.AboveNormal;
-            /*switch (priority / 33)
-            {
-                case 0: processorThread.Priority = System.Threading.ThreadPriority.Normal; break;
-                case 1: processorThread.Priority = System.Threading.ThreadPriority.AboveNormal; break;
-                default: processorThread.Priority = System.Threading.ThreadPriority.Highest; break;
-            }*/
             RendererManager.threadsToStart.Add(new KeyValuePair<Thread, int>(processorThread, priority));
         }
     }
@@ -122,9 +124,6 @@ public class CPURenderer : Renderer
         Function func = FunctionElement.selectedFunc.func;
         bytecodeMemory = func.GetBytecodeMemoryArr();
 
-        //Color farColor = Color.white;
-        //Color nearColor = Color.black;
-
         for (int y = minY; y < maxY; y++)
         {
             for (int x = minX; x < maxX; x++)
@@ -132,6 +131,9 @@ public class CPURenderer : Renderer
 
                 Vector3 nearPos = nearStart + (right * ((float)x / width) - up * ((float)y / height)) * region * nearSize;
                 Vector3 farPos = farStart + (right * ((float)x / width) - up * ((float)y / height)) * region * farSize;
+
+                nearPos = ViewController.TransformToRegion(ref nearPos);
+                farPos = ViewController.TransformToRegion(ref farPos);
 
                 bool landed = false;
                 float normDepth = 0f;
@@ -158,7 +160,7 @@ public class CPURenderer : Renderer
                     normDepth = Vector3.Distance(nearPos, surface) / rayDirMag;
                     
                     Vector3 normal = CalculateNormal(surface, rayDir, rayStep, func) * 0.5f;
-                    normalColor = new Color(normal.x+0.5f, normal.y+0.5f, normal.z+0.5f, 1f);
+                    normalColor = new Color(normal.x+0.5f, normal.z+0.5f, normal.y + 0.5f, 1f);
                 }
                 depths[x, y] = landed ? normDepth : 2f;
                 int row = height - y - 1;
@@ -166,7 +168,6 @@ public class CPURenderer : Renderer
                 normalMemory[x + row * height] = normalColor;//new Color(normal.x/*+0.5f*/, /*normal.y+0.5f*/0f, /*normal.z+0.5f*/0f, 1f);
             }
         }
-        done = true;
     }
 
     private Vector3 CalculateNormal(Vector3 pos, Vector3 up, float explorationRadius, Function func)
@@ -203,7 +204,7 @@ public class CPURenderer : Renderer
 
         for(int i = 0; i < points.Length - 1; i++)
         {
-            n += Vector3.Cross(points[0], points[1]);
+            n += Vector3.Cross(points[i], points[i+1]);
         }
         n.Normalize();
 

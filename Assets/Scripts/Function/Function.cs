@@ -17,7 +17,11 @@ public class Function
     private int memorySize;
     private Dictionary<FunctionNode, int> memoryNodes;
     private int maxOperatorIndex;
-    private int resultIndex;
+    public int numOperations;
+    public int resultIndex;
+
+    public const int maxMemorySize = 64;
+    public const int maxOperationsSize = 256;
 
     public Function(string name, string declaration,string originalDefinition, string definition)
     {
@@ -37,12 +41,12 @@ public class Function
         return result;
     }
 
-    public bool IsMass(ref Vector3 pos, float[] memory)
+    public bool IsMass(ref Vector3 p, float[] memory)
     {
-        bool outOfRegion = ViewController.IsOutOfRegion(ref pos);
+        bool outOfRegion = ViewController.IsOutOfRegion(ref p);
         if (outOfRegion) return false;
 
-        Vector3 p = ViewController.TransformToRegion(ref pos);
+        //Vector3 p = pos;//ViewController.TransformToRegion(ref pos);
         float eval = SolveByteCode(memory, p.x, p.y, p.z);
         //float eval = Solve(p.x, p.y, p.z);
         return VolumeInterpreter.Interpretate(ref p, eval);
@@ -106,9 +110,35 @@ public class Function
         memoryNodes = new Dictionary<FunctionNode, int>();
         List<int> operations = new List<int>();
         HashSet<string> subFuncs = new HashSet<string>();
-        memorySize = rootNode.CalculateBytecode(memoryNodes, operations, subFuncs);
+        memorySize = rootNode.CalculateBytecode(memoryNodes, operations, subFuncs, 4, maxMemorySize);
         resultIndex =memoryNodes[rootNode];
-        bytecode = operations.ToArray();
+        int[] arr = operations.ToArray();
+
+        int max = Math.Min(arr.Length, maxOperationsSize);
+        List<int> aux = new List<int>();
+        numOperations = 0;
+        int i = 0;
+        while(i < max)
+        {
+            int op = arr[i];
+            int spaceRequired = (op > maxOperatorIndex - 1) ? 5 : 4;
+            if (i + spaceRequired > maxOperationsSize) break;
+            else
+            {
+                numOperations++;
+                for (int j = 0; j < spaceRequired; j++)
+                {
+                    aux.Add(arr[i + j]);
+                }
+                i += spaceRequired;
+            }
+        }
+        bytecode = aux.ToArray();
+    }
+
+    public int[] GetBytecode()
+    {
+        return bytecode;
     }
 
     public float[] GetBytecodeMemoryArr()
@@ -141,7 +171,7 @@ public class Function
             float v1 = memory[Math.Abs(bytecode[i])] * (bytecode[i] >= 0 ? 1f : -1f);
 
             float result;
-            if (op >= maxOperatorIndex-1) //is sub function
+            if (op > maxOperatorIndex-1) //is sub function
             {
                 i++;
                 float v2 = memory[Math.Abs(bytecode[i])] * (bytecode[i] >= 0 ? 1f : -1f);

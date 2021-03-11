@@ -159,7 +159,7 @@ public class ViewController : MonoBehaviour, IPointerDownHandler
     private void GetInput()
     {
         x = Input.GetAxis("Mouse X");
-        y = Input.GetAxis("Mouse Y");
+        y = Input.GetAxis("Mouse Y");;
         if (Mathf.Abs(x) > 0.001f || Mathf.Abs(y) > 0.001f) changed = true;
     }
 
@@ -241,6 +241,16 @@ public class ViewController : MonoBehaviour, IPointerDownHandler
         return clampToRegion;
     }
 
+    public static Vector3 GetRegionScale()
+    {
+        return regionScale;
+    }
+
+    public static Vector3 GetRegionCenter()
+    {
+        return regionCenter;
+    }
+
     public static void SetRegion(float minX, float maxX, float minY, float maxY, float minZ, float maxZ)
     {
         regionX = new Vector2(Mathf.Min(minX, maxX), Mathf.Max(minX, maxX));
@@ -260,7 +270,7 @@ public class ViewController : MonoBehaviour, IPointerDownHandler
     public static bool IsOutOfRegion(ref Vector3 pos)
     {
         if (!clampToRegion) return false;
-        else return pos.x < -0.5f || pos.x > 0.5f || pos.y < -0.5f || pos.y > 0.5f || pos.z < -0.5f || pos.z > 0.5f;
+        else return pos.x < regionX.x || pos.x > regionX.y || pos.y < regionY.x || pos.y > regionY.y || pos.z < regionZ.x || pos.z > regionZ.y;
     }
 
     #endregion

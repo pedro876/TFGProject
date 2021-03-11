@@ -1,36 +1,251 @@
-﻿// Each #kernel tells which function to compile; you can have many kernels
+﻿
 #pragma kernel CSMain
+#define maxMemorySize 128
 
-// Create a RenderTexture with enableRandomWrite flag and set it
-// with cs.SetTexture
-Texture2D<float4> DepthTex;
-Texture2D<float4> NormalTex;
-RWTexture2D<float4> ResultTex;
-float fog;
-float power;
-float3 lightDir;
+float3 right;
+float3 up;
+
+float nearSize;
+float farSize;
+
+float3 nearStart;
+float3 farStart;
+
+float width;
+float height;
+float region;
+float depth;
+
+float depthExplorationMult;
+float normalPlaneMultiplier;
+float normalExplorationMultiplier;
+
+bool clampToRegion;
+float2 regionX;
+float2 regionY;
+float2 regionZ;
+float3 regionScale;
+float3 regionCenter;
+
+int variable;
+int criterion;
+float threshold;
+
+int explorationSamples;
+
+RWStructuredBuffer<float> memoryBuffer;
+RWStructuredBuffer<int> operationsBuffer;
+int operationsSize;
+int maxOperatorIndex;
+int maxMemoryIndex;
+int resultIndex;
+
+RWTexture2D<float4> DepthTex;
+RWTexture2D<float4> NormalTex;
+
+inline bool Interpretate(float3 pos, float eval) {
+    float v = 0.0f;
+    int index = min(2, variable);
+    float useThreshold = variable > 2;
+    v = pos[index] * (1 - useThreshold) + threshold * useThreshold;
+    bool ev1 = eval >= v;
+    bool ev2 = eval <= v;
+    return (ev1 && criterion == 0) || (ev2 && criterion == 1);
+}
+
+inline float SolveSubFunction(int op, float v0, float v1, float v2) {
+    float ops[] = {
+        cos(v0),
+        sin(v0),
+        abs(v0)
+    };
+    return ops[op];
+    /*switch (op) {
+    case 0: return cos(v0); break;
+    case 1: return sin(v0); break;
+    case 2: return abs(v0); break;
+    }
+    return 0.0f;*/
+}
+
+inline float SolveOperator(int op, float v0, float v1) {
+    int v1Int = v1;
+    float ops[] = {
+        v0 - v1,
+        v0 + v1,
+        v0 * v1,
+        v0 / v1,
+        pow(abs(v0),v1) *(-1+2*(v1Int%2==0)),
+    };
+    return ops[op];
+    /*switch (op) {
+    case 0: return v0 - v1; break;
+    case 1: return v0 + v1; break;
+    case 2: return v0 * v1; break;
+    case 3: return v0 / v1; break;
+    case 4: return pow(v0, v1); break;
+    }
+    return 0.0f;*/
+}
+
+inline bool IsMass(float3 pos, float mem[maxMemorySize]) {
+    
+    bool outOfRegion = pos.x < regionX.x || pos.x > regionX.y ||
+        pos.y < regionY.x || pos.y > regionY.y ||
+        pos.z < regionZ.x || pos.z > regionZ.y;
+
+    outOfRegion = outOfRegion && clampToRegion;
+
+    mem[0] = 0;
+    mem[1] = pos.x;
+    mem[2] = pos.y;
+    mem[3] = pos.z;
+    
+    int i = 0;
+    int positive;
+
+    while(i < operationsSize){
+        int op = operationsBuffer[i];
+
+        positive = operationsBuffer[i+1] > 0;
+        float v0 = mem[abs(operationsBuffer[i+1])];
+        v0 = v0 * positive - v0 * (1 - positive);
+        
+        positive = operationsBuffer[i+2] > 0;
+        float v1 = mem[abs(operationsBuffer[i+2])];
+        v1 = v1 * positive - v1 * (1 - positive);
+
+        bool isSubfunc = op > maxOperatorIndex - 1;
+        positive = operationsBuffer[i + 3] > 0;
+        float v2 = mem[abs(operationsBuffer[i + 3])];
+        v2 = v2 * positive - v2 * (1 - positive);
+
+        float resultSubFunc = SolveSubFunction(op - maxOperatorIndex, v0, v1, v2);
+        float resultOp = SolveOperator(op, v0, v1);
+
+        float result = resultSubFunc * isSubfunc + resultOp * (1 - isSubfunc);
+        i = (i + 4) * isSubfunc + (i + 3) * (1 - isSubfunc);
+
+        int rIdx = operationsBuffer[i];
+        mem[rIdx] = result;
+        i++;
+    }
+
+    int absIdx = abs(resultIndex);
+    positive = resultIndex > 0;
+    float eval = mem[absIdx];
+    eval = eval * positive - eval * (1 - positive);
+
+    return !outOfRegion && Interpretate(pos, eval);
+}
+
+inline float4 ExploreDirectionDAC(float3 origin, float3 destiny, bool originInside, float mem[maxMemorySize]) {
+
+    float3 middle = destiny;
+    bool reachedSurface = IsMass(destiny, mem) != originInside;
+
+    if (reachedSurface) {
+        for (int i = 0; i < explorationSamples; i++) {
+            middle = lerp(origin, destiny, 0.5f);
+            float mass = IsMass(middle, mem) == originInside;
+            origin = middle * mass + origin * (1.0 - mass);
+            destiny = middle * (1.0 - mass) + destiny * mass;
+        }
+    }
+
+    return float4(middle, reachedSurface);
+}
+
+inline float3 CalculateNormal(float3 pos, float3 rayDir, float explorationRadius, float mem[maxMemorySize]) {
+    float3 right = normalize(float3(1, 1, (-rayDir.x - rayDir.y) / rayDir.z));
+    float3 forward = normalize(cross(rayDir, right));
+
+    float3 points[4] = {
+        pos + right * explorationRadius * normalPlaneMultiplier,
+        pos + forward * explorationRadius * normalPlaneMultiplier,
+        pos - right * explorationRadius * normalPlaneMultiplier,
+        pos - forward * explorationRadius * normalPlaneMultiplier
+    };
+
+    rayDir = normalize(rayDir) * explorationRadius * normalExplorationMultiplier;
+
+    for (int i = 0; i < 4; i++) {
+        bool pointInside = IsMass(points[i], mem);
+        float pointInsideF = pointInside;
+        float3 dir = rayDir * pointInsideF - rayDir * (1 - pointInsideF);
+        float4 s = ExploreDirectionDAC(points[i], points[i] + dir, pointInside, mem);
+        points[i] = normalize(s.xyz - pos);
+    }
+
+    float3 n = float3(0, 0, 0);
+    for (int j = 0; j < 3; j++) {
+        n += cross(points[j], points[j + 1]);
+    }
+
+    n = normalize(n);
+
+    return n;
+}
+
+inline float3 TransformToRegion(float3 pos) {
+    return float3(pos.x * regionScale.x, pos.z * regionScale.y, pos.y * regionScale.z) + regionCenter;
+}
 
 [numthreads(8,8,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
-    float4 depthColor = DepthTex[id.xy];
-    float4 normalColor = NormalTex[id.xy];
+    float mem[maxMemorySize];
+    for (int i = 0; i < maxMemoryIndex; i++) {
+        mem[i] = memoryBuffer[i];
+    }
 
-    /*float landed = depthColor.y > 0.5f;
-    float4 finalColor = float4(normalColor.xyz * depthColor.x, 1.0f);
-    finalColor = finalColor * landed + float4(1, 1, 1, 1) * (1 - landed);*/
+    float x = id.x;
+    float y = id.y;
 
-    float landed = depthColor.y > 0.5f;
+    float3 nearPos = nearStart + (right * x / width - up * y / height) * region * nearSize;
+    float3 farPos = farStart + (right * x / width - up * y / height) * region * farSize;
+    nearPos = TransformToRegion(nearPos);
+    farPos = TransformToRegion(farPos);
 
-    float3 normal = normalize(normalColor.xyz * 2 - 1);
+    bool landed = false;
+    float normDepth = 0.0f;
+    float3 pos = float3(0, 0, 0);
+    //float z = 0.0f;
+    for (int z = 0; z < depth && !landed; z++) {
+        normDepth = z / depth;
+        pos = lerp(nearPos, farPos, normDepth);
+        landed = IsMass(pos, mem);
+    }
+    /*while (z < depth && !landed) {
+        normDepth = z / depth;
+        pos = lerp(nearPos, farPos, normDepth);
+        landed = IsMass(pos, mem);
+        z++;
+    }*/
 
-    float dotValue = pow(clamp(dot(-normal, lightDir), 0, 1), 2) * 0.8 + 0.1;
+    float3 normalColor = float3(1, 1, 1);
+    bool reachedSurface = false;
 
-    float4 finalColor = float4(dotValue, dotValue, dotValue, 1);
 
-    finalColor = finalColor * (1-fog) + lerp(finalColor, float4(1, 1, 1, 1), pow(depthColor.x, power)) * fog;
+    if (landed) {
+        float3 rayDir = nearPos - farPos;
+        float rayDirMag = length(rayDir);
+        float rayStep = rayDirMag / depth;
+        rayDir = normalize(rayDir);
 
-    finalColor = finalColor* (float4(0.48, 0.54, 0.82, 1)+0.5) * landed + float4(1, 1, 1, 1) * (1 - landed);
+        float4 surface = ExploreDirectionDAC(pos, pos + rayDir * rayStep * depthExplorationMult, true, mem);
+        float3 dirToSurface = nearPos - surface.xyz;
+        normDepth = length(dirToSurface) / rayDirMag;
+        float3 normal = CalculateNormal(surface.xyz, rayDir, rayStep, mem);
+        normalColor = normal.xzy * 0.5f + 0.5f;
+    }
 
-    ResultTex[id.xy] = finalColor;
+    float4 finalDepthColor = float4(normDepth, (float)landed, 0, 1);
+    float4 finalNormalColor = float4(normalColor, 1);
+
+    uint2 texCoord = uint2(id.x, height - id.y - 1);
+    DepthTex[texCoord] = finalDepthColor;
+    NormalTex[texCoord] = finalNormalColor;
 }
+
+

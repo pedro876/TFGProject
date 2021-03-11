@@ -483,7 +483,7 @@ public class FunctionNode
         return 0f;
     }
 
-    public int CalculateBytecode(Dictionary<FunctionNode, int> memoryNodes, List<int> bytecode, HashSet<string> subFuncs, int lastMemoryIndex = 4, int max = 1024, int[] varIdx = null)
+    public int CalculateBytecode(Dictionary<FunctionNode, int> memoryNodes, List<int> bytecode, HashSet<string> subFuncs, int lastMemoryIndex = 4, int max = 256, int[] varIdx = null)
     {
         if (varIdx == null) varIdx = new int[] { 1, 2, 3 };
         int memoryIndex;

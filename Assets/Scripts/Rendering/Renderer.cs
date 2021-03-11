@@ -14,8 +14,6 @@ public abstract class Renderer : MonoBehaviour
     protected Renderer parent;
     protected RawImage image;
     protected int level;
-    protected Color[] depthMemory;
-    protected Color[] normalMemory;
     protected Texture depthTex;
     protected Texture normalTex;
     protected float startX;
@@ -72,15 +70,46 @@ public abstract class Renderer : MonoBehaviour
         return GetDisparity() + RendererManager.maxLevel - level;
     }
 
+    protected virtual void GetSubRegion(int r, out int minX, out int minY, out int maxX, out int maxY)
+    {
+        if (r == 0)
+        {
+            minX = 0;
+            minY = 0;
+            maxX = width / 2;
+            maxY = height / 2;
+        }
+        else if (r == 1)
+        {
+            minX = width / 2;
+            minY = 0;
+            maxX = width;
+            maxY = height / 2;
+        }
+        else if (r == 2)
+        {
+            minX = 0;
+            minY = height / 2;
+            maxX = width / 2;
+            maxY = height;
+        }
+        else
+        {
+            minX = width / 2;
+            minY = height / 2;
+            maxX = width;
+            maxY = height;
+        }
+    }
+
     protected virtual void CalculateHomogeneity()
     {
-
         List<float[]> randomDepths = new List<float[]>()
         {
-            GetRandomDepths(0,0,width/2,height/2),
-            GetRandomDepths(width/2,0,width,height/2),
-            GetRandomDepths(0,height/2,width/2,height),
-            GetRandomDepths(width/2,height/2,width,height),
+            GetRandomDepths(0),
+            GetRandomDepths(1),
+            GetRandomDepths(2),
+            GetRandomDepths(3),
         };
         for (int i = 0; i < homogeneities.Length; i++) homogeneities[i] = 0f;
 
@@ -100,44 +129,11 @@ public abstract class Renderer : MonoBehaviour
         for (int i = 0; i < homogeneities.Length; i++) homogeneities[i] = 1f-Mathf.Clamp(homogeneities[i]/totalDistances,0f,1f);
     }
 
-    protected abstract float[] GetRandomDepths(int minX, int minY, int maxX, int maxY);
+    protected abstract float[] GetRandomDepths(int r);
 
     #endregion
 
     #region rendering
-
-    /*private static readonly Vector3[] dirsExplored = new Vector3[]
-    {
-        new Vector3(1,0,0),
-        new Vector3(-1,0,0),
-        new Vector3(0,1,0),
-        new Vector3(0,-1,0),
-        new Vector3(0,0,1),
-        new Vector3(0,0,-1),
-    };*/
-
-    //protected readonly Vector3[] dirsExplored = new Vector3[6];
-
-    //private void UpdateNormalExplorationRadius()
-    //{
-    //    /*dirsExplored[0] =  ViewController.camTransform.forward;
-    //    dirsExplored[1] = -ViewController.camTransform.forward;
-    //    dirsExplored[2] =  ViewController.camTransform.right;
-    //    dirsExplored[3] = -ViewController.camTransform.right;
-    //    dirsExplored[4] =  ViewController.camTransform.up;
-    //    dirsExplored[5] = -ViewController.camTransform.up;*/
-    //
-    //    dirsExplored[0] =  Vector3.up;
-    //    dirsExplored[1] = -Vector3.up;
-    //    dirsExplored[2] =  Vector3.right;
-    //    dirsExplored[3] = -Vector3.right;
-    //    dirsExplored[4] =  Vector3.forward;
-    //    dirsExplored[5] = -Vector3.forward;
-    //
-    //    normalExplorationRadius = (Vector3.Distance(ViewController.nearTopLeft, ViewController.farTopLeft) / depth) * explorationRadiusMultiplier;
-    //
-    //
-    //}
 
     public virtual void DeepStop()
     {
@@ -225,7 +221,7 @@ public abstract class Renderer : MonoBehaviour
 
     #region creation
 
-    public void Init(int level = 0, Renderer parent = null, float startX = 0f, float startY = 1f, float region = 1f)
+    public virtual void Init(int level = 0, Renderer parent = null, float startX = 0f, float startY = 1f, float region = 1f)
     {
         children = null;
         this.startX = startX;
@@ -236,8 +232,7 @@ public abstract class Renderer : MonoBehaviour
         width = RendererManager.setting[level].width;
         height = RendererManager.setting[level].height;
         depth = RendererManager.setting[level].depth;
-        depthMemory = new Color[width*height];
-        normalMemory = new Color[width * height];
+        
         CreateTextures();
 
         image.texture = normalTex;
@@ -276,7 +271,9 @@ public abstract class Renderer : MonoBehaviour
         children = new Renderer[4];
         for(int i = 0; i < 4; i++)
         {
-            var obj = Instantiate(RendererManager.cpuRendererProto, transform);
+            GameObject proto = RendererManager.setting[level + 1].type == RendererManager.RendererType.CPU ? 
+                RendererManager.cpuRendererProto : RendererManager.gpuRendererProto;
+            var obj = Instantiate(proto, transform);
             obj.name = "renderer" + (level + 1) + "_" + i;
             var r = obj.GetComponent<Renderer>();
             children[i] = r;

@@ -26,10 +26,13 @@ public class RendererManager : MonoBehaviour
     public static HashSet<Thread> currentThreads = new HashSet<Thread>();
     public static List<KeyValuePair<Thread, int>> threadsToStart = new List<KeyValuePair<Thread, int>>();
     public static Queue<Action> displayOrders = new Queue<Action>();
+    public static List<KeyValuePair<Action, int>> renderOrders = new List<KeyValuePair<Action, int>>();
     [SerializeField] private int displayOrdersPerFrame = 3;
+    [SerializeField] private int renderOrdersPerFrame = 1;
     [SerializeField] private int maxParallelThreads = 10;
 
     [Header("Render settings")]
+    [SerializeField] int gpuHomogeneityDepth = 256;
     [SerializeField] int explorationSamples = 10;
     [SerializeField] float depthExplorationMultiplier = 1.05f;
     [SerializeField] float normalExplorationMultiplier = 1.05f;
@@ -42,6 +45,7 @@ public class RendererManager : MonoBehaviour
 
     private void Start()
     {
+        GPURenderer.homogeneityDepth = gpuHomogeneityDepth;
         Renderer.explorationSamples = explorationSamples;
         Renderer.depthExplorationMultiplier = depthExplorationMultiplier;
         Renderer.normalExplorationMultiplier = normalExplorationMultiplier;
@@ -76,8 +80,7 @@ public class RendererManager : MonoBehaviour
 
     private void Update()
     {
-        AttendOrders();
-        AttendThreads();
+        
     }
 
     private void AttendOrders()
@@ -88,6 +91,18 @@ public class RendererManager : MonoBehaviour
         for (int i = 0; i < top; i++)
         {
             displayOrders.Dequeue().Invoke();
+        }
+
+        int count = renderOrders.Count;
+        top = count;
+        if (top > renderOrdersPerFrame) top = renderOrdersPerFrame;
+        renderOrders.Sort((a, b) => a.Value - b.Value);
+
+        for(int i = 0; i < top; i++)
+        {
+            Action action = renderOrders[count - 1 - i].Key;
+            renderOrders.RemoveAt(count - 1 - i);
+            action();
         }
     }
 
@@ -128,6 +143,8 @@ public class RendererManager : MonoBehaviour
 
     private void LateUpdate()
     {
+        AttendOrders();
+        AttendThreads();
         AdjustPositions();
         CheckIfRenderFinished();
     }
@@ -147,6 +164,7 @@ public class RendererManager : MonoBehaviour
         rendering = true;
         displayOrders.Clear();
         threadsToStart.Clear();
+        renderOrders.Clear();
         lock (currentThreadsLock)
         {
             foreach(var t in currentThreads)
@@ -193,10 +211,9 @@ public class RendererManager : MonoBehaviour
 
     public static List<RendererQuality> setting = new List<RendererQuality>()
     {
-        new RendererQuality(RendererType.CPU, 64, 32),
-        new RendererQuality(RendererType.CPU, 64, 128),
-        new RendererQuality(RendererType.CPU, 128, 256),
-        new RendererQuality(RendererType.CPU, 128, 800),
+        new RendererQuality(RendererType.GPU, 360, 90),
+        new RendererQuality(RendererType.GPU, 128, 128),
+        new RendererQuality(RendererType.GPU, 256, 1024),
     };
 
     #endregion
