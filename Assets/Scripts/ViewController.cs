@@ -50,8 +50,9 @@ public class ViewController : MonoBehaviour, IPointerDownHandler
 
     float x, y;
 
-    bool changed = false;
+    public static bool changed = false;
     public static event Action onChanged;
+    public static event Action onPreChanged;
 
     bool firstFrame = true;
 
@@ -67,6 +68,12 @@ public class ViewController : MonoBehaviour, IPointerDownHandler
         SetRegion(regionX.x, regionX.y, regionY.x, regionY.y, regionZ.x, regionZ.y);
     }
 
+    private static void OnChanged()
+    {
+        onPreChanged?.Invoke();
+        onChanged?.Invoke();
+    }
+
     private void LateUpdate()
     {
         changed = false;
@@ -76,12 +83,20 @@ public class ViewController : MonoBehaviour, IPointerDownHandler
         if (focused)
         {
             GetInput();
-            MoveCamera();
+            //MoveCamera();
         }
         CalculatePlanes();
 
-        if (changed || firstFrame) onChanged?.Invoke();
+        if (changed || firstFrame) OnChanged();
         firstFrame = false;
+    }
+
+    private void FixedUpdate()
+    {
+        if (focused)
+        {
+            MoveCamera();
+        }
     }
 
     #region CameraInfo
@@ -159,7 +174,7 @@ public class ViewController : MonoBehaviour, IPointerDownHandler
     private void GetInput()
     {
         x = Input.GetAxis("Mouse X");
-        y = Input.GetAxis("Mouse Y");;
+        y = Input.GetAxis("Mouse Y");
         if (Mathf.Abs(x) > 0.001f || Mathf.Abs(y) > 0.001f) changed = true;
     }
 
@@ -175,9 +190,9 @@ public class ViewController : MonoBehaviour, IPointerDownHandler
     private void OrbitMove()
     {
         camTransform.LookAt(Vector3.zero);
-        float degreesX = x * orbitSpeed * Time.deltaTime;
+        float degreesX = x * orbitSpeed * Time.fixedDeltaTime;
         camTransform.RotateAround(Vector3.zero, Vector3.up, degreesX);
-        float degreesY = -y * orbitSpeed * Time.deltaTime;
+        float degreesY = -y * orbitSpeed * Time.fixedDeltaTime;
 
         const float limit = 89.5f;
         float currentDegreesY = Vector3.SignedAngle(camTransform.position, Vector3.ProjectOnPlane(camTransform.position, Vector3.up), -camTransform.right);
@@ -233,7 +248,7 @@ public class ViewController : MonoBehaviour, IPointerDownHandler
     public static void SetClampToRegion(bool t)
     {
         clampToRegion = t;
-        onChanged?.Invoke();
+        OnChanged();
     }
 
     public static bool GetClampToRegion()
@@ -259,7 +274,7 @@ public class ViewController : MonoBehaviour, IPointerDownHandler
 
         regionScale = new Vector3(regionX.y - regionX.x, regionY.y - regionY.x, regionZ.y - regionZ.x);
         regionCenter = new Vector3((regionX.x + regionX.y) * 0.5f, (regionY.x + regionY.y) * 0.5f, (regionZ.x + regionZ.y) * 0.5f);
-        onChanged?.Invoke();
+        OnChanged();
     }
 
     public static Vector3 TransformToRegion(ref Vector3 pos)

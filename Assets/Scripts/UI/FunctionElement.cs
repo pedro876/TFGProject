@@ -58,7 +58,7 @@ public class FunctionElement : MonoBehaviour
         {
             func = function;
             //if(selectedFunc == this)
-            FunctionPanel.InvokeOnChanged();
+            FunctionPanel.OnChanged();
         } else func = function;
         if (!IsBeingEdit())
         {

@@ -20,12 +20,10 @@ public class CPURenderer : Renderer
 
     //private const int levelThreadsSleepMs = 50;
 
-    protected override float[] GetRandomDepths(int r)
+    protected override void GetRandomDepths(int r, float[] homogeneityDepths)
     {
         int minX, minY, maxX, maxY;
         GetSubRegion(r, out minX, out minY, out maxX, out maxY);
-
-        float[] homogeneityDepths = new float[homogeneityPoints];
 
         homogeneityDepths[0] = depths[minX, minY];
         homogeneityDepths[1] = depths[minX, maxY-1];
@@ -38,8 +36,6 @@ public class CPURenderer : Renderer
             int y = Random.Range(minY, maxY);
             homogeneityDepths[i] = depths[x, y];
         }
-        
-        return homogeneityDepths;
     }
 
     override protected void CreateTextures()
@@ -87,11 +83,12 @@ public class CPURenderer : Renderer
             RenderRegion(0, 0, width, height);
             done = true;
             rendering = false;
-            RendererManager.displayOrders.Enqueue(() =>
+            MemoryToTex();
+            /*RendererManager.displayOrders.Enqueue(() =>
             {
                 MemoryToTex();
                 RenderChildren();
-            });
+            });*/
         } else
         {
             queued = true;

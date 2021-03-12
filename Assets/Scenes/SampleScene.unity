@@ -4709,7 +4709,7 @@ MonoBehaviour:
   localGpuRendererProto: {fileID: 8246636911185074625, guid: 8f552df62494e6245aa960eacfda9686,
     type: 3}
   displayOrdersPerFrame: 1
-  renderOrdersInterval: 0.02
+  renderOrdersInterval: 0.03
   maxParallelThreads: 10
   gpuHomogeneityDepth: 128
   explorationSamples: 9

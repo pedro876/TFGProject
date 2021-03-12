@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class VolumeInterpreter : MonoBehaviour
 {
@@ -22,22 +23,34 @@ public class VolumeInterpreter : MonoBehaviour
     public static Criterion criterion = Criterion.greaterThan;
     public static Variable variable = Variable.z;
 
+    public static event Action onPreChanged;
+    public static event Action onChanged;
+
+    private static void OnChanged()
+    {
+        onPreChanged?.Invoke();
+        onChanged?.Invoke();
+    }
+
     public static void SetCriterion(Criterion c)
     {
         criterion = c;
-        RendererManager.StartRender();
+        OnChanged();
+        //RendererManager.StartRender();
     }
 
     public static void SetVariable(Variable v)
     {
         variable = v;
-        RendererManager.StartRender();
+        OnChanged();
+        //RendererManager.StartRender();
     }
 
     public static void SetThreshold(float t)
     {
         threshold = t;
-        RendererManager.StartRender();
+        OnChanged();
+        //RendererManager.StartRender();
     }
 
     public static bool Interpretate(ref Vector3 p, float eval)

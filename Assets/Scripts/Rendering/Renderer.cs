@@ -29,6 +29,7 @@ public abstract class Renderer : MonoBehaviour
     public static float normalPlaneMultiplier = 0.2f;
 
     protected float[] homogeneities = new float[4];
+    List<float[]> randomDepths = new List<float[]>();
     protected const int homogeneityPoints = 10;
 
     private int renderCount = 0;
@@ -39,6 +40,7 @@ public abstract class Renderer : MonoBehaviour
     private bool renderingChildren = false;
     protected bool texApplied = false;
     public bool deepFinished = false;
+    private bool sentDisplayOrder = false;
 
     public static event Action onTexApplied;
 
@@ -104,13 +106,10 @@ public abstract class Renderer : MonoBehaviour
 
     protected virtual void CalculateHomogeneity()
     {
-        List<float[]> randomDepths = new List<float[]>()
+        for(int i = 0; i < 4; i++)
         {
-            GetRandomDepths(0),
-            GetRandomDepths(1),
-            GetRandomDepths(2),
-            GetRandomDepths(3),
-        };
+            GetRandomDepths(i, randomDepths[i]);
+        }
         for (int i = 0; i < homogeneities.Length; i++) homogeneities[i] = 0f;
 
         float totalDistances = 0f;
@@ -129,7 +128,7 @@ public abstract class Renderer : MonoBehaviour
         for (int i = 0; i < homogeneities.Length; i++) homogeneities[i] = 1f-Mathf.Clamp(homogeneities[i]/totalDistances,0f,1f);
     }
 
-    protected abstract float[] GetRandomDepths(int r);
+    protected abstract void GetRandomDepths(int r, float[] arr);
 
     #endregion
 
@@ -144,6 +143,7 @@ public abstract class Renderer : MonoBehaviour
         rendering = false;
         texApplied = false;
         deepFinished = false;
+        sentDisplayOrder = false;
         if (children != null)
         {
             foreach (var c in children) c.DeepStop();
@@ -152,12 +152,19 @@ public abstract class Renderer : MonoBehaviour
 
     private void LateUpdate()
     {
-        if(rendering && done && level > 0)
+        if(level == 0 && !renderingChildren && done && !ViewController.changed)
         {
-            MemoryToTex();
-
-            rendering = false;
             RenderChildren();
+        }
+        if(!sentDisplayOrder && rendering && done && !ViewController.changed && level > 0)
+        {
+            sentDisplayOrder = true;
+            RendererManager.displayOrders.Enqueue(() =>
+            {
+                if (level > 0) MemoryToTex();
+                rendering = false;
+                RenderChildren();
+            });
         }
     }
 
@@ -165,6 +172,7 @@ public abstract class Renderer : MonoBehaviour
     {
         image.enabled = true;
         texApplied = true;
+        onTexApplied?.Invoke();
     }
 
     public virtual void Render()
@@ -183,7 +191,6 @@ public abstract class Renderer : MonoBehaviour
 
     protected void RenderChildren()
     {
-        onTexApplied?.Invoke();
         CalculateHomogeneity();
         if (parent != null)
         {
@@ -191,7 +198,6 @@ public abstract class Renderer : MonoBehaviour
             if (parent.renderCount >= 4)
             {
                 parent.image.enabled = false;
-                
             }
         }
         if (children != null)
@@ -232,6 +238,11 @@ public abstract class Renderer : MonoBehaviour
         width = RendererManager.setting[level].width;
         height = RendererManager.setting[level].height;
         depth = RendererManager.setting[level].depth;
+
+        for(int i = 0; i < 4; i++)
+        {
+            randomDepths.Add(new float[homogeneityPoints]);
+        }
         
         CreateTextures();
 

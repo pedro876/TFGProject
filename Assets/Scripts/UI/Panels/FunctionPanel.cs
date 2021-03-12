@@ -17,6 +17,7 @@ public class FunctionPanel : MonoBehaviour
     [SerializeField] Button addBtn;
     [SerializeField] Transform addElement;
 
+    public static event Action onPreChanged;
     public static event Action onChanged;
     //public static event Action
 
@@ -35,9 +36,13 @@ public class FunctionPanel : MonoBehaviour
         addElement.SetAsLastSibling();
     }
 
-    public static void InvokeOnChanged()
+    public static void OnChanged()
     {
-        onChanged?.Invoke();
+        if(FunctionElement.selectedFunc != null && FunctionElement.selectedFunc.func != null)
+        {
+            onPreChanged?.Invoke();
+            onChanged?.Invoke();
+        }
     }
 
     private void OnEnable()
@@ -108,6 +113,6 @@ public class FunctionPanel : MonoBehaviour
         {
             if (f != func) f.OnUnselected();
         }
-        onChanged?.Invoke();
+        OnChanged();
     }
 }

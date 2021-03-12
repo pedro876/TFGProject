@@ -64,6 +64,7 @@ public class RendererManager : MonoBehaviour
         StartRender();
         FunctionPanel.onChanged += StartRender;
         ViewController.onChanged += StartRender;
+        VolumeInterpreter.onChanged += StartRender;
         StartCoroutine(AttendRenderOrders());
     }
 
@@ -79,20 +80,13 @@ public class RendererManager : MonoBehaviour
 
     #region ordersAndThreads
 
+    bool mustAttendRenderOrder = false;
     IEnumerator AttendRenderOrders()
     {
         while (true)
         {
-            int count = renderOrders.Count;
-            if(count > 0)
-            {
-                renderOrders.Sort((a, b) => a.Value - b.Value);
-                Action action = renderOrders[count - 1].Key;
-                renderOrders.RemoveAt(count - 1);
-                action();
-            }
-            
-            yield return new WaitForSeconds(renderOrdersInterval + Time.deltaTime);
+            mustAttendRenderOrder = true;
+            yield return new WaitForSeconds(renderOrdersInterval);
         }
     }
 
@@ -104,6 +98,19 @@ public class RendererManager : MonoBehaviour
         for (int i = 0; i < top; i++)
         {
             displayOrders.Dequeue().Invoke();
+        }
+
+        if (mustAttendRenderOrder)
+        {
+            mustAttendRenderOrder = false;
+            int count = renderOrders.Count;
+            if (count > 0)
+            {
+                renderOrders.Sort((a, b) => a.Value - b.Value);
+                Action action = renderOrders[count - 1].Key;
+                renderOrders.RemoveAt(count - 1);
+                action();
+            }
         }
     }
 
@@ -177,6 +184,7 @@ public class RendererManager : MonoBehaviour
         
         rootRenderer.DeepStop();
         rootRenderer.Render();
+        return;
     }
 
     private void CheckIfRenderFinished()
@@ -212,11 +220,19 @@ public class RendererManager : MonoBehaviour
 
     public static List<RendererQuality> setting = new List<RendererQuality>()
     {
-        new RendererQuality(RendererType.GPU, 256, 90),
-        /*new RendererQuality(RendererType.GPU, 128, 128),
+        new RendererQuality(RendererType.GPU, 256, 128),
+        new RendererQuality(RendererType.GPU, 128, 128),
         new RendererQuality(RendererType.GPU, 128, 200),
-        new RendererQuality(RendererType.GPU, 128, 700),*/
+        new RendererQuality(RendererType.GPU, 128, 700),
     };
+
+    /*public static List<RendererQuality> setting = new List<RendererQuality>()
+    {
+        new RendererQuality(RendererType.CPU, 64, 90),
+        new RendererQuality(RendererType.CPU, 128, 128),
+        new RendererQuality(RendererType.CPU, 128, 200),
+        new RendererQuality(RendererType.CPU, 128, 700),
+    };*/
 
     #endregion
 }

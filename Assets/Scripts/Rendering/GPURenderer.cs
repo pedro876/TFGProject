@@ -11,7 +11,12 @@ public class GPURenderer : Renderer
         public int x;
         public int y;
 
-        public Coord(int x, int y)
+        public Coord(int x = 0, int y = 0)
+        {
+            this.x = x;
+            this.y = y;
+        }
+        public void Set(int x, int y)
         {
             this.x = x;
             this.y = y;
@@ -20,47 +25,55 @@ public class GPURenderer : Renderer
 
     RenderTexture depthTex2D;
     RenderTexture normalTex2D;
-    ComputeShader volumeShader;
-    int volumeKernel;
-    uint numThreadsX;
-    uint numThreadsY;
-    uint numThreadsZ;
+    static ComputeShader volumeShader;
+    static int volumeKernel;
+    static uint numThreadsX;
+    static uint numThreadsY;
+    static uint numThreadsZ;
 
     Thread processorThread;
     float[,] depths;
 
-    List<Coord[]> homogeneityCoords;
+    Coord[,] homogeneityCoords;
 
     float[] bytecodeMemory;
 
     public static int homogeneityDepth = 128;
 
-    ComputeBuffer bytecodeMemoryBuffer;
-    ComputeBuffer bytecodeOperationsBuffer;
+    static ComputeBuffer bytecodeMemoryBuffer;
+    static ComputeBuffer bytecodeOperationsBuffer;
 
     //private const int levelThreadsSleepMs = 50;
 
-    protected override float[] GetRandomDepths(int r)
-    {
-        float[] homogeneityDepths = new float[homogeneityPoints];
-
-        for(int i = 0; i < homogeneityPoints; i++)
-        {
-            Coord c = homogeneityCoords[r][i];
-            homogeneityDepths[i] = depths[c.x, c.y];
-        }
-
-        return homogeneityDepths;
-    }
-
     public override void Init(int level = 0, Renderer parent = null, float startX = 0, float startY = 1, float region = 1)
     {
-        volumeShader = Resources.Load("Shaders/VolumeShader") as ComputeShader;
-        volumeKernel = volumeShader.FindKernel("CSMain");
-        volumeShader.GetKernelThreadGroupSizes(volumeKernel, out numThreadsX, out numThreadsY, out numThreadsZ);
+        if (level == 0)
+        {
+            volumeShader = Resources.Load("Shaders/VolumeShader") as ComputeShader;
+            volumeKernel = volumeShader.FindKernel("CSMain");
+            volumeShader.GetKernelThreadGroupSizes(volumeKernel, out numThreadsX, out numThreadsY, out numThreadsZ);
 
-        bytecodeMemoryBuffer = new ComputeBuffer(Function.maxMemorySize, sizeof(float));
-        bytecodeOperationsBuffer = new ComputeBuffer(Function.maxOperationsSize, sizeof(int));
+            bytecodeMemoryBuffer = new ComputeBuffer(Function.maxMemorySize, sizeof(float));
+            bytecodeOperationsBuffer = new ComputeBuffer(Function.maxOperationsSize, sizeof(int));
+
+            ViewController.onPreChanged += PrepareCameraInfo;
+            ViewController.onPreChanged += PrepareRegionInfo;
+            FunctionPanel.onPreChanged += PrepareFunctionInfo;
+            VolumeInterpreter.onPreChanged += PrepareInterpretationInfo;
+            PrepareInterpretationInfo();
+            PrepareCameraInfo();
+            PrepareRegionInfo();
+            PrepareExplorationInfo();
+        }
+
+        homogeneityCoords = new Coord[4, homogeneityPoints];
+        for(int r = 0; r < 4; r++)
+        {
+            for(int i = 0; i < homogeneityPoints; i++)
+            {
+                homogeneityCoords[r, i] = new Coord();
+            }
+        }
 
         base.Init(level, parent, startX, startY, region);
     }
@@ -88,6 +101,16 @@ public class GPURenderer : Renderer
         depths = new float[width, height];
     }
 
+    protected override void GetRandomDepths(int r, float[] homogeneityDepths)
+    {
+
+        for (int i = 0; i < homogeneityPoints; i++)
+        {
+            Coord c = homogeneityCoords[r, i];
+            homogeneityDepths[i] = depths[c.x, c.y];
+        }
+    }
+
     #region rendering
 
     public override void Render()
@@ -102,32 +125,26 @@ public class GPURenderer : Renderer
         CalculateHomogeneityPoints();
         if (level == 0)
         {
-            RenderRegion(homogeneityCoords);
+            RenderRegion();
             DispatchVolumeShader();
             done = true;
             rendering = false;
-            RendererManager.displayOrders.Enqueue(() =>
-            {
-                MemoryToTex();
-                RenderChildren();
-            });
+            MemoryToTex();
         } else
         {
             queued = true;
             int priority = Mathf.RoundToInt(GetImportance() * 100);
             SemaphoreSlim doneSemaphore = new SemaphoreSlim(0);
-            //RenderRegion(homogeneityCoords);
             RendererManager.renderOrders.Add(new KeyValuePair<System.Action, int>(()=>
             {
                 queued = false;
                 DispatchVolumeShader();
-                //done = true;
                 doneSemaphore.Release();
             } ,priority));
             
             processorThread = new Thread(() =>
             {
-                RenderRegion(homogeneityCoords);
+                RenderRegion();
                 
                 lock (RendererManager.currentThreadsLock)
                 {
@@ -141,38 +158,38 @@ public class GPURenderer : Renderer
                 {
                     done = false;
                 }
-                
             }
             );
             RendererManager.threadsToStart.Add(new KeyValuePair<Thread, int>(processorThread, priority));
         }
     }
 
-    private void DispatchVolumeShader()
+    
+    private void PrepareExplorationInfo()
     {
+        //Debug.Log("Preparing exploration info");
+        volumeShader.SetFloat("depthExplorationMult", depthExplorationMultiplier);
+        volumeShader.SetFloat("normalPlaneMultiplier", normalPlaneMultiplier);
+        volumeShader.SetFloat("normalExplorationMultiplier", normalExplorationMultiplier);
+        volumeShader.SetInt("explorationSamples", explorationSamples);
+    }
+
+    private void PrepareCameraInfo()
+    {
+        //Debug.Log("Preparing camera info");
         Vector3 right = (ViewController.nearTopRight - ViewController.nearTopLeft).normalized;
         Vector3 up = (ViewController.nearTopLeft - ViewController.nearBottomLeft).normalized;
         float nearSize = Vector3.Distance(ViewController.nearTopLeft, ViewController.nearTopRight);
         float farSize = Vector3.Distance(ViewController.farTopLeft, ViewController.farTopRight);
-        Vector3 nearStart = Vector3.Lerp(ViewController.nearTopLeft, ViewController.nearTopRight, startX) - up * (1f - startY) * nearSize;
-        Vector3 farStart = Vector3.Lerp(ViewController.farTopLeft, ViewController.farTopRight, startX) - up * (1f - startY) * farSize;
-
         volumeShader.SetFloats("right", new float[] { right.x, right.y, right.z });
         volumeShader.SetFloats("up", new float[] { up.x, up.y, up.z });
         volumeShader.SetFloat("nearSize", nearSize);
         volumeShader.SetFloat("farSize", farSize);
-        volumeShader.SetFloats("nearStart", new float[] { nearStart.x, nearStart.y, nearStart.z });
-        volumeShader.SetFloats("farStart", new float[] { farStart.x, farStart.y, farStart.z });
+    }
 
-        volumeShader.SetFloat("width", (float)width);
-        volumeShader.SetFloat("height", (float)height);
-        volumeShader.SetFloat("region", region);
-        volumeShader.SetFloat("depth", (float)depth);
-
-        volumeShader.SetFloat("depthExplorationMult", depthExplorationMultiplier);
-        volumeShader.SetFloat("normalPlaneMultiplier", normalPlaneMultiplier);
-        volumeShader.SetFloat("normalExplorationMultiplier", normalExplorationMultiplier);
-
+    private void PrepareRegionInfo()
+    {
+        //Debug.Log("Preparing region info");
         volumeShader.SetBool("clampToRegion", ViewController.GetClampToRegion());
         volumeShader.SetFloats("regionX", new float[] { ViewController.regionX.x, ViewController.regionX.y });
         volumeShader.SetFloats("regionY", new float[] { ViewController.regionY.x, ViewController.regionY.y });
@@ -182,13 +199,21 @@ public class GPURenderer : Renderer
         Vector3 regionCenter = ViewController.GetRegionCenter();
         volumeShader.SetFloats("regionScale", new float[] { regionScale.x, regionScale.y, regionScale.z });
         volumeShader.SetFloats("regionCenter", new float[] { regionCenter.x, regionCenter.y, regionCenter.z });
+    }
 
+    private void PrepareInterpretationInfo()
+    {
+        //Debug.Log("Preparing interpretation info");
         volumeShader.SetInt("variable", (int)VolumeInterpreter.variable);
         volumeShader.SetInt("criterion", (int)VolumeInterpreter.criterion);
         volumeShader.SetFloat("threshold", VolumeInterpreter.threshold);
+    }
 
-        volumeShader.SetInt("explorationSamples", explorationSamples);
-
+    static bool functionInfoPrepared = false;
+    private void PrepareFunctionInfo()
+    {
+        //Debug.Log("Preparing function info");
+        functionInfoPrepared = true;
         Function func = FunctionElement.selectedFunc.func;
         float[] gpuBytecodeMemory = func.GetBytecodeMemoryArr();
         int[] operations = func.GetBytecode();
@@ -200,6 +225,33 @@ public class GPURenderer : Renderer
         volumeShader.SetInt("maxOperatorIndex", FunctionNode.GetMaxOperatorIndex);
         volumeShader.SetInt("maxMemoryIndex", gpuBytecodeMemory.Length);
         volumeShader.SetInt("resultIndex", func.resultIndex);
+    }
+
+    private void DispatchVolumeShader()
+    {
+        if (!functionInfoPrepared && level == 0)
+        {
+            if (FunctionElement.selectedFunc != null && FunctionElement.selectedFunc.func != null)
+            {
+                PrepareFunctionInfo();
+            }
+            else return;
+        }
+
+        Vector3 up = (ViewController.nearTopLeft - ViewController.nearBottomLeft).normalized;
+        float nearSize = Vector3.Distance(ViewController.nearTopLeft, ViewController.nearTopRight);
+        float farSize = Vector3.Distance(ViewController.farTopLeft, ViewController.farTopRight);
+        Vector3 nearStart = Vector3.Lerp(ViewController.nearTopLeft, ViewController.nearTopRight, startX) - up * (1f - startY) * nearSize;
+        Vector3 farStart = Vector3.Lerp(ViewController.farTopLeft, ViewController.farTopRight, startX) - up * (1f - startY) * farSize;
+
+
+        volumeShader.SetFloats("nearStart", new float[] { nearStart.x, nearStart.y, nearStart.z });
+        volumeShader.SetFloats("farStart", new float[] { farStart.x, farStart.y, farStart.z });
+
+        volumeShader.SetFloat("width", (float)width);
+        volumeShader.SetFloat("height", (float)height);
+        volumeShader.SetFloat("region", region);
+        volumeShader.SetInt("depth", depth);
 
         volumeShader.SetTexture(volumeKernel, "DepthTex", depthTex2D);
         volumeShader.SetTexture(volumeKernel, "NormalTex", normalTex2D);
@@ -208,26 +260,23 @@ public class GPURenderer : Renderer
 
     private void CalculateHomogeneityPoints()
     {
-        homogeneityCoords = new List<Coord[]>();
-        for (int i = 0; i < 4; i++)
+        for (int r = 0; r < 4; r++)
         {
-            Coord[] c = new Coord[homogeneityPoints];
             int minX, minY, maxX, maxY;
-            GetSubRegion(i, out minX, out minY, out maxX, out maxY);
-            c[0] = new Coord(minX, minY);
-            c[1] = new Coord(minX, maxY - 1);
-            c[2] = new Coord(maxX - 1, minY);
-            c[3] = new Coord(maxX - 1, maxY - 1);
+            GetSubRegion(r, out minX, out minY, out maxX, out maxY);
+            homogeneityCoords[r,0].Set(minX, minY);
+            homogeneityCoords[r,1].Set(minX, maxY - 1);
+            homogeneityCoords[r,2].Set(maxX - 1, minY);
+            homogeneityCoords[r,3].Set(maxX - 1, maxY - 1);
 
             for (int j = 4; j < homogeneityPoints; j++)
             {
-                c[j] = new Coord(Random.Range(minX, maxX), Random.Range(minY, maxY));
+                homogeneityCoords[r,j].Set(Random.Range(minX, maxX), Random.Range(minY, maxY));
             }
-            homogeneityCoords.Add(c);
         }
     }
 
-    private void RenderRegion(List<Coord[]> coordsList)
+    private void RenderRegion()
     {
         
         Vector3 right = (ViewController.nearTopRight - ViewController.nearTopLeft).normalized;
@@ -239,13 +288,12 @@ public class GPURenderer : Renderer
         Vector3 farStart = Vector3.Lerp(ViewController.farTopLeft, ViewController.farTopRight, startX) - up * (1f - startY) * farSize;
         Function func = FunctionElement.selectedFunc.func;
         bytecodeMemory = func.GetBytecodeMemoryArr();
-
-        foreach(var coords in coordsList)
+        for(int r = 0; r < 4; r++)
         {
             for (int i = 0; i < homogeneityPoints; i++)
             {
-                int x = coords[i].x;
-                int y = coords[i].y;
+                int x = homogeneityCoords[r,i].x;
+                int y = homogeneityCoords[r,i].y;
                 Vector3 nearPos = nearStart + (right * ((float)x / width) - up * ((float)y / height)) * region * nearSize;
                 Vector3 farPos = farStart + (right * ((float)x / width) - up * ((float)y / height)) * region * farSize;
 
