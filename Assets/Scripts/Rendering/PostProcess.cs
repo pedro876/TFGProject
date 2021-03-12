@@ -47,6 +47,8 @@ public class PostProcess : MonoBehaviour
 
     public static event Action onLightDirChanged;
 
+    bool mustRender = false;
+
     public enum Display
     {
         depth,
@@ -62,9 +64,35 @@ public class PostProcess : MonoBehaviour
         CreateEffects();
         CreateTextures();
 
-        Renderer.onTexApplied += Render;
+        Renderer.onTexApplied += () =>
+        {
+            mustRender = true;
+        };
         UpdateDisplay();
+        //StartCoroutine(RenderCoroutine());
     }
+
+    private void Update()
+    {
+        if (mustRender)
+        {
+            mustRender = false;
+            Render();
+        }
+    }
+
+    /*IEnumerator RenderCoroutine()
+    {
+        while (true)
+        {
+            if (mustRender)
+            {
+                mustRender = false;
+                Render();
+            }
+            yield return new WaitForSeconds(renderInterval);
+        }
+    }*/
 
     private void CreateTextures()
     {
@@ -112,8 +140,6 @@ public class PostProcess : MonoBehaviour
             case Display.normals: functionView.texture = normalTex; break;
             case Display.light: functionView.texture = antialiasing ? fxaaTex : lightTex; break;
         }
-        
-        Render();
     }
 
     public void Render()

@@ -102,9 +102,8 @@ public class GPURenderer : Renderer
         CalculateHomogeneityPoints();
         if (level == 0)
         {
-            //RenderRegion(0, 0, width, height);
-            DispatchVolumeShader();
             RenderRegion(homogeneityCoords);
+            DispatchVolumeShader();
             done = true;
             rendering = false;
             RendererManager.displayOrders.Enqueue(() =>

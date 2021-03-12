@@ -1,6 +1,6 @@
 ﻿
 #pragma kernel CSMain
-#define maxMemorySize 128
+#define maxMemorySize 64
 
 float3 right;
 float3 up;
@@ -88,7 +88,7 @@ inline float SolveOperator(int op, float v0, float v1) {
     return 0.0f;*/
 }
 
-inline bool IsMass(float3 pos, float mem[maxMemorySize]) {
+inline bool IsMass(float3 pos, half mem[maxMemorySize]) {
     
     bool outOfRegion = pos.x < regionX.x || pos.x > regionX.y ||
         pos.y < regionY.x || pos.y > regionY.y ||
@@ -139,7 +139,7 @@ inline bool IsMass(float3 pos, float mem[maxMemorySize]) {
     return !outOfRegion && Interpretate(pos, eval);
 }
 
-inline float4 ExploreDirectionDAC(float3 origin, float3 destiny, bool originInside, float mem[maxMemorySize]) {
+inline float4 ExploreDirectionDAC(float3 origin, float3 destiny, bool originInside, half mem[maxMemorySize]) {
 
     float3 middle = destiny;
     bool reachedSurface = IsMass(destiny, mem) != originInside;
@@ -156,7 +156,7 @@ inline float4 ExploreDirectionDAC(float3 origin, float3 destiny, bool originInsi
     return float4(middle, reachedSurface);
 }
 
-inline float3 CalculateNormal(float3 pos, float3 rayDir, float explorationRadius, float mem[maxMemorySize]) {
+inline float3 CalculateNormal(float3 pos, float3 rayDir, float explorationRadius, half mem[maxMemorySize]) {
     float3 right = normalize(float3(1, 1, (-rayDir.x - rayDir.y) / rayDir.z));
     float3 forward = normalize(cross(rayDir, right));
 
@@ -194,7 +194,7 @@ inline float3 TransformToRegion(float3 pos) {
 [numthreads(8,8,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
-    float mem[maxMemorySize];
+    half mem[maxMemorySize];
     for (int i = 0; i < maxMemoryIndex; i++) {
         mem[i] = memoryBuffer[i];
     }

@@ -28,7 +28,7 @@ public class RendererManager : MonoBehaviour
     public static Queue<Action> displayOrders = new Queue<Action>();
     public static List<KeyValuePair<Action, int>> renderOrders = new List<KeyValuePair<Action, int>>();
     [SerializeField] private int displayOrdersPerFrame = 3;
-    [SerializeField] private int renderOrdersPerFrame = 1;
+    [SerializeField] private float renderOrdersInterval = 0.1f;
     [SerializeField] private int maxParallelThreads = 10;
 
     [Header("Render settings")]
@@ -64,6 +64,7 @@ public class RendererManager : MonoBehaviour
         StartRender();
         FunctionPanel.onChanged += StartRender;
         ViewController.onChanged += StartRender;
+        StartCoroutine(AttendRenderOrders());
     }
 
     public static void DisplayDepth()
@@ -78,9 +79,21 @@ public class RendererManager : MonoBehaviour
 
     #region ordersAndThreads
 
-    private void Update()
+    IEnumerator AttendRenderOrders()
     {
-        
+        while (true)
+        {
+            int count = renderOrders.Count;
+            if(count > 0)
+            {
+                renderOrders.Sort((a, b) => a.Value - b.Value);
+                Action action = renderOrders[count - 1].Key;
+                renderOrders.RemoveAt(count - 1);
+                action();
+            }
+            
+            yield return new WaitForSeconds(renderOrdersInterval + Time.deltaTime);
+        }
     }
 
     private void AttendOrders()
@@ -91,18 +104,6 @@ public class RendererManager : MonoBehaviour
         for (int i = 0; i < top; i++)
         {
             displayOrders.Dequeue().Invoke();
-        }
-
-        int count = renderOrders.Count;
-        top = count;
-        if (top > renderOrdersPerFrame) top = renderOrdersPerFrame;
-        renderOrders.Sort((a, b) => a.Value - b.Value);
-
-        for(int i = 0; i < top; i++)
-        {
-            Action action = renderOrders[count - 1 - i].Key;
-            renderOrders.RemoveAt(count - 1 - i);
-            action();
         }
     }
 
@@ -211,9 +212,10 @@ public class RendererManager : MonoBehaviour
 
     public static List<RendererQuality> setting = new List<RendererQuality>()
     {
-        new RendererQuality(RendererType.GPU, 360, 90),
-        new RendererQuality(RendererType.GPU, 128, 128),
-        new RendererQuality(RendererType.GPU, 256, 1024),
+        new RendererQuality(RendererType.GPU, 256, 90),
+        /*new RendererQuality(RendererType.GPU, 128, 128),
+        new RendererQuality(RendererType.GPU, 128, 200),
+        new RendererQuality(RendererType.GPU, 128, 700),*/
     };
 
     #endregion

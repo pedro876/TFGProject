@@ -23,8 +23,8 @@ public class FunctionPanel : MonoBehaviour
     private void Start()
     {
         allFunctions = new List<FunctionElement>();
-        FunctionManager.AddFunction("g(x)=x^2");
         FunctionManager.AddFunction("f(x)=cos(x)+cos(y)");
+        FunctionManager.AddFunction("g(x)=x^2");
         FunctionElement elem;
         foreach(Function f in FunctionManager.functions.Values)
         {
