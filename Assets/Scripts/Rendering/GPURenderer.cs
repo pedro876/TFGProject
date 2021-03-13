@@ -56,8 +56,8 @@ public class GPURenderer : Renderer
             bytecodeMemoryBuffer = new ComputeBuffer(Function.maxMemorySize, sizeof(float));
             bytecodeOperationsBuffer = new ComputeBuffer(Function.maxOperationsSize, sizeof(int));
 
-            ViewController.onPreChanged += PrepareCameraInfo;
-            ViewController.onPreChanged += PrepareRegionInfo;
+            //ViewController.onPreChanged += PrepareCameraInfo;
+            //ViewController.onPreChanged += PrepareRegionInfo;
             FunctionPanel.onPreChanged += PrepareFunctionInfo;
             VolumeInterpreter.onPreChanged += PrepareInterpretationInfo;
             PrepareInterpretationInfo();
@@ -243,6 +243,12 @@ public class GPURenderer : Renderer
         float farSize = Vector3.Distance(ViewController.farTopLeft, ViewController.farTopRight);
         Vector3 nearStart = Vector3.Lerp(ViewController.nearTopLeft, ViewController.nearTopRight, startX) - up * (1f - startY) * nearSize;
         Vector3 farStart = Vector3.Lerp(ViewController.farTopLeft, ViewController.farTopRight, startX) - up * (1f - startY) * farSize;
+
+        if(ViewController.changed && level == 0)
+        {
+            PrepareCameraInfo();
+            PrepareRegionInfo();
+        }
 
 
         volumeShader.SetFloats("nearStart", new float[] { nearStart.x, nearStart.y, nearStart.z });

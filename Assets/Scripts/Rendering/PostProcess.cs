@@ -69,6 +69,9 @@ public class PostProcess : MonoBehaviour
             mustRender = true;
         };
         UpdateDisplay();
+        onLightDirChanged += PrepareLightShader;
+        PrepareLightShader();
+        PrepareFXAAShader(lightTex);
         //StartCoroutine(RenderCoroutine());
     }
 
@@ -160,11 +163,11 @@ public class PostProcess : MonoBehaviour
 
         if (display == Display.light)
         {
-            PrepareLightShader();
+            //PrepareLightShader();
             pp_light.Render(lightTex.width, lightTex.height);
             if (antialiasing)
             {
-                PrepareFXAAShader(lightTex);
+                //PrepareFXAAShader(lightTex);
                 pp_fxaa.Render(fxaaTex.width, fxaaTex.height);
             }
         }

@@ -83,7 +83,7 @@ public class ViewController : MonoBehaviour, IPointerDownHandler
         if (focused)
         {
             GetInput();
-            //MoveCamera();
+            MoveCamera();
         }
         CalculatePlanes();
 
@@ -91,13 +91,13 @@ public class ViewController : MonoBehaviour, IPointerDownHandler
         firstFrame = false;
     }
 
-    private void FixedUpdate()
+    /*private void FixedUpdate()
     {
         if (focused)
         {
             MoveCamera();
         }
-    }
+    }*/
 
     #region CameraInfo
 
@@ -190,9 +190,9 @@ public class ViewController : MonoBehaviour, IPointerDownHandler
     private void OrbitMove()
     {
         camTransform.LookAt(Vector3.zero);
-        float degreesX = x * orbitSpeed * Time.fixedDeltaTime;
+        float degreesX = x * orbitSpeed * Time.deltaTime;
         camTransform.RotateAround(Vector3.zero, Vector3.up, degreesX);
-        float degreesY = -y * orbitSpeed * Time.fixedDeltaTime;
+        float degreesY = -y * orbitSpeed * Time.deltaTime;
 
         const float limit = 89.5f;
         float currentDegreesY = Vector3.SignedAngle(camTransform.position, Vector3.ProjectOnPlane(camTransform.position, Vector3.up), -camTransform.right);
