@@ -19,47 +19,53 @@ public class InterpretationPanel : MonoBehaviour
 
     private void Start()
     {
-        greaterThanToggle.isOn = VolumeInterpreter.criterion == VolumeInterpreter.Criterion.greaterThan;
-        lessThanToggle.isOn = VolumeInterpreter.criterion == VolumeInterpreter.Criterion.lessThan;
+        greaterThanToggle.isOn = VolumeInterpreter.Criterion == VolumeInterpreter.CriterionType.GreaterThan;
+        lessThanToggle.isOn = VolumeInterpreter.Criterion == VolumeInterpreter.CriterionType.LessThan;
 
-        xToggle.isOn = VolumeInterpreter.variable == VolumeInterpreter.Variable.x;
-        yToggle.isOn = VolumeInterpreter.variable == VolumeInterpreter.Variable.y;
-        zToggle.isOn = VolumeInterpreter.variable == VolumeInterpreter.Variable.z;
-        thresholdToggle.isOn = VolumeInterpreter.variable == VolumeInterpreter.Variable.threshold;
+        xToggle.isOn = VolumeInterpreter.Variable == VolumeInterpreter.VariableType.X;
+        yToggle.isOn = VolumeInterpreter.Variable == VolumeInterpreter.VariableType.Y;
+        zToggle.isOn = VolumeInterpreter.Variable == VolumeInterpreter.VariableType.Z;
+        thresholdToggle.isOn = VolumeInterpreter.Variable == VolumeInterpreter.VariableType.Threshold;
 
-        thresholdField.text = "" + VolumeInterpreter.threshold;
+        thresholdField.text = "" + VolumeInterpreter.Threshold;
 
         greaterThanToggle.onValueChanged.AddListener((val) =>
         {
-            if (val) VolumeInterpreter.SetCriterion(VolumeInterpreter.Criterion.greaterThan);
+            if (val) VolumeInterpreter.Criterion = VolumeInterpreter.CriterionType.GreaterThan;
         });
+
         lessThanToggle.onValueChanged.AddListener((val) =>
         {
-            if (val) VolumeInterpreter.SetCriterion(VolumeInterpreter.Criterion.lessThan);
+            if (val) VolumeInterpreter.Criterion= VolumeInterpreter.CriterionType.LessThan;
         });
+
         xToggle.onValueChanged.AddListener((val) =>
         {
-            if (val) VolumeInterpreter.SetVariable(VolumeInterpreter.Variable.x);
+            if (val) VolumeInterpreter.Variable= VolumeInterpreter.VariableType.X;
         });
+
         yToggle.onValueChanged.AddListener((val) =>
         {
-            if (val) VolumeInterpreter.SetVariable(VolumeInterpreter.Variable.y);
+            if (val) VolumeInterpreter.Variable= VolumeInterpreter.VariableType.Y;
         });
+
         zToggle.onValueChanged.AddListener((val) =>
         {
-            if (val) VolumeInterpreter.SetVariable(VolumeInterpreter.Variable.z);
+            if (val) VolumeInterpreter.Variable= VolumeInterpreter.VariableType.Z;
         });
+
         thresholdToggle.onValueChanged.AddListener((val) =>
         {
-            if (val) VolumeInterpreter.SetVariable(VolumeInterpreter.Variable.threshold);
+            if (val) VolumeInterpreter.Variable= VolumeInterpreter.VariableType.Threshold;
         });
+
         thresholdField.onValueChanged.AddListener((val) =>
         {
             float v;
             val = val.Replace(".", ",");
             if(float.TryParse(val, out v))
             {
-                VolumeInterpreter.SetThreshold(v);
+                VolumeInterpreter.Threshold = v;
             }
         });
 
@@ -88,42 +94,28 @@ public class InterpretationPanel : MonoBehaviour
     private void ChooseInterpretation()
     {
         if (!useAuto.isOn) return;
-        if (FunctionElement.selectedFunc == null || FunctionElement.selectedFunc.func == null) return;
+        if (!FunctionElement.hasValidFunc) return;
 
         Function func = FunctionElement.selectedFunc.func;
         bool hasX = func.variables.Contains("x");
         bool hasY = func.variables.Contains("y");
         bool hasZ = func.variables.Contains("z");
 
-        VolumeInterpreter.criterion = VolumeInterpreter.Criterion.greaterThan;
+        VolumeInterpreter.Criterion = VolumeInterpreter.CriterionType.GreaterThan;
 
         if (hasX && hasY && hasZ)
-        {
             thresholdToggle.isOn = true;
-        }
         else if (hasX && hasY)
-        {
             zToggle.isOn = true;
-        }
         else if(hasY && hasZ)
-        {
             xToggle.isOn = true;
-        }
         else if (hasX && hasZ)
-        {
             yToggle.isOn = true;
-        }
         else if (hasX)
-        {
             zToggle.isOn = true;
-        }
         else if (hasY)
-        {
             zToggle.isOn = true;
-        }
         else if (hasZ)
-        {
             xToggle.isOn = true;
-        }
     }
 }

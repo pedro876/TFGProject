@@ -64,15 +64,16 @@ public class PostProcess : MonoBehaviour
         CreateEffects();
         CreateTextures();
 
+        onLightDirChanged += PrepareLightShader;
         Renderer.onTexApplied += () =>
         {
             mustRender = true;
         };
+
         UpdateDisplay();
-        onLightDirChanged += PrepareLightShader;
         PrepareLightShader();
         PrepareFXAAShader(lightTex);
-        //StartCoroutine(RenderCoroutine());
+        
     }
 
     private void Update()
@@ -83,19 +84,6 @@ public class PostProcess : MonoBehaviour
             Render();
         }
     }
-
-    /*IEnumerator RenderCoroutine()
-    {
-        while (true)
-        {
-            if (mustRender)
-            {
-                mustRender = false;
-                Render();
-            }
-            yield return new WaitForSeconds(renderInterval);
-        }
-    }*/
 
     private void CreateTextures()
     {
@@ -118,15 +106,19 @@ public class PostProcess : MonoBehaviour
         pp_light = new PostProcessEffect("LightShader");
     }
 
+    bool fxaaShaderPrepared = false;
     private void PrepareFXAAShader(RenderTexture inputTex)
     {
+        fxaaShaderPrepared = true;
         pp_fxaa.shader.SetTexture(pp_fxaa.kernel, "InputTex", inputTex);
         pp_fxaa.shader.SetTexture(pp_fxaa.kernel, "ResultTex", fxaaTex);
         pp_fxaa.shader.SetInt("maxRes", fxaaTex.width);
     }
 
+    bool lightShaderPrepared = false;
     private void PrepareLightShader()
     {
+        lightShaderPrepared = true;
         pp_light.shader.SetFloat("fog", fog ? 1f : 0f);
         pp_light.shader.SetFloat("power", fogPower);
         pp_light.shader.SetFloats("lightDir", new float[] { lightDir.x, lightDir.y, lightDir.z });
@@ -143,10 +135,12 @@ public class PostProcess : MonoBehaviour
             case Display.normals: functionView.texture = normalTex; break;
             case Display.light: functionView.texture = antialiasing ? fxaaTex : lightTex; break;
         }
+        Render();
     }
 
     public void Render()
     {
+        if (!fxaaShaderPrepared || !lightShaderPrepared) return;
         if (display == Display.light || display == Display.depth)
         {
             RendererManager.DisplayDepth();
@@ -163,11 +157,9 @@ public class PostProcess : MonoBehaviour
 
         if (display == Display.light)
         {
-            //PrepareLightShader();
             pp_light.Render(lightTex.width, lightTex.height);
             if (antialiasing)
             {
-                //PrepareFXAAShader(lightTex);
                 pp_fxaa.Render(fxaaTex.width, fxaaTex.height);
             }
         }

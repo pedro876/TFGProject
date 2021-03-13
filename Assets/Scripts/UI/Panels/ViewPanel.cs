@@ -110,9 +110,11 @@ public class ViewPanel : MonoBehaviour
             PostProcess.antialiasing = val;
             pp.UpdateDisplay();
         });
+
         if (depthToggle.isOn) PostProcess.display = PostProcess.Display.depth;
         if (normalToggle.isOn) PostProcess.display = PostProcess.Display.normals;
         if (lightToggle.isOn) PostProcess.display = PostProcess.Display.light;
+
         depthToggle.onValueChanged.AddListener((val) => {
             if (val)
             {

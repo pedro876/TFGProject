@@ -1395,7 +1395,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sizeMultiplierOnHover: 2
-  resizeWidth: 0
   panel: {fileID: 0}
 --- !u!114 &112897995
 MonoBehaviour:
@@ -4404,7 +4403,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sizeMultiplierOnHover: 2.3
-  resizeWidth: 1
   panel: {fileID: 1639588112}
 --- !u!1 &281037679
 GameObject:
@@ -4709,8 +4707,9 @@ MonoBehaviour:
   localGpuRendererProto: {fileID: 8246636911185074625, guid: 8f552df62494e6245aa960eacfda9686,
     type: 3}
   displayOrdersPerFrame: 1
-  renderOrdersInterval: 0.03
+  renderOrdersInterval: 0.035
   maxParallelThreads: 10
+  targetFramerate: 30
   gpuHomogeneityDepth: 128
   explorationSamples: 9
   depthExplorationMultiplier: 1.05
@@ -5629,7 +5628,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sizeMultiplierOnHover: 2
-  resizeWidth: 0
   panel: {fileID: 0}
 --- !u!114 &351570488
 MonoBehaviour:
@@ -5975,7 +5973,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sizeMultiplierOnHover: 2
-  resizeWidth: 0
   panel: {fileID: 0}
 --- !u!114 &398859164
 MonoBehaviour:
@@ -6809,7 +6806,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sizeMultiplierOnHover: 2
-  resizeWidth: 0
   panel: {fileID: 0}
 --- !u!114 &455723782
 MonoBehaviour:
@@ -8848,7 +8844,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sizeMultiplierOnHover: 2
-  resizeWidth: 0
   panel: {fileID: 0}
 --- !u!114 &590103937
 MonoBehaviour:
@@ -16297,7 +16292,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sizeMultiplierOnHover: 2
-  resizeWidth: 0
   panel: {fileID: 0}
 --- !u!114 &1130620328
 MonoBehaviour:
@@ -22409,6 +22403,49 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 29
+--- !u!1 &1567791532
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1567791533}
+  - component: {fileID: 1567791534}
+  m_Layer: 0
+  m_Name: Init
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1567791533
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1567791532}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1112, y: -112, z: 1100}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 9
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1567791534
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1567791532}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 42bef1ba8ee9d054aa2bfcd13d71ce13, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1573585322
 GameObject:
   m_ObjectHideFlags: 0
@@ -26125,7 +26162,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sizeMultiplierOnHover: 2
-  resizeWidth: 0
   panel: {fileID: 0}
 --- !u!114 &1809757139
 MonoBehaviour:

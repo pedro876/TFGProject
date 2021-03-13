@@ -19,12 +19,11 @@ public class FunctionPanel : MonoBehaviour
 
     public static event Action onPreChanged;
     public static event Action onChanged;
-    //public static event Action
 
     private void Start()
     {
         allFunctions = new List<FunctionElement>();
-        FunctionManager.AddFunction("f(x)=cos(x)+cos(y)");
+        FunctionManager.AddFunction("f(x) = cos(x) + cos(y)");
         FunctionManager.AddFunction("g(x)=x^2");
         FunctionElement elem;
         foreach(Function f in FunctionManager.functions.Values)
@@ -47,19 +46,8 @@ public class FunctionPanel : MonoBehaviour
 
     private void OnEnable()
     {
-        //StartCoroutine(UpdateFunction());
         StartCoroutine(RemoveUnusedFunctions());
     }
-
-    /*IEnumerator UpdateFunction()
-    {
-        while (true)
-        {
-            yield return new WaitForSeconds(updateTime);
-            FunctionElement.selectedFunc?.UpdateFunction();
-            //Debug.Log(FunctionElement.selectedFunc.func.ToString());
-        }
-    }*/
 
     IEnumerator RemoveUnusedFunctions()
     {

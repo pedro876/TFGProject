@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using System.Text;
 
 public class FunctionReader
 {
@@ -11,8 +12,8 @@ public class FunctionReader
     public Function ProcessFunc(string funcText)
     {
         funcText = funcText.ToLower();
-        string rawFunc = GetRawFunc(ref funcText);
-        string[] parts = rawFunc.Split('=');
+        string trimmedFunc = funcText.Replace(" ", "");
+        string[] parts = trimmedFunc.Split('=');
         if (parts.Length < 2) return null;
         string name;
         string declaration = ProcessDeclaration(parts[0], ref parts[1], out name);
@@ -23,20 +24,21 @@ public class FunctionReader
         return func;
     }
 
-
     /*
      * Check if some coordinate variable is missing in the declaration and fix it
      */
     private string ProcessDeclaration(string declaration, ref string definition, out string name)
     {
-        string funcName = "";
+        StringBuilder funcName = new StringBuilder();
         int i = 0;
         while (i < declaration.Length && declaration[i] != '(')
         {
-            funcName += declaration[i];
+            funcName.Append(declaration[i]);
             i++;
         }
-        declaration = funcName+'(';
+
+        StringBuilder processedDeclaration = new StringBuilder(funcName.ToString());
+        processedDeclaration.Append('(');
         bool firstVar = true;
         string possibleVars = "xyz";
         int numPossibleVars = possibleVars.Length;
@@ -46,16 +48,20 @@ public class FunctionReader
             {
                 if (firstVar)
                 {
-                    declaration += possibleVars[j];
+                    processedDeclaration.Append(possibleVars[j]);
                     firstVar = false;
                 }
-                else declaration += "," + possibleVars[j];
+                else
+                {
+                    processedDeclaration.Append(',');//processedDeclaration.Append(','); possibleVars[j]);
+                    processedDeclaration.Append(possibleVars[j]);
+                }
             }
         }
-        declaration += ')';
-        if (firstVar) declaration = funcName;
-        name = funcName;
-        return declaration;
+        name = funcName.ToString();
+        processedDeclaration.Append(')');
+        if (firstVar) return name;
+        return processedDeclaration.ToString();
     }
 
     /*
@@ -107,14 +113,9 @@ public class FunctionReader
                 if (definition[i] == ')' && !symbols.Contains("" + definition[i + 1])) aux += "*";
                 cut = cut.Substring(1);
             }
-
-
-            
         }
-        /*if(definition.Length > 1)
-        {*/
-            aux += definition[definition.Length - 1];
-        //}
+
+        aux += definition[definition.Length - 1];
         
         definition = aux;
 
@@ -123,7 +124,7 @@ public class FunctionReader
         string cutDef = definition;
         bool previousVar = false;
         bool previousNumber = false;
-        string numberSymbols = "0123456789.";
+        const string numberSymbols = "0123456789.";
         while (cutDef.Length > 0)
         {
             bool isVariable = false;
@@ -157,17 +158,5 @@ public class FunctionReader
         definition = aux;
 
         return definition;
-    }
-
-
-    /*
-     * Remove all whitespaces from the function
-     */
-    private string GetRawFunc(ref string raw)
-    {
-        string rawFunc = "";
-        int size = raw.Length;
-        for (int i = 0; i < size; i++) if (!raw[i].Equals(' ')) rawFunc += raw[i];
-        return rawFunc;
     }
 }

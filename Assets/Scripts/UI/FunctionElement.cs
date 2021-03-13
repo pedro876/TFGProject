@@ -9,10 +9,13 @@ public class FunctionElement : MonoBehaviour
     public static FunctionElement selectedFunc;
 
     [SerializeField] Button selectBtn;
-    FunctionPanel panel;
     [SerializeField] Image camImage;
-    public Function func;
     [SerializeField] TMP_InputField inputField;
+    public Function func;
+    FunctionPanel panel;
+
+    public bool isBeingEdit { get => inputField.isFocused; }
+    public static bool hasValidFunc { get => selectedFunc != null && selectedFunc.func != null; }
 
     private void Awake()
     {
@@ -20,26 +23,17 @@ public class FunctionElement : MonoBehaviour
         selectBtn.onClick.AddListener(() => panel.SelectFunction(this));
         camImage.enabled = selectedFunc == this;
         inputField.onValueChanged.AddListener((str)=>UpdateFunction());
-        inputField.onDeselect.AddListener((str)=>
-        {
-            if (func != null) inputField.text = func.ToString();
-        });
-        inputField.onSubmit.AddListener((str) =>
-        {
-            if (func != null) inputField.text = func.ToString();
-        });
-        inputField.onEndEdit.AddListener((str) =>
-        {
-            if (func != null) inputField.text = func.ToString();
-        });
+        inputField.onDeselect.AddListener((str)=>OnEndEdit());
+        inputField.onSubmit.AddListener((str) => OnEndEdit());
+        inputField.onEndEdit.AddListener((str) => OnEndEdit());
     }
 
-    private void Update()
+    private void OnEndEdit()
     {
-        if(inputField.text.Trim() == "" && !IsBeingEdit())
+        if (inputField.text.Trim() == "")
         {
             panel.RemoveFunctionElement(this);
-        }
+        } else if (func != null) inputField.text = func.ToString();
     }
 
     public void Focus()
@@ -47,20 +41,14 @@ public class FunctionElement : MonoBehaviour
         inputField.Select();
     }
 
-    public bool IsBeingEdit()
-    {
-        return inputField.isFocused;
-    }
-
     public void SetFunction(Function function)
     {
         if (func != null && !func.Equals(function))
         {
             func = function;
-            //if(selectedFunc == this)
             FunctionPanel.OnChanged();
         } else func = function;
-        if (!IsBeingEdit())
+        if (!isBeingEdit)
         {
             inputField.onValueChanged.RemoveAllListeners();
             inputField.text = func.ToString();

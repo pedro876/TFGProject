@@ -26,7 +26,6 @@ public class CoordSphere : MonoBehaviour
     private void UpdateInfo()
     {
         Vector3 pos = transform.position;
-        //pos = new Vector3(pos.x, pos.z, pos.y);
         Vector3 finalPos = ViewController.TransformToRegion(ref pos);
 
         const float mult = 100f;
@@ -43,6 +42,4 @@ public class CoordSphere : MonoBehaviour
     {
         transform.LookAt(transform.position-cam.forward);
     }
-
-
 }

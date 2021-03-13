@@ -5,23 +5,42 @@ using System;
 
 public class VolumeInterpreter : MonoBehaviour
 {
-    public enum Criterion
-    {
-        greaterThan,
-        lessThan
-    }
+    public enum CriterionType { GreaterThan, LessThan }
+    public enum VariableType { X, Y, Z, Threshold }
 
-    public enum Variable
-    {
-        x,
-        y,
-        z,
-        threshold
-    }
+    private static float threshold = 0.5f;
+    private static CriterionType criterion = CriterionType.GreaterThan;
+    private static VariableType variable = VariableType.Z;
 
-    public static float threshold = 0.5f;
-    public static Criterion criterion = Criterion.greaterThan;
-    public static Variable variable = Variable.z;
+    public static float Threshold
+    { 
+        get { return threshold; }
+        set 
+        {
+            threshold = value;
+            OnChanged();
+        }
+    }
+    
+    public static CriterionType Criterion
+    {
+        get { return criterion; }
+        set
+        {
+            criterion = value;
+            OnChanged();
+        }
+    }
+    
+    public static VariableType Variable
+    {
+        get { return variable; }
+        set
+        {
+            variable = value;
+            OnChanged();
+        }
+    }
 
     public static event Action onPreChanged;
     public static event Action onChanged;
@@ -32,42 +51,20 @@ public class VolumeInterpreter : MonoBehaviour
         onChanged?.Invoke();
     }
 
-    public static void SetCriterion(Criterion c)
-    {
-        criterion = c;
-        OnChanged();
-        //RendererManager.StartRender();
-    }
-
-    public static void SetVariable(Variable v)
-    {
-        variable = v;
-        OnChanged();
-        //RendererManager.StartRender();
-    }
-
-    public static void SetThreshold(float t)
-    {
-        threshold = t;
-        OnChanged();
-        //RendererManager.StartRender();
-    }
-
     public static bool Interpretate(ref Vector3 p, float eval)
     {
         float v = 0f;
         switch (variable)
         {
-            case Variable.x: v = p.x; break;
-            case Variable.y: v = p.y; break;
-            case Variable.z: v = p.z; break;
-            case Variable.threshold: v = threshold; break;
+            case VariableType.X: v = p.x; break;
+            case VariableType.Y: v = p.y; break;
+            case VariableType.Z: v = p.z; break;
+            case VariableType.Threshold: v = threshold; break;
         }
-
         switch (criterion)
         {
-            case Criterion.greaterThan: return eval >= v; break;
-            case Criterion.lessThan: return eval <= v; break;
+            case CriterionType.GreaterThan: return eval >= v;
+            case CriterionType.LessThan: return eval <= v;
         }
         return false;
     }

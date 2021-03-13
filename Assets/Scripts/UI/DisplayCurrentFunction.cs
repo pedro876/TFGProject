@@ -8,12 +8,14 @@ public class DisplayCurrentFunction : MonoBehaviour
     TextMeshProUGUI text;
     [SerializeField] float updateTime = 1f;
 
+    bool mustUpdateDisplay = true;
+
     // Start is called before the first frame update
     void Awake()
     {
         text = GetComponent<TextMeshProUGUI>();
         text.text = "";
-        FunctionPanel.onChanged += UpdateDisplay;
+        FunctionPanel.onChanged += ()=>mustUpdateDisplay = true;
     }
 
     private void Start()
@@ -32,13 +34,10 @@ public class DisplayCurrentFunction : MonoBehaviour
 
     void UpdateDisplay()
     {
-        if (FunctionElement.selectedFunc != null && FunctionElement.selectedFunc.func != null)
+        if (mustUpdateDisplay)
         {
-            text.text = FunctionElement.selectedFunc.func.ToString();
-        }
-        else
-        {
-            text.text = "";
+            mustUpdateDisplay = !FunctionElement.hasValidFunc;
+            text.text = FunctionElement.hasValidFunc ? FunctionElement.selectedFunc.func.ToString() : "";
         }
     }
 

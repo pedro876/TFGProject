@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Globalization;
 using System;
+using System.Text;
 
 public class FunctionNode
 {
@@ -12,7 +13,6 @@ public class FunctionNode
     private bool isOperator;
     private string operation = "+";
     private int operationIndex = 0;
-    private float value;
     private bool isVariable;
     private string variable;
     private bool variablePositive = true;
@@ -20,11 +20,8 @@ public class FunctionNode
     private string subFunction = "";
     private int subFunctionIndex = -1;
     private FunctionNode[] subFunctionInputs = null;
-
     private bool woreParenthesis = false;
-    private int parenthesisLevel = 0;
-
-    //public int memoryIndex;
+    //private int parenthesisLevel = 0;
 
     #region static
 
@@ -66,15 +63,15 @@ public class FunctionNode
 
     #region classCreation
 
-    public FunctionNode(FunctionNode parent, int level = 0)
+    public FunctionNode(FunctionNode parent/*, int level = 0*/)
     {
         this.parent = parent;
-        parenthesisLevel = 0;
+        //parenthesisLevel = 0;
     }
 
     private void CopyNode(FunctionNode node)
     {
-        value = node.value;
+        Value = node.Value;
         isVariable = node.isVariable;
         isOperator = node.isOperator;
         isSubFunction = node.isSubFunction;
@@ -93,30 +90,22 @@ public class FunctionNode
 
     #region complexProperties
 
-    public bool IsFloat()
-    {
-        return IsLeaf() && !isVariable;
-    }
-
-    public float GetValue()
-    {
-        return value;
-    }
+    public float Value { get; private set; }
+    public bool IsFloat { get => IsLeaf && !isVariable; }
+    private bool IsLeaf { get => childLeft == null && childRight == null && !isSubFunction; }
 
     private bool NeedsParenthesis()
     {
         if (parent == null) return false;
-        if(parent.childRight == this)
+        if (parent.childRight == this && parent.operation == "-" &&
+            (isOperator || (!isVariable && Value < 0f) || (isVariable && !variablePositive)))
         {
-            if (parent.operation == "-")
-            {
-                if (isOperator || (!isVariable && value < 0f) || (isVariable && !variablePositive)) return true;
-            }
+            return true;
         }
         if (!isOperator)
         {
-            if (!isVariable && value >= 0f) return false;
-            else if (!isVariable && value < 0f) return true;
+            if (!isVariable && Value >= 0f) return false;
+            else if (!isVariable && Value < 0f) return true;
             if (isVariable && variablePositive) return false;
             else if (isVariable && !variablePositive) return true;
         }
@@ -126,7 +115,7 @@ public class FunctionNode
 
     private bool NeedsRepresentation()
     {
-        if(parent != null && IsFloat() && value == 0f)
+        if(parent != null && IsFloat && Value == 0f)
         {
             string op = parent.operation;
             if (op == "+" || op == "-") return false;
@@ -134,12 +123,9 @@ public class FunctionNode
         return true;
     }
 
-    private bool IsLeaf()
-    {
-        return childLeft == null && childRight == null && !isSubFunction;
-    }
-
     #endregion
+
+    #region functionProcessing
 
     public void ProcessFunc(string func)
     {
@@ -151,7 +137,7 @@ public class FunctionNode
             {
                 func = func.Substring(1, func.Length - 2);
                 woreParenthesis = true;
-                parenthesisLevel++;
+                //parenthesisLevel++;
             }
         }
         
@@ -187,8 +173,8 @@ public class FunctionNode
                 int breakPoint = coincidences[cIdx];
                 string left = breakPoint == 0 ? "0.0" : func.Substring(0, breakPoint);
                 string right = breakPoint == func.Length-1 ? "0.0" : func.Substring(breakPoint + 1);
-                childLeft = new FunctionNode(this, parenthesisLevel);
-                childRight = new FunctionNode(this, parenthesisLevel);
+                childLeft = new FunctionNode(this/*, parenthesisLevel*/);
+                childRight = new FunctionNode(this/*, parenthesisLevel*/);
                 childLeft.ProcessFunc(left);
                 childRight.ProcessFunc(right);
 
@@ -218,7 +204,7 @@ public class FunctionNode
             isOperator = false;
             variablePositive = true;
             isSubFunction = false;
-            value = 0f;
+            Value = 0f;
             foreach (var n in FunctionManager.functions.Keys)
             {
                 if (func.StartsWith(n))
@@ -259,7 +245,7 @@ public class FunctionNode
                 subFunctionInputs = new FunctionNode[maxInput];
                 for(int i = 0; i < maxInput; i++)
                 {
-                    subFunctionInputs[i] = new FunctionNode(this, parenthesisLevel + 1);
+                    subFunctionInputs[i] = new FunctionNode(this/*, parenthesisLevel + 1*/);
                     subFunctionInputs[i].ProcessFunc(inputs[i]);
                 }
             }
@@ -272,24 +258,26 @@ public class FunctionNode
                     isVariable = true;
                 }
 
-                if (isVariable) value = 0.0f;
+                if (isVariable) Value = 0.0f;
 
                 try
                 {
-                    value = float.Parse(func.Replace(",", "."), CultureInfo.InvariantCulture);
-                } catch(Exception e)
+                    Value = float.Parse(func.Replace(",", "."), CultureInfo.InvariantCulture);
+                } catch (Exception)
                 {
-                    value = 0f;
+                    Value = 0f;
                 }
             }
         }
     }
 
+    #endregion
+
     #region Simplify
 
     private bool DeepSimplify()
     {
-        if (IsLeaf())
+        if (IsLeaf)
         {
             return true;
         } else
@@ -306,13 +294,13 @@ public class FunctionNode
 
     private bool TrySimplify()
     {
-        if (IsLeaf()) return false;
+        if (IsLeaf) return false;
         if (isSubFunction || (parent != null && parent.isSubFunction)) return false;
         bool simplified = false;
         string op = operation;
-        if (/*!childLeft.isOperator && !childLeft.isVariable && !childRight.isOperator && !childRight.isVariable*/childLeft.IsFloat() && childRight.IsFloat())
+        if (childLeft.IsFloat && childRight.IsFloat)
         {
-            value = Solve();
+            Value = Solve();
             isOperator = false;
             isVariable = false;
             operation = "+";
@@ -321,47 +309,47 @@ public class FunctionNode
             simplified = true;
         } else if(op == "*")
         {
-            if ((childLeft.IsFloat() && childLeft.value == 0f) || 
-                (childRight.IsFloat() && childRight.value == 0f)) //Mult por 0
+            if ((childLeft.IsFloat && childLeft.Value == 0f) || 
+                (childRight.IsFloat && childRight.Value == 0f)) //Mult por 0
             {
                 isOperator = false;
                 simplified = true;
                 isVariable = false;
-                value = 0f;
+                Value = 0f;
                 childLeft = null;
                 childRight = null;
-            } else if((childLeft.IsFloat() && childLeft.value == 1f) ||
-                (childRight.IsFloat() && childRight.value == 1f))
+            } else if((childLeft.IsFloat && childLeft.Value == 1f) ||
+                (childRight.IsFloat && childRight.Value == 1f))
             {
                 isOperator = false;
                 simplified = true;
                 isVariable = false;
                 //childLeft = null;
                 //childRight = null;
-                if (childLeft.IsFloat() && childLeft.value == 1f) CopyNode(childRight);
+                if (childLeft.IsFloat && childLeft.Value == 1f) CopyNode(childRight);
                 else CopyNode(childLeft);
             }
         } else if (op == "/")
         {
-            if (childRight.IsFloat() && childRight.value == 0f) //denominador 0
+            if (childRight.IsFloat && childRight.Value == 0f) //denominador 0
             {
                 isOperator = false;
                 simplified = true;
                 isVariable = true;
                 variable = "inf";
-                value = 0f;
+                Value = 0f;
                 childLeft = null;
                 childRight = null;
             }
-            else if (childLeft.IsFloat() && childLeft.value == 0f) //numerador 0
+            else if (childLeft.IsFloat && childLeft.Value == 0f) //numerador 0
             {
                 isOperator = false;
                 simplified = true;
                 isVariable = false;
-                value = 0f;
+                Value = 0f;
                 childLeft = null;
                 childRight = null;
-            } else if (childRight.IsFloat() && childRight.value == 1f)
+            } else if (childRight.IsFloat && childRight.Value == 1f)
             {
                 isOperator = false;
                 simplified = true;
@@ -372,14 +360,14 @@ public class FunctionNode
             }
         } else if (op == "+" || op == "-")
         {
-            if (childRight.IsFloat() && childRight.value == 0f)
+            if (childRight.IsFloat && childRight.Value == 0f)
             {
                 CopyNode(childLeft);
                 if (childLeft != null) childLeft.parent = this;
                 if (childRight != null) childRight.parent = this;
                 simplified = true;
             }
-            else if(childLeft.IsFloat() && childLeft.value == 0f && !childRight.isOperator)
+            else if(childLeft.IsFloat && childLeft.Value == 0f && !childRight.isOperator)
             {
                 CopyNode(childRight);
                 
@@ -388,27 +376,27 @@ public class FunctionNode
                 if (op == "-" && !isOperator)
                 {
                     variablePositive = false;
-                    value = -Mathf.Abs(value);
+                    Value = -Mathf.Abs(Value);
                 }
                 simplified = true;
             }
         } else if (op == "^")
         {
-            if (childRight.IsFloat() && childRight.value == 0f)
+            if (childRight.IsFloat && childRight.Value == 0f)
             {
                 simplified = true;
                 isOperator = false;
                 isVariable = false;
-                value = 1f;
+                Value = 1f;
                 childLeft = null;
                 childRight = null;
             }
-            else if (childLeft.IsFloat() && childLeft.value == 0f)
+            else if (childLeft.IsFloat && childLeft.Value == 0f)
             {
                 simplified = true;
                 isOperator = false;
                 isVariable = false;
-                value = 0f;
+                Value = 0f;
                 childLeft = null;
                 childRight = null;
             }
@@ -417,6 +405,8 @@ public class FunctionNode
     }
 
     #endregion
+
+    #region Solve
 
     public float Solve(float x = 0f, float y = 0f, float z = 0f)
     {
@@ -460,7 +450,7 @@ public class FunctionNode
                 }
                 val = variablePositive ? val : -val;
             }
-            else val = value;
+            else val = Value;
             return val;
         }
     }
@@ -483,6 +473,10 @@ public class FunctionNode
         return 0f;
     }
 
+    #endregion
+
+    #region bytecode
+
     public int CalculateBytecode(Dictionary<FunctionNode, int> memoryNodes, List<int> bytecode, HashSet<string> subFuncs, int lastMemoryIndex = 4, int max = 256, int[] varIdx = null)
     {
         if (varIdx == null) varIdx = new int[] { 1, 2, 3 };
@@ -491,7 +485,7 @@ public class FunctionNode
         {
             return lastMemoryIndex;
         }
-        else if (IsLeaf())
+        else if (IsLeaf)
         {
             if (isVariable)
             {
@@ -563,28 +557,50 @@ public class FunctionNode
         return lastMemoryIndex;
     }
 
-    public override string ToString()
+    #endregion
+
+    #region ToString
+
+    private void ToStringDeep(StringBuilder builder)
     {
-        string aux = "";
+        if (!NeedsRepresentation()) return;
         if (isSubFunction)
         {
-            aux += subFunction + '(';
+            builder.Append(subFunction);
+            builder.Append('(');
             for (int i = 0; i < subFunctionInputs.Length; i++)
             {
-                aux += subFunctionInputs[i].ToString();
-                if (i < subFunctionInputs.Length - 1) aux += ',';
+                subFunctionInputs[i].ToStringDeep(builder);
+                if (i < subFunctionInputs.Length - 1) builder.Append(',');
             }
-            aux += ")";
-            return aux;
+            builder.Append(')');
+            return;
         }
-        if (!NeedsRepresentation()) return "";
 
         bool needsParenthesis = NeedsParenthesis();
-        if (needsParenthesis) aux += '(';
-        if (isOperator) aux += childLeft.ToString() + operation + childRight.ToString();
-        else if (isVariable) aux += (variablePositive ? "" : "-") + variable;
-        else aux += "" + value;
-        if (needsParenthesis) aux += ")";
-        return aux;
+        if (needsParenthesis) builder.Append('(');
+        if (isOperator)
+        {
+            childLeft.ToStringDeep(builder);
+            builder.Append(operation);
+            childRight.ToStringDeep(builder);
+        }
+        else if (isVariable)
+        {
+            if (!variablePositive) builder.Append('-');
+            builder.Append(variable);
+        }
+        else builder.Append(Value.ToString());
+        if (needsParenthesis) builder.Append(')');
+        return;
     }
+
+    public override string ToString()
+    {
+        StringBuilder builder = new StringBuilder();
+        ToStringDeep(builder);
+        return builder.ToString();
+    }
+
+    #endregion
 }

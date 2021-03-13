@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using System;
 
 public class RenderPanel : MonoBehaviour
 {
@@ -24,7 +25,7 @@ public class RenderPanel : MonoBehaviour
     [SerializeField] RawImage processImg;
     private Texture2D processTex;
     private int imgSize;
-    private float renderTime = 0f;
+    private DateTime renderInitTime;
 
     [Header("Homogeneity")]
     [SerializeField] RawImage homogeneityImg;
@@ -32,12 +33,12 @@ public class RenderPanel : MonoBehaviour
     [SerializeField] Color maxHomogeneityColor = Color.black;
     private Texture2D homogeneityTex;
 
-    bool mustUpdate = false;
+    bool mustUpdate = true;
+    public static event Action onRestartRender;
 
-
-    private void Start()
+    private void Awake()
     {
-        restartBtn.onClick.AddListener(RendererManager.StartRender);
+        restartBtn.onClick.AddListener(()=>onRestartRender?.Invoke());
 
         imgSize = Mathf.RoundToInt(Mathf.Pow(2, RendererManager.setting.Count - 1));
         int lastLevelRes = imgSize * RendererManager.setting[RendererManager.setting.Count - 1].width;
@@ -59,9 +60,10 @@ public class RenderPanel : MonoBehaviour
         homogeneityImg.texture = homogeneityTex;
         homogeneityImg.color = Color.white;
 
+        renderInitTime = DateTime.Now;
         RendererManager.renderStarted += () =>
         {
-            renderTime = 0f;
+            renderInitTime = DateTime.Now;
             mustUpdate = true;
         };
         RendererManager.renderFinished += () =>
@@ -69,19 +71,9 @@ public class RenderPanel : MonoBehaviour
             mustUpdate = false;
             UpdateAllInfo();
         };
-        if (RendererManager.rendering)
-        {
-            renderTime = 0f;
-            mustUpdate = true;
-        }
     }
 
     #region Update
-
-    private void Update()
-    {
-        if (mustUpdate) renderTime += Time.deltaTime;
-    }
 
     private void OnEnable()
     {
@@ -116,7 +108,7 @@ public class RenderPanel : MonoBehaviour
 
     private void UpdateProcessInfo()
     {
-        timeText.text = "" + (Mathf.RoundToInt(renderTime * 1000f) / 1000f) + "s";
+        timeText.text = "" + Mathf.RoundToInt((float)(DateTime.Now - renderInitTime).TotalSeconds*1000f)/1000f + "s";
         liveThreadsText.text = "" + RendererManager.currentThreads.Count;
         queuedThreadsText.text = "" + RendererManager.threadsToStart.Count;
         queuedDisplaysText.text = "" + RendererManager.displayOrders.Count;

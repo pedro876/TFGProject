@@ -32,11 +32,14 @@ public class RendererManager : MonoBehaviour
     [SerializeField] private int maxParallelThreads = 10;
 
     [Header("Render settings")]
+    [SerializeField] float targetFramerate = 30f;
     [SerializeField] int gpuHomogeneityDepth = 256;
     [SerializeField] int explorationSamples = 10;
     [SerializeField] float depthExplorationMultiplier = 1.05f;
     [SerializeField] float normalExplorationMultiplier = 1.05f;
     [SerializeField] float normalPlaneMultiplier = 1.05f;
+    private float renderInterval = 1000f;
+    private bool CanRender { get => renderInterval > (1f / targetFramerate); }
 
     //events
     public static event Action renderStarted;
@@ -61,10 +64,11 @@ public class RendererManager : MonoBehaviour
 
         rootRenderer.Init(0);
         AdjustPositions();
-        StartRender();
-        FunctionPanel.onChanged += StartRender;
-        ViewController.onChanged += StartRender;
-        VolumeInterpreter.onChanged += StartRender;
+        //StartRender();
+        ViewController.onChanged += () => StartRender(false);
+        FunctionPanel.onChanged += () => StartRender(true);
+        VolumeInterpreter.onChanged += () => StartRender(true);
+        RenderPanel.onRestartRender += () => StartRender(true);
         StartCoroutine(AttendRenderOrders());
     }
 
@@ -151,6 +155,7 @@ public class RendererManager : MonoBehaviour
 
     private void LateUpdate()
     {
+        if (renderInterval < (1f / targetFramerate)) renderInterval += Time.deltaTime;
         AttendOrders();
         AttendThreads();
         AdjustPositions();
@@ -166,8 +171,10 @@ public class RendererManager : MonoBehaviour
 
     #region rendering
 
-    public static void StartRender()
+    public void StartRender(bool forced = false)
     {
+        if (!CanRender && !forced) return;
+        renderInterval = 0f;
         renderStarted?.Invoke();
         rendering = true;
         displayOrders.Clear();

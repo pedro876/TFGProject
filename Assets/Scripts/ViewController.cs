@@ -68,12 +68,6 @@ public class ViewController : MonoBehaviour, IPointerDownHandler
         SetRegion(regionX.x, regionX.y, regionY.x, regionY.y, regionZ.x, regionZ.y);
     }
 
-    private static void OnChanged()
-    {
-        onPreChanged?.Invoke();
-        onChanged?.Invoke();
-    }
-
     private void LateUpdate()
     {
         changed = false;
@@ -91,15 +85,13 @@ public class ViewController : MonoBehaviour, IPointerDownHandler
         firstFrame = false;
     }
 
-    /*private void FixedUpdate()
-    {
-        if (focused)
-        {
-            MoveCamera();
-        }
-    }*/
-
     #region CameraInfo
+
+    private static void OnChanged()
+    {
+        onPreChanged?.Invoke();
+        onChanged?.Invoke();
+    }
 
     private void CheckCamInfo()
     {
@@ -186,16 +178,18 @@ public class ViewController : MonoBehaviour, IPointerDownHandler
             case CamMode.Fly: FlyMove(); break;
         }
     }
-
+    
     private void OrbitMove()
     {
-        camTransform.LookAt(Vector3.zero);
+        Vector3 zeroVec = Vector3.zero;
+        Vector3 upVec = Vector3.up;
+        camTransform.LookAt(zeroVec);
         float degreesX = x * orbitSpeed * Time.deltaTime;
-        camTransform.RotateAround(Vector3.zero, Vector3.up, degreesX);
+        camTransform.RotateAround(zeroVec, upVec, degreesX);
         float degreesY = -y * orbitSpeed * Time.deltaTime;
 
         const float limit = 89.5f;
-        float currentDegreesY = Vector3.SignedAngle(camTransform.position, Vector3.ProjectOnPlane(camTransform.position, Vector3.up), -camTransform.right);
+        float currentDegreesY = Vector3.SignedAngle(camTransform.position, Vector3.ProjectOnPlane(camTransform.position, upVec), -camTransform.right);
         //limit view
         if(currentDegreesY + degreesY >= limit && degreesY > 0f)
         {
@@ -204,8 +198,7 @@ public class ViewController : MonoBehaviour, IPointerDownHandler
         {
             degreesY = -limit - currentDegreesY;
         } 
-        camTransform.RotateAround(Vector3.zero, camTransform.right, degreesY);
-
+        camTransform.RotateAround(zeroVec, camTransform.right, degreesY);
     }
 
     private void FlyMove()

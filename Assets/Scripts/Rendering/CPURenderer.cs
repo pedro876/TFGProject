@@ -119,7 +119,7 @@ public class CPURenderer : Renderer
         Vector3 nearStart = Vector3.Lerp(ViewController.nearTopLeft, ViewController.nearTopRight, startX) - up * (1f - startY) * nearSize;
         Vector3 farStart = Vector3.Lerp(ViewController.farTopLeft, ViewController.farTopRight, startX) - up * (1f - startY) * farSize;
         Function func = FunctionElement.selectedFunc.func;
-        bytecodeMemory = func.GetBytecodeMemoryArr();
+        bytecodeMemory = func.CreateBytecodeMemory();
 
         for (int y = minY; y < maxY; y++)
         {

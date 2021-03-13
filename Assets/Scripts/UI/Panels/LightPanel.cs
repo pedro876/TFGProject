@@ -49,20 +49,20 @@ public class LightPanel : MonoBehaviour
         inclinationText.text = "" + Mathf.RoundToInt(lightDir.y);
         rotationSlider.value = Mathf.RoundToInt(lightDir.x);
         inclinationSlider.value = Mathf.RoundToInt(lightDir.y);
-        rotationSlider.onValueChanged.AddListener((val) =>
+        rotationSlider.onValueChanged.AddListener((rotation) =>
         {
             float inclination = inclinationSlider.value;
-            PostProcess.SetLightDir(val, inclination);
+            PostProcess.SetLightDir(rotation, inclination);
             pp.Render();
-            rotationText.text = "" + Mathf.RoundToInt(val);
+            rotationText.text = "" + Mathf.RoundToInt(rotation);
         });
 
-        inclinationSlider.onValueChanged.AddListener((val) =>
+        inclinationSlider.onValueChanged.AddListener((inclination) =>
         {
             float rotation = rotationSlider.value;
-            PostProcess.SetLightDir(rotation, val);
+            PostProcess.SetLightDir(rotation, inclination);
             pp.Render();
-            inclinationText.text = "" + Mathf.RoundToInt(val);
+            inclinationText.text = "" + Mathf.RoundToInt(inclination);
         });
     }
 }

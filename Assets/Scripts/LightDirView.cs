@@ -6,12 +6,21 @@ public class LightDirView : MonoBehaviour
 {
     Camera cam;
     [SerializeField] Transform arrowTransform;
+    bool mustRender = true;
 
     private void Start()
     {
         cam = GameObject.FindGameObjectWithTag("lightDirCam").GetComponent<Camera>();
-        UpdateDir();
-        PostProcess.onLightDirChanged += UpdateDir;
+        PostProcess.onLightDirChanged += ()=>mustRender = true;
+    }
+
+    private void Update()
+    {
+        if (mustRender)
+        {
+            mustRender = false;
+            UpdateDir();
+        }
     }
 
     private void UpdateDir()

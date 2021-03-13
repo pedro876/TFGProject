@@ -56,8 +56,8 @@ public class GPURenderer : Renderer
             bytecodeMemoryBuffer = new ComputeBuffer(Function.maxMemorySize, sizeof(float));
             bytecodeOperationsBuffer = new ComputeBuffer(Function.maxOperationsSize, sizeof(int));
 
-            //ViewController.onPreChanged += PrepareCameraInfo;
-            //ViewController.onPreChanged += PrepareRegionInfo;
+            ViewController.onPreChanged += PrepareCameraInfo;
+            ViewController.onPreChanged += PrepareRegionInfo;
             FunctionPanel.onPreChanged += PrepareFunctionInfo;
             VolumeInterpreter.onPreChanged += PrepareInterpretationInfo;
             PrepareInterpretationInfo();
@@ -204,9 +204,9 @@ public class GPURenderer : Renderer
     private void PrepareInterpretationInfo()
     {
         //Debug.Log("Preparing interpretation info");
-        volumeShader.SetInt("variable", (int)VolumeInterpreter.variable);
-        volumeShader.SetInt("criterion", (int)VolumeInterpreter.criterion);
-        volumeShader.SetFloat("threshold", VolumeInterpreter.threshold);
+        volumeShader.SetInt("variable", (int)VolumeInterpreter.Variable);
+        volumeShader.SetInt("criterion", (int)VolumeInterpreter.Criterion);
+        volumeShader.SetFloat("threshold", VolumeInterpreter.Threshold);
     }
 
     static bool functionInfoPrepared = false;
@@ -215,7 +215,7 @@ public class GPURenderer : Renderer
         //Debug.Log("Preparing function info");
         functionInfoPrepared = true;
         Function func = FunctionElement.selectedFunc.func;
-        float[] gpuBytecodeMemory = func.GetBytecodeMemoryArr();
+        float[] gpuBytecodeMemory = func.CreateBytecodeMemory();
         int[] operations = func.GetBytecode();
         bytecodeMemoryBuffer.SetData(gpuBytecodeMemory);
         bytecodeOperationsBuffer.SetData(operations);
@@ -244,11 +244,11 @@ public class GPURenderer : Renderer
         Vector3 nearStart = Vector3.Lerp(ViewController.nearTopLeft, ViewController.nearTopRight, startX) - up * (1f - startY) * nearSize;
         Vector3 farStart = Vector3.Lerp(ViewController.farTopLeft, ViewController.farTopRight, startX) - up * (1f - startY) * farSize;
 
-        if(ViewController.changed && level == 0)
+        /*if(ViewController.changed && level == 0)
         {
             PrepareCameraInfo();
             PrepareRegionInfo();
-        }
+        }*/
 
 
         volumeShader.SetFloats("nearStart", new float[] { nearStart.x, nearStart.y, nearStart.z });
@@ -293,7 +293,7 @@ public class GPURenderer : Renderer
         Vector3 nearStart = Vector3.Lerp(ViewController.nearTopLeft, ViewController.nearTopRight, startX) - up * (1f - startY) * nearSize;
         Vector3 farStart = Vector3.Lerp(ViewController.farTopLeft, ViewController.farTopRight, startX) - up * (1f - startY) * farSize;
         Function func = FunctionElement.selectedFunc.func;
-        bytecodeMemory = func.GetBytecodeMemoryArr();
+        bytecodeMemory = func.CreateBytecodeMemory();
         for(int r = 0; r < 4; r++)
         {
             for (int i = 0; i < homogeneityPoints; i++)

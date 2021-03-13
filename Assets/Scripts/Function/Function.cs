@@ -45,8 +45,6 @@ public class Function
     {
         bool outOfRegion = ViewController.IsOutOfRegion(ref p);
         if (outOfRegion) return false;
-
-        //Vector3 p = pos;//ViewController.TransformToRegion(ref pos);
         float eval = SolveByteCode(memory, p.x, p.y, p.z);
         //float eval = Solve(p.x, p.y, p.z);
         return VolumeInterpreter.Interpretate(ref p, eval);
@@ -86,7 +84,6 @@ public class Function
         {
             finalDeclaration = name;
         }
-
         CreateByteCode();
     }
 
@@ -141,13 +138,13 @@ public class Function
         return bytecode;
     }
 
-    public float[] GetBytecodeMemoryArr()
+    public float[] CreateBytecodeMemory()
     {
         float[] memory = new float[memorySize];
 
         foreach(KeyValuePair<FunctionNode, int> node in memoryNodes)
         {
-            if (node.Key.IsFloat()) memory[node.Value] = node.Key.GetValue();
+            if (node.Key.IsFloat) memory[node.Value] = node.Key.Value;
         }
 
         return memory;
@@ -204,6 +201,6 @@ public class Function
 
     public bool Equals(Function f)
     {
-        return finalDefinition == f.finalDefinition;
+        return finalDefinition.Equals(f.finalDefinition);
     }
 }
