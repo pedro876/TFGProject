@@ -37,10 +37,10 @@ public class LightPanel : MonoBehaviour
             }
         });
 
-        fogToggle.isOn = PostProcess.fog;
+        fogToggle.isOn = PostProcess.GetFog();
         fogToggle.onValueChanged.AddListener((val) =>
         {
-            PostProcess.fog = val;
+            PostProcess.SetFog(val);
             pp.Render();
         });
 

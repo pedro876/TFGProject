@@ -41,7 +41,7 @@ public class PostProcess : MonoBehaviour
     private RenderTexture fxaaTex;
 
     public static bool antialiasing = true;
-    public static bool fog = true;
+    private static bool fog = true;
     public static float fogPower = 3f;
     private static Vector3 lightDir = new Vector3(-0.5f, -1.3f, 0f).normalized;
 
@@ -202,6 +202,17 @@ public class PostProcess : MonoBehaviour
     public static Vector3 GetLightDirVec()
     {
         return lightDir;
+    }
+
+    public static void SetFog(bool f)
+    {
+        fog = f;
+        onLightDirChanged?.Invoke();
+    }
+
+    public static bool GetFog()
+    {
+        return fog;
     }
 
     #endregion
