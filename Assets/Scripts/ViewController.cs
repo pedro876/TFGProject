@@ -184,9 +184,9 @@ public class ViewController : MonoBehaviour, IPointerDownHandler
         Vector3 zeroVec = Vector3.zero;
         Vector3 upVec = Vector3.up;
         camTransform.LookAt(zeroVec);
-        float degreesX = x * orbitSpeed * Time.deltaTime;
+        float degreesX = x * orbitSpeed * Time.fixedDeltaTime;
         camTransform.RotateAround(zeroVec, upVec, degreesX);
-        float degreesY = -y * orbitSpeed * Time.deltaTime;
+        float degreesY = -y * orbitSpeed * Time.fixedDeltaTime;
 
         const float limit = 89.5f;
         float currentDegreesY = Vector3.SignedAngle(camTransform.position, Vector3.ProjectOnPlane(camTransform.position, upVec), -camTransform.right);

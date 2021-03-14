@@ -37,8 +37,8 @@ public class PostProcess : MonoBehaviour
 
     [Header("Render textures")]
     [SerializeField] RenderTexture depthTex;
-    [SerializeField] RenderTexture displayDepthTex;
     [SerializeField] RenderTexture normalTex;
+    private RenderTexture displayDepthTex;
     private RenderTexture lightTex;
     private RenderTexture fxaaTex;
 

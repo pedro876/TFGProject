@@ -4877,7 +4877,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   quadTreeCam: {fileID: 862683982}
   depthTex: {fileID: 8400000, guid: 01d280cfdb866ba479d7c6f437e07c40, type: 2}
-  displayDepthTex: {fileID: 0}
   normalTex: {fileID: 8400000, guid: 8a769e1ae4393e746aa06426eff79355, type: 2}
 --- !u!1 &302631718
 GameObject:
@@ -9290,7 +9289,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 190, y: 0}
-  m_SizeDelta: {x: 1220, y: 0}
+  m_SizeDelta: {x: 1540, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &602339304
 MonoBehaviour:
@@ -14506,11 +14505,11 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.01
-  far clip plane: 2
+  near clip plane: 0.1
+  far clip plane: 3
   field of view: 90
   orthographic: 1
-  orthographic size: 0.9
+  orthographic size: 1.3
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -14534,7 +14533,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
   m_LocalRotation: {x: 0.23911765, y: -0.3696438, z: 0.09904577, w: 0.89239913}
-  m_LocalPosition: {x: 0.75, y: 0.582, z: -0.75}
+  m_LocalPosition: {x: 1.06, y: 0.83, z: -1.06}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 537136842}
@@ -23239,6 +23238,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42bef1ba8ee9d054aa2bfcd13d71ce13, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  garbageCollectionInterval: 1
 --- !u!1 &1573585322
 GameObject:
   m_ObjectHideFlags: 0
@@ -24664,7 +24664,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1670882456
 RectTransform:
   m_ObjectHideFlags: 0
@@ -24682,7 +24682,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 190, y: 0}
-  m_SizeDelta: {x: 1220, y: 1220}
+  m_SizeDelta: {x: 1540, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1670882457
 MonoBehaviour:
@@ -24711,7 +24711,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.5019608}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.4}
   m_RaycastTarget: 0
   m_Maskable: 0
   m_OnCullStateChanged:

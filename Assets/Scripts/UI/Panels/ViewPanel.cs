@@ -70,6 +70,7 @@ public class ViewPanel : MonoBehaviour
             float v;
             if(float.TryParse(val, out v))
             {
+                v = Mathf.Max(0.01f, v);
                 ViewController.cam.nearClipPlane = v;
             }
         });
@@ -80,6 +81,7 @@ public class ViewPanel : MonoBehaviour
             float v;
             if (float.TryParse(val, out v))
             {
+                v = Mathf.Max(ViewController.cam.nearClipPlane+0.01f, v);
                 ViewController.cam.farClipPlane = v;
             }
         });
@@ -90,6 +92,7 @@ public class ViewPanel : MonoBehaviour
             float v;
             if (float.TryParse(val, out v))
             {
+                v = Mathf.Max(v, 0.1f);
                 ViewController.cam.orthographicSize = v;
             }
         });
@@ -100,6 +103,7 @@ public class ViewPanel : MonoBehaviour
             float v;
             if (float.TryParse(val, out v))
             {
+                v = Mathf.Clamp(v, 1f, 180f);
                 ViewController.cam.fieldOfView = v;
             }
         });
