@@ -30,6 +30,7 @@ float3 regionCenter;
 int variable;
 int criterion;
 float threshold;
+float difference;
 
 int explorationSamples;
 
@@ -50,7 +51,8 @@ inline bool Interpretate(float3 pos, float eval) {
     v = pos[index] * (1 - useThreshold) + threshold * useThreshold;
     bool ev1 = eval >= v;
     bool ev2 = eval <= v;
-    return (ev1 && criterion == 0) || (ev2 && criterion == 1);
+    bool ev3 = abs(eval - v) < difference;
+    return (ev1 && criterion == 0) || (ev2 && criterion == 1) || (ev3 && criterion == 2);
 }
 
 inline float SolveSubFunction(int op, float v0, float v1, float v2) {

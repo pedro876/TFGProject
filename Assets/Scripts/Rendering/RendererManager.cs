@@ -174,6 +174,7 @@ public class RendererManager : MonoBehaviour
     public void StartRender(bool forced = false)
     {
         if (!CanRender && !forced) return;
+        //while (renderInterval > (1f / targetFramerate)) renderInterval -= (1f / targetFramerate);
         renderInterval = 0f;
         renderStarted?.Invoke();
         rendering = true;
@@ -227,8 +228,8 @@ public class RendererManager : MonoBehaviour
 
     public static List<RendererQuality> setting = new List<RendererQuality>()
     {
-        new RendererQuality(RendererType.GPU, 256, 128),
-        new RendererQuality(RendererType.GPU, 128, 128),
+        new RendererQuality(RendererType.GPU, 312, 128),
+        new RendererQuality(RendererType.GPU, 176, 128),
         new RendererQuality(RendererType.GPU, 128, 200),
         new RendererQuality(RendererType.GPU, 128, 700),
     };

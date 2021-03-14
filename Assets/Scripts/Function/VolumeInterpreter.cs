@@ -5,12 +5,23 @@ using System;
 
 public class VolumeInterpreter : MonoBehaviour
 {
-    public enum CriterionType { GreaterThan, LessThan }
+    public enum CriterionType { Greater, Less, MinDifference }
     public enum VariableType { X, Y, Z, Threshold }
 
     private static float threshold = 0.5f;
-    private static CriterionType criterion = CriterionType.GreaterThan;
+    private static float minDifference = 0.4f;
+    private static CriterionType criterion = CriterionType.Greater;
     private static VariableType variable = VariableType.Z;
+
+    public static float MinDifference
+    {
+        get { return minDifference; }
+        set
+        {
+            minDifference = value;
+            OnChanged();
+        }
+    }
 
     public static float Threshold
     { 
@@ -63,8 +74,9 @@ public class VolumeInterpreter : MonoBehaviour
         }
         switch (criterion)
         {
-            case CriterionType.GreaterThan: return eval >= v;
-            case CriterionType.LessThan: return eval <= v;
+            case CriterionType.Greater: return eval >= v;
+            case CriterionType.Less: return eval <= v;
+            case CriterionType.MinDifference: return Mathf.Abs(eval - v) < minDifference;
         }
         return false;
     }

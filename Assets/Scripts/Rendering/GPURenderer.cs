@@ -189,7 +189,6 @@ public class GPURenderer : Renderer
 
     private void PrepareRegionInfo()
     {
-        //Debug.Log("Preparing region info");
         volumeShader.SetBool("clampToRegion", ViewController.GetClampToRegion());
         volumeShader.SetFloats("regionX", new float[] { ViewController.regionX.x, ViewController.regionX.y });
         volumeShader.SetFloats("regionY", new float[] { ViewController.regionY.x, ViewController.regionY.y });
@@ -203,9 +202,11 @@ public class GPURenderer : Renderer
 
     private void PrepareInterpretationInfo()
     {
-        //Debug.Log("Preparing interpretation info");
-        volumeShader.SetInt("variable", (int)VolumeInterpreter.Variable);
-        volumeShader.SetInt("criterion", (int)VolumeInterpreter.Criterion);
+        int variable = (int)VolumeInterpreter.Variable;
+        int criterion = (int)VolumeInterpreter.Criterion;
+        volumeShader.SetInt("variable", variable);
+        volumeShader.SetInt("criterion", criterion);
+        volumeShader.SetFloat("difference", VolumeInterpreter.MinDifference);
         volumeShader.SetFloat("threshold", VolumeInterpreter.Threshold);
     }
 

@@ -33,9 +33,11 @@ public class PostProcess : MonoBehaviour
     //POST PROCESS EFFECTS
     private PostProcessEffect pp_light;
     private PostProcessEffect pp_fxaa;
+    private PostProcessEffect pp_depth;
 
     [Header("Render textures")]
     [SerializeField] RenderTexture depthTex;
+    [SerializeField] RenderTexture displayDepthTex;
     [SerializeField] RenderTexture normalTex;
     private RenderTexture lightTex;
     private RenderTexture fxaaTex;
@@ -70,10 +72,11 @@ public class PostProcess : MonoBehaviour
             mustRender = true;
         };
 
-        UpdateDisplay();
+        PrepareDepthShader();
         PrepareLightShader();
         PrepareFXAAShader(lightTex);
-        
+        UpdateDisplay();
+
     }
 
     private void Update()
@@ -98,12 +101,15 @@ public class PostProcess : MonoBehaviour
 
         lightTex = CreateTex("lightTex");
         fxaaTex = CreateTex("fxaaTex");
+        displayDepthTex = CreateTex("displayDepth");
     }
 
     private void CreateEffects()
     {
+
         pp_fxaa = new PostProcessEffect("FXAAShader");
         pp_light = new PostProcessEffect("LightShader");
+        pp_depth = new PostProcessEffect("DisplayDepthShader");
     }
 
     bool fxaaShaderPrepared = false;
@@ -127,11 +133,17 @@ public class PostProcess : MonoBehaviour
         pp_light.shader.SetTexture(pp_light.kernel, "NormalTex", normalTex);
     }
 
+    private void PrepareDepthShader()
+    {
+        pp_depth.shader.SetTexture(pp_depth.kernel, "DepthTex", depthTex);
+        pp_depth.shader.SetTexture(pp_depth.kernel, "ResultTex", displayDepthTex);
+    }
+
     public void UpdateDisplay()
     {
         switch (display)
         {
-            case Display.depth: functionView.texture = depthTex; break;
+            case Display.depth: functionView.texture = displayDepthTex; break;
             case Display.normals: functionView.texture = normalTex; break;
             case Display.light: functionView.texture = antialiasing ? fxaaTex : lightTex; break;
         }
@@ -146,6 +158,10 @@ public class PostProcess : MonoBehaviour
             RendererManager.DisplayDepth();
             quadTreeCam.targetTexture = depthTex;
             quadTreeCam.Render();
+            if(display == Display.depth)
+            {
+                pp_depth.Render(displayDepthTex.width, displayDepthTex.height);
+            }
         }
         
         if(display == Display.light || display == Display.normals)

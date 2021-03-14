@@ -1,0 +1,12 @@
+﻿
+#pragma kernel CSMain
+
+Texture2D<float4> DepthTex;
+RWTexture2D<float4> ResultTex;
+
+[numthreads(16,16,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    float depth = DepthTex[id.xy].x;
+    ResultTex[id.xy] = float4(depth, depth, depth, 1);
+}
