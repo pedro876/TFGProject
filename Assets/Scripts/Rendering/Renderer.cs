@@ -37,7 +37,6 @@ public abstract class Renderer : MonoBehaviour
     protected bool done = false;
     protected bool rendering = false;
     protected bool queued = false;
-    private bool renderingChildren = false;
     protected bool texApplied = false;
     public bool deepFinished = false;
     private bool sentDisplayOrder = false;
@@ -49,7 +48,7 @@ public abstract class Renderer : MonoBehaviour
     public bool IsQueued { get => queued; }
     public bool IsRendering { get => rendering && !queued; }
     public bool IsDone { get => done; }
-    public bool IsRenderingChildren { get => renderingChildren; }
+    public bool IsRenderingChildren { get; private set; } = false;
     public bool IsTextureApplied { get => texApplied; }
 
     #endregion
@@ -138,7 +137,7 @@ public abstract class Renderer : MonoBehaviour
     {
         image.enabled = level == 0;
         done = false;
-        renderingChildren = false;
+        IsRenderingChildren = false;
         queued = false;
         rendering = false;
         texApplied = false;
@@ -152,7 +151,7 @@ public abstract class Renderer : MonoBehaviour
 
     private void LateUpdate()
     {
-        if(level == 0 && !renderingChildren && done && !ViewController.changed)
+        if(level == 0 && !IsRenderingChildren && done && !ViewController.changed)
         {
             RenderChildren();
         }
@@ -202,7 +201,7 @@ public abstract class Renderer : MonoBehaviour
         }
         if (children != null)
         {
-            renderingChildren = true;
+            IsRenderingChildren = true;
             foreach (var c in children) c.Render();
         } else
         {
@@ -226,6 +225,14 @@ public abstract class Renderer : MonoBehaviour
     #endregion
 
     #region creation
+
+    private void OnDestroy()
+    {
+        if(image != null)
+        {
+            Destroy(image.gameObject);
+        }
+    }
 
     public virtual void Init(int level = 0, Renderer parent = null, float startX = 0f, float startY = 1f, float region = 1f)
     {

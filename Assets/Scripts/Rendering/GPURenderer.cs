@@ -134,33 +134,47 @@ public class GPURenderer : Renderer
         {
             queued = true;
             int priority = Mathf.RoundToInt(GetImportance() * 100);
-            SemaphoreSlim doneSemaphore = new SemaphoreSlim(0);
-            RendererManager.renderOrders.Add(new KeyValuePair<System.Action, int>(()=>
+            if(RendererManager.Instance.maxParallelThreads > 0)
             {
-                queued = false;
-                DispatchVolumeShader();
-                doneSemaphore.Release();
-            } ,priority));
-            
-            processorThread = new Thread(() =>
-            {
-                RenderRegion();
-                
-                lock (RendererManager.currentThreadsLock)
+                SemaphoreSlim doneSemaphore = new SemaphoreSlim(0);
+                RendererManager.renderOrders.Add(new KeyValuePair<System.Action, int>(() =>
                 {
-                    RendererManager.currentThreads.Remove(Thread.CurrentThread);
+                    queued = false;
+                    DispatchVolumeShader();
+                    doneSemaphore.Release();
+                }, priority));
+
+                processorThread = new Thread(() =>
+                {
+                    RenderRegion();
+
+                    lock (RendererManager.currentThreadsLock)
+                    {
+                        RendererManager.currentThreads.Remove(Thread.CurrentThread);
+                    }
+                    try
+                    {
+                        doneSemaphore.Wait();
+                        done = true;
+                    }
+                    catch (ThreadAbortException e)
+                    {
+                        done = false;
+                    }
                 }
-                try
+                );
+                RendererManager.threadsToStart.Add(new KeyValuePair<Thread, int>(processorThread, priority));
+            } else
+            {
+                RendererManager.renderOrders.Add(new KeyValuePair<System.Action, int>(() =>
                 {
-                    doneSemaphore.Wait();
+                    queued = false;
+                    DispatchVolumeShader();
+                    RenderRegion();
                     done = true;
-                } catch (ThreadAbortException e)
-                {
-                    done = false;
-                }
+                }, priority));
             }
-            );
-            RendererManager.threadsToStart.Add(new KeyValuePair<Thread, int>(processorThread, priority));
+            
         }
     }
 

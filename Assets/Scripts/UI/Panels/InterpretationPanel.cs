@@ -20,7 +20,7 @@ public class InterpretationPanel : MonoBehaviour
 
     [SerializeField] Toggle useAuto;
 
-    private void Start()
+    private void Awake()
     {
         greaterThanToggle.isOn = VolumeInterpreter.Criterion == VolumeInterpreter.CriterionType.Greater;
         lessThanToggle.isOn = VolumeInterpreter.Criterion == VolumeInterpreter.CriterionType.Less;

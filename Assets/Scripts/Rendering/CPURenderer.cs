@@ -92,19 +92,30 @@ public class CPURenderer : Renderer
         } else
         {
             queued = true;
-            processorThread = new Thread(() =>
-            {
-                queued = false;
-                RenderRegion(0, 0, width, height);
-                done = true;
-                lock (RendererManager.currentThreadsLock)
-                {
-                    RendererManager.currentThreads.Remove(Thread.CurrentThread);
-                }
-            }
-            );
             int priority = Mathf.RoundToInt(GetImportance() * 100);
-            RendererManager.threadsToStart.Add(new KeyValuePair<Thread, int>(processorThread, priority));
+            if (RendererManager.Instance.maxParallelThreads > 0)
+            {
+                processorThread = new Thread(() =>
+                {
+                    queued = false;
+                    RenderRegion(0, 0, width, height);
+                    done = true;
+                    lock (RendererManager.currentThreadsLock)
+                    {
+                        RendererManager.currentThreads.Remove(Thread.CurrentThread);
+                    }
+                }
+                );
+                RendererManager.threadsToStart.Add(new KeyValuePair<Thread, int>(processorThread, priority));
+            } else
+            {
+                RendererManager.renderOrders.Add(new KeyValuePair<System.Action, int>(() =>
+                {
+                    queued = false;
+                    RenderRegion(0, 0, width, height);
+                    done = true;
+                }, priority));
+            }
         }
     }
 

@@ -29,7 +29,7 @@ public class RendererManager : MonoBehaviour
     public static List<KeyValuePair<Action, int>> renderOrders = new List<KeyValuePair<Action, int>>();
     [SerializeField] private int displayOrdersPerFrame = 3;
     [SerializeField] private float renderOrdersInterval = 0.1f;
-    [SerializeField] private int maxParallelThreads = 10;
+    [SerializeField] public int maxParallelThreads = 10;
 
     [Header("Render settings")]
     [SerializeField] float targetFramerate = 30f;
@@ -39,31 +39,36 @@ public class RendererManager : MonoBehaviour
     [SerializeField] float normalExplorationMultiplier = 1.05f;
     [SerializeField] float normalPlaneMultiplier = 1.05f;
     private float renderInterval = 1000f;
+    public RendererType renderMode { get; private set; }
     private bool CanRender { get => renderInterval > (1f / targetFramerate); }
 
     //events
     public static event Action renderStarted;
     public static event Action renderFinished;
+    public static event Action<RendererManager.RendererType> onRenderModeChanged;
     public static bool rendering = false;
+
+    public static RendererManager Instance { get; private set; }
 
     private void Start()
     {
+        Instance = this;
         GPURenderer.homogeneityDepth = gpuHomogeneityDepth;
         Renderer.explorationSamples = explorationSamples;
         Renderer.depthExplorationMultiplier = depthExplorationMultiplier;
         Renderer.normalExplorationMultiplier = normalExplorationMultiplier;
         Renderer.normalPlaneMultiplier = normalPlaneMultiplier;
-        maxLevel = setting.Count;
+        
         texObjProto = localTexObjProto;
         cpuRendererProto = localCpuRendererProto;
         gpuRendererProto = localGpuRendererProto;
         spaceView = FindObjectOfType<ViewController>().GetComponent<RectTransform>();
         quadContainer = GameObject.FindGameObjectWithTag("QuadContainer").GetComponent<RectTransform>();
-        rootRenderer = Instantiate(setting[0].type == RendererType.CPU ? cpuRendererProto : gpuRendererProto, transform).GetComponent<Renderer>();
-        rootRenderer.gameObject.name = "rootRenderer";
-
-        rootRenderer.Init(0);
-        AdjustPositions();
+#if UNITY_WEBGL
+        ChangeRenderMode(RendererType.CPU);
+#else
+        ChangeRenderMode(RendererType.GPU);
+#endif
         //StartRender();
         ViewController.onChanged += () => StartRender(false);
         FunctionPanel.onChanged += () => StartRender(true);
@@ -82,7 +87,7 @@ public class RendererManager : MonoBehaviour
         rootRenderer.DisplayNormal();
     }
 
-    #region ordersAndThreads
+#region ordersAndThreads
 
     bool mustAttendRenderOrder = false;
     IEnumerator AttendRenderOrders()
@@ -151,9 +156,9 @@ public class RendererManager : MonoBehaviour
         }
     }
 
-    #endregion
+#endregion
 
-    private void LateUpdate()
+    private void Update()
     {
         if (renderInterval < (1f / targetFramerate)) renderInterval += Time.deltaTime;
         AttendOrders();
@@ -164,12 +169,10 @@ public class RendererManager : MonoBehaviour
 
     private void AdjustPositions()
     {
-        //rootRenderer.texTransform.position = spaceView.position+new Vector3(-spaceView.sizeDelta.x*0.5f, spaceView.sizeDelta.y*0.5f, 0f);
-        //rootRenderer.texTransform.sizeDelta = spaceView.sizeDelta;
         rootRenderer.AdjustChildrenPositions();
     }
 
-    #region rendering
+#region rendering
 
     public void StartRender(bool forced = false)
     {
@@ -204,9 +207,27 @@ public class RendererManager : MonoBehaviour
         }
     }
 
-    #endregion
+#endregion
 
-    #region Quality
+#region Quality
+
+    public void ChangeRenderMode(RendererType type)
+    {
+        renderMode = type;
+        setting = type == RendererType.CPU ? CPUSetting : GPUSetting;
+        maxLevel = setting.Count;
+        if (rootRenderer != null)
+        {
+            DestroyImmediate(rootRenderer.gameObject);
+        }
+        rootRenderer = Instantiate(setting[0].type == RendererType.CPU ? cpuRendererProto : gpuRendererProto, transform).GetComponent<Renderer>();
+        rootRenderer.gameObject.name = "rootRenderer";
+        rootRenderer.Init(0);
+        AdjustPositions();
+        
+        onRenderModeChanged?.Invoke(type);
+        StartRender();
+    }
 
     public enum RendererType { CPU, GPU }
 
@@ -226,7 +247,9 @@ public class RendererManager : MonoBehaviour
         }
     }
 
-    public static List<RendererQuality> setting = new List<RendererQuality>()
+    public static List<RendererQuality> setting;
+
+    private static List<RendererQuality> GPUSetting = new List<RendererQuality>()
     {
         new RendererQuality(RendererType.GPU, 256, 128),
         new RendererQuality(RendererType.GPU, 176, 128),
@@ -234,13 +257,13 @@ public class RendererManager : MonoBehaviour
         new RendererQuality(RendererType.GPU, 176, 700),
     };
 
-    /*public static List<RendererQuality> setting = new List<RendererQuality>()
+    private static List<RendererQuality> CPUSetting = new List<RendererQuality>()
     {
         new RendererQuality(RendererType.CPU, 64, 90),
         new RendererQuality(RendererType.CPU, 128, 128),
         new RendererQuality(RendererType.CPU, 128, 200),
         new RendererQuality(RendererType.CPU, 128, 700),
-    };*/
+    };
 
-    #endregion
+#endregion
 }

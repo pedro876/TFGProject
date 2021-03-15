@@ -7,6 +7,11 @@ using System;
 
 public class RenderPanel : MonoBehaviour
 {
+    [Header("Render Mode")]
+    [SerializeField] Toggle cpuMode;
+    [SerializeField] Toggle gpuMode;
+    [SerializeField] TMP_InputField threadsField;
+
     [Header("Process info")]
     [SerializeField] Button restartBtn;
     [SerializeField] TextMeshProUGUI finalResText;
@@ -39,6 +44,54 @@ public class RenderPanel : MonoBehaviour
     private void Awake()
     {
         restartBtn.onClick.AddListener(()=>onRestartRender?.Invoke());
+        gpuMode.isOn = true;
+
+#if UNITY_WEBGL
+        gpuMode.interactable = false;
+        cpuMode.isOn = true;
+        RendererManager.Instance.maxParallelThreads = 0;
+#endif
+
+        cpuMode.onValueChanged.AddListener((val) =>
+        {
+            if (val) RendererManager.Instance.ChangeRenderMode(RendererManager.RendererType.CPU);
+        });
+        gpuMode.onValueChanged.AddListener((val) =>
+        {
+            if (val) RendererManager.Instance.ChangeRenderMode(RendererManager.RendererType.GPU);
+        });
+
+        threadsField.text = "" + RendererManager.Instance.maxParallelThreads;
+        threadsField.onValueChanged.AddListener((val) =>
+        {
+            int v;
+            if(int.TryParse(val, out v))
+            {
+                RendererManager.Instance.maxParallelThreads = v;
+                threadsField.text = "" + RendererManager.Instance.maxParallelThreads;
+            }
+        });
+
+        renderInitTime = DateTime.Now;
+        RendererManager.renderFinished += () =>
+        {
+            mustUpdate = false;
+            UpdateAllInfo();
+        };
+        RendererManager.onRenderModeChanged += InitRenderMode;
+        RendererManager.renderStarted += () =>
+        {
+            renderInitTime = DateTime.Now;
+            mustUpdate = true;
+        };
+    }
+
+    bool didInit = false;
+    private void InitRenderMode(RendererManager.RendererType type)
+    {
+        didInit = true;
+        //cpuMode.interactable = type != RendererManager.RendererType.CPU;
+        //gpuMode.interactable = !cpuMode.interactable;
 
         imgSize = Mathf.RoundToInt(Mathf.Pow(2, RendererManager.setting.Count - 1));
         int lastLevelRes = imgSize * RendererManager.setting[RendererManager.setting.Count - 1].width;
@@ -59,21 +112,9 @@ public class RenderPanel : MonoBehaviour
         processImg.color = Color.white;
         homogeneityImg.texture = homogeneityTex;
         homogeneityImg.color = Color.white;
-
-        renderInitTime = DateTime.Now;
-        RendererManager.renderStarted += () =>
-        {
-            renderInitTime = DateTime.Now;
-            mustUpdate = true;
-        };
-        RendererManager.renderFinished += () =>
-        {
-            mustUpdate = false;
-            UpdateAllInfo();
-        };
     }
 
-    #region Update
+#region Update
 
     private void OnEnable()
     {
@@ -95,6 +136,7 @@ public class RenderPanel : MonoBehaviour
 
     private void UpdateAllInfo()
     {
+        if (!didInit) InitRenderMode(RendererManager.Instance.renderMode);
         UpdateProcessInfo();
         UpdateProcessTex(0, 0, imgSize, imgSize, RendererManager.rootRenderer);
         UpdateHomogeneityTex(0, 0, imgSize, imgSize, RendererManager.rootRenderer);
@@ -102,9 +144,9 @@ public class RenderPanel : MonoBehaviour
         homogeneityTex.Apply();
     }
 
-    #endregion
+#endregion
 
-    #region process
+#region process
 
     private void UpdateProcessInfo()
     {
@@ -143,9 +185,9 @@ public class RenderPanel : MonoBehaviour
         }
     }
 
-    #endregion
+#endregion
 
-    #region Homogeneity
+#region Homogeneity
 
     private void UpdateHomogeneityTex(int minX, int minY, int maxX, int maxY, Renderer renderer)
     {
@@ -172,6 +214,6 @@ public class RenderPanel : MonoBehaviour
         }
     }
 
-    #endregion
+#endregion
 
 }

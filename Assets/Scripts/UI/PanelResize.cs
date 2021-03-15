@@ -12,12 +12,14 @@ public class PanelResize : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
     bool drag = false;
 
+    [SerializeField] CanvasScaler canvasScaler;
     [SerializeField] RectTransform panel;
     RectTransform parent;
     RectTransform selfTransform;
 
     void Start()
     {
+        
         widthCursorTex = Resources.Load("Cursors/widthCursor") as Texture2D;
         parent = panel.parent.GetComponent<RectTransform>();
         selfTransform = GetComponent<RectTransform>();
@@ -30,7 +32,7 @@ public class PanelResize : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
         if (drag)
         {
-            float x = Input.mousePosition.x;
+            float x = Input.mousePosition.x / canvasScaler.scaleFactor;
             if (panel != null)
             {
                 float size = x - panel.rect.xMin;
