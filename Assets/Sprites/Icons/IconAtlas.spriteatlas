@@ -52,6 +52,7 @@ SpriteAtlas:
       allowAlphaSplitting: 0
       enableRotation: 0
       enableTightPacking: 0
+    secondaryTextureSettings: {}
     variantMultiplier: 1
     packables:
     - {fileID: 2800000, guid: 8d615e75c462c4140a14f43a88768a7a, type: 3}
@@ -69,7 +70,10 @@ SpriteAtlas:
     - {fileID: 2800000, guid: 15be0813c9f94ac4d839120097c5d7b1, type: 3}
     - {fileID: 2800000, guid: 63d1ecc60dce8ae43bf26863a983f445, type: 3}
     - {fileID: 2800000, guid: 6306f43fc32678d44b8b2a70a7b1f4ae, type: 3}
+    totalSpriteSurfaceArea: 3735552
     bindAsDefault: 1
+    isAtlasV2: 0
+    cachedData: {fileID: 0}
   m_MasterAtlas: {fileID: 0}
   m_PackedSprites:
   - {fileID: 21300000, guid: ec3dff00d451bc6409450769d1a52bb2, type: 3}
@@ -103,5 +107,6 @@ SpriteAtlas:
   - gyro
   - ranking
   - camera
+  m_RenderDataMap: {}
   m_Tag: IconAtlas
   m_IsVariant: 0
