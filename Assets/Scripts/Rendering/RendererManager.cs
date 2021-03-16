@@ -10,7 +10,7 @@ public class RendererManager : MonoBehaviour
     public const bool DEBUG = false;
 
     [Header("Prototypes")]
-    public static Renderer rootRenderer = null;
+    public static AbstractRenderer rootRenderer = null;
     [SerializeField] GameObject localTexObjProto;
     [SerializeField] GameObject localCpuRendererProto;
     [SerializeField] GameObject localGpuRendererProto;
@@ -54,10 +54,10 @@ public class RendererManager : MonoBehaviour
     {
         Instance = this;
         GPURenderer.homogeneityDepth = gpuHomogeneityDepth;
-        Renderer.explorationSamples = explorationSamples;
-        Renderer.depthExplorationMultiplier = depthExplorationMultiplier;
-        Renderer.normalExplorationMultiplier = normalExplorationMultiplier;
-        Renderer.normalPlaneMultiplier = normalPlaneMultiplier;
+        AbstractRenderer.explorationSamples = explorationSamples;
+        AbstractRenderer.depthExplorationMultiplier = depthExplorationMultiplier;
+        AbstractRenderer.normalExplorationMultiplier = normalExplorationMultiplier;
+        AbstractRenderer.normalPlaneMultiplier = normalPlaneMultiplier;
         
         texObjProto = localTexObjProto;
         cpuRendererProto = localCpuRendererProto;
@@ -220,7 +220,7 @@ public class RendererManager : MonoBehaviour
         {
             DestroyImmediate(rootRenderer.gameObject);
         }
-        rootRenderer = Instantiate(setting[0].type == RendererType.CPU ? cpuRendererProto : gpuRendererProto, transform).GetComponent<Renderer>();
+        rootRenderer = Instantiate(setting[0].type == RendererType.CPU ? cpuRendererProto : gpuRendererProto, transform).GetComponent<AbstractRenderer>();
         rootRenderer.gameObject.name = "rootRenderer";
         rootRenderer.Init(0);
         AdjustPositions();

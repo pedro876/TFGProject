@@ -67,7 +67,7 @@ public class PostProcess : MonoBehaviour
         CreateTextures();
 
         onLightDirChanged += PrepareLightShader;
-        Renderer.onTexApplied += () =>
+        AbstractRenderer.onTexApplied += () =>
         {
             mustRender = true;
         };

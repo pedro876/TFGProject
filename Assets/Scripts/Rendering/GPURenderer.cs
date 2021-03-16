@@ -4,7 +4,7 @@ using UnityEngine;
 using System.Threading;
 //using System.Collections.Concurrent;
 
-public class GPURenderer : Renderer
+public class GPURenderer : AbstractRenderer
 {
     private class Coord
     {
@@ -16,7 +16,8 @@ public class GPURenderer : Renderer
             this.x = x;
             this.y = y;
         }
-        public void Set(int x, int y)
+
+        public void SetXY(int x, int y)
         {
             this.x = x;
             this.y = y;
@@ -45,7 +46,7 @@ public class GPURenderer : Renderer
 
     //private const int levelThreadsSleepMs = 50;
 
-    public override void Init(int level = 0, Renderer parent = null, float startX = 0, float startY = 1, float region = 1)
+    public override void Init(int level = 0, AbstractRenderer parent = null, float startX = 0, float startY = 1, float region = 1)
     {
         if (level == 0)
         {
@@ -78,7 +79,7 @@ public class GPURenderer : Renderer
         base.Init(level, parent, startX, startY, region);
     }
 
-    private void OnDestroy()
+    public override void Finish()
     {
         if(level == 0)
         {
@@ -204,8 +205,8 @@ public class GPURenderer : Renderer
         Vector3 up = (ViewController.nearTopLeft - ViewController.nearBottomLeft).normalized;
         float nearSize = Vector3.Distance(ViewController.nearTopLeft, ViewController.nearTopRight);
         float farSize = Vector3.Distance(ViewController.farTopLeft, ViewController.farTopRight);
-        volumeShader.SetFloats("right", new float[] { right.x, right.y, right.z });
-        volumeShader.SetFloats("up", new float[] { up.x, up.y, up.z });
+        volumeShader.SetFloats("camRight", new float[] { right.x, right.y, right.z });
+        volumeShader.SetFloats("camUp", new float[] { up.x, up.y, up.z });
         volumeShader.SetFloat("nearSize", nearSize);
         volumeShader.SetFloat("farSize", farSize);
     }
@@ -294,14 +295,14 @@ public class GPURenderer : Renderer
         {
             int minX, minY, maxX, maxY;
             GetSubRegion(r, out minX, out minY, out maxX, out maxY);
-            homogeneityCoords[r,0].Set(minX, minY);
-            homogeneityCoords[r,1].Set(minX, maxY - 1);
-            homogeneityCoords[r,2].Set(maxX - 1, minY);
-            homogeneityCoords[r,3].Set(maxX - 1, maxY - 1);
+            homogeneityCoords[r,0].SetXY(minX, minY);
+            homogeneityCoords[r,1].SetXY(minX, maxY - 1);
+            homogeneityCoords[r,2].SetXY(maxX - 1, minY);
+            homogeneityCoords[r,3].SetXY(maxX - 1, maxY - 1);
 
             for (int j = 4; j < homogeneityPoints; j++)
             {
-                homogeneityCoords[r,j].Set(Random.Range(minX, maxX), Random.Range(minY, maxY));
+                homogeneityCoords[r,j].SetXY(Random.Range(minX, maxX), Random.Range(minY, maxY));
             }
         }
     }

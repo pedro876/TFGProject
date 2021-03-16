@@ -4,7 +4,7 @@ using UnityEngine;
 using System.Threading;
 //using System.Collections.Concurrent;
 
-public class CPURenderer : Renderer
+public class CPURenderer : AbstractRenderer
 {
 
     private Texture2D depthTex2D;

@@ -4,14 +4,14 @@ using UnityEngine;
 using UnityEngine.UI;
 using System;
 
-public abstract class Renderer : MonoBehaviour
+public abstract class AbstractRenderer : MonoBehaviour
 {
     [HideInInspector] public RectTransform texTransform;
 
-    [HideInInspector] public Renderer[] children;
+    [HideInInspector] public AbstractRenderer[] children;
     private int childIndex = 0;
 
-    protected Renderer parent;
+    protected AbstractRenderer parent;
     protected RawImage image;
     protected int level;
     protected Texture depthTex;
@@ -214,7 +214,7 @@ public abstract class Renderer : MonoBehaviour
         deepFinished = true;
         if(children != null)
         {
-            foreach (Renderer r in children)
+            foreach (AbstractRenderer r in children)
                 if (!r.deepFinished)
                     deepFinished = false;
         }
@@ -232,9 +232,10 @@ public abstract class Renderer : MonoBehaviour
         {
             Destroy(image.gameObject);
         }
+        Finish();
     }
 
-    public virtual void Init(int level = 0, Renderer parent = null, float startX = 0f, float startY = 1f, float region = 1f)
+    public virtual void Init(int level = 0, AbstractRenderer parent = null, float startX = 0f, float startY = 1f, float region = 1f)
     {
         children = null;
         this.startX = startX;
@@ -255,11 +256,6 @@ public abstract class Renderer : MonoBehaviour
 
         image.texture = normalTex;
 
-        if (RendererManager.DEBUG)
-        {
-            image.color = UnityEngine.Random.ColorHSV();
-        }
-
         if (level+1 < RendererManager.maxLevel)
         {
             CreateChildren();
@@ -268,6 +264,8 @@ public abstract class Renderer : MonoBehaviour
 
         image.enabled = false;
     }
+
+    public virtual void Finish() { }
 
     protected virtual void CreateTextures()
     {
@@ -286,14 +284,14 @@ public abstract class Renderer : MonoBehaviour
 
     private void CreateChildren()
     {
-        children = new Renderer[4];
+        children = new AbstractRenderer[4];
         for(int i = 0; i < 4; i++)
         {
             GameObject proto = RendererManager.setting[level + 1].type == RendererManager.RendererType.CPU ? 
                 RendererManager.cpuRendererProto : RendererManager.gpuRendererProto;
             var obj = Instantiate(proto, transform);
             obj.name = "renderer" + (level + 1) + "_" + i;
-            var r = obj.GetComponent<Renderer>();
+            var r = obj.GetComponent<AbstractRenderer>();
             children[i] = r;
             r.childIndex = i;
             r.Init(level + 1, this, startX+region*positions[i].x, startY+region*positions[i].y, region*0.5f);

@@ -1,12 +1,11 @@
-﻿
-#pragma kernel CSMain
-#define MAX_MEMORY_SIZE 64
+﻿#pragma kernel CSMain
+#define MAX_MEMORY_SIZE 16
 #define MAX_OPERATIONS_SIZE 256
 #define MAX_DEPTH_SAMPLES 2048
 #define MAX_EXPLORATION_SAMPLES 20
 
-float3 right;
-float3 up;
+float3 camRight;
+float3 camUp;
 
 float nearSize;
 float farSize;
@@ -37,7 +36,7 @@ float difference;
 
 int explorationSamples;
 
-Buffer<float> memoryBuffer;
+RWBuffer<float> memoryBuffer;
 Buffer<int> operationsBuffer;
 int operationsSize;
 int maxOperatorIndex;
@@ -47,49 +46,74 @@ int resultIndex;
 RWTexture2D<float4> DepthTex;
 RWTexture2D<float4> NormalTex;
 
-inline bool Interpretate(float3 pos, float eval)
+#define GREATER_THAN 0
+#define LESS_THAN 1
+#define MIN_DIFFERENCE 2
+bool Interpretate(float3 pos, float eval)
 {
-    float v = 0.0f;
-    int index = min(2, variable);
+	int posCoord = clamp(variable, 0, 2);
     float useThreshold = variable > 2;
-    v = pos[index] * (1 - useThreshold) + threshold * useThreshold;
-    bool ev1 = eval >= v;
-    bool ev2 = eval <= v;
-    bool ev3 = abs(eval - v) < difference;
-    return (ev1 && criterion == 0) || (ev2 && criterion == 1) || (ev3 && criterion == 2);
+	float v = lerp(pos[posCoord], threshold, useThreshold);
+	switch (criterion)
+	{
+		case GREATER_THAN:
+			return eval >= v;
+		case LESS_THAN:
+			return eval <= v;
+		case MIN_DIFFERENCE:
+			return abs(eval - v) < difference;
+		default:
+			return 0.0f;
+	}
 }
 
-inline float SolveSubFunction(int op, float v0, float v1, float v2)
+#define FUNC_COS 0
+#define FUNC_SIN 1
+#define FUNC_ABS 2
+float SolveSubFunction(int op, float v0, float v1, float v2)
 {
     switch (op)
     {
-        case 0: return cos(v0); break;
-        case 1: return sin(v0); break;
-        case 2: return abs(v0); break;
-		default: return 0.0f;
+		case FUNC_COS:
+            return cos(v0);
+		case FUNC_SIN:
+            return sin(v0);
+		case FUNC_ABS:
+            return abs(v0);
+		default:
+            return 0.0f;
 	}
 }
 
-inline float SolveOperator(int op, float v0, float v1)
+#define SUBTRACT 0
+#define ADD 1
+#define PRODUCT 2
+#define DIVISION 3
+#define POWER 4
+float SolveOperator(int op, float v0, float v1)
 {
     switch (op) {
-    case 0: return v0 - v1; break;
-    case 1: return v0 + v1; break;
-    case 2: return v0 * v1; break;
-    case 3: return v0 / v1; break;
-    case 4:
-        uint v1Int = v1;
-        bool v1IsEven = v1Int % 2 == 0;
-        bool v0IsPositive = v0 >= 0;
-        float p = pow(abs(v0), v1Int);
-        p = p * (v0IsPositive || v1IsEven) - p * (!v0IsPositive && !v1IsEven);
-        return p;
-			break;
-	default: return 0.0f;
+		case SUBTRACT:
+			return v0 - v1;
+		case ADD:
+			return v0 + v1;
+		case PRODUCT:
+			return v0 * v1;
+		case DIVISION:
+			return v0 / v1;
+		case POWER:
+            uint v1Int = v1;
+            bool v1IsEven = v1Int % 2 == 0;
+            bool v0IsPositive = v0 >= 0;
+            float p = pow(abs(v0), v1Int);
+            p = p * (v0IsPositive || v1IsEven) - p * (!v0IsPositive && !v1IsEven);
+            return p;
+	    default:
+            return 0.0f;
 	}
 }
 
-inline bool IsMass(float3 pos, half mem[MAX_MEMORY_SIZE])
+bool IsMass(float3 pos, half mem[MAX_MEMORY_SIZE])
 {
     
     bool outOfRegion = pos.x < regionX.x || pos.x > regionX.y ||
@@ -142,7 +166,7 @@ inline bool IsMass(float3 pos, half mem[MAX_MEMORY_SIZE])
     return !outOfRegion && Interpretate(pos, eval);
 }
 
-inline float4 ExploreDirectionDAC(float3 origin, float3 destiny, bool originInside, half mem[MAX_MEMORY_SIZE])
+float4 ExploreDirectionDAC(float3 origin, float3 destiny, bool originInside, half mem[MAX_MEMORY_SIZE])
 {
 
     float3 middle = destiny;
@@ -161,7 +185,7 @@ inline float4 ExploreDirectionDAC(float3 origin, float3 destiny, bool originInsi
     return float4(middle, reachedSurface);
 }
 
-inline float3 CalculateNormal(float3 pos, float3 rayDir, float explorationRadius, half mem[MAX_MEMORY_SIZE])
+float3 CalculateNormal(float3 pos, float3 rayDir, float explorationRadius, half mem[MAX_MEMORY_SIZE])
 {
     float3 right = normalize(float3(1, 1, (-rayDir.x - rayDir.y) / rayDir.z));
     float3 forward = normalize(cross(rayDir, right));
@@ -193,7 +217,7 @@ inline float3 CalculateNormal(float3 pos, float3 rayDir, float explorationRadius
     return n;
 }
 
-inline float3 TransformToRegion(float3 pos) {
+float3 TransformToRegion(float3 pos) {
     return float3(pos.x * regionScale.x, pos.z * regionScale.y, pos.y * regionScale.z) + regionCenter;
 }
 
@@ -227,8 +251,8 @@ void CSMain(uint3 id : SV_DispatchThreadID)
 	float x = id.x;
 	float y = id.y;
     
-	float3 nearPos = nearStart + (right * x / width - up * y / height) * region * nearSize;
-	float3 farPos = farStart + (right * x / width - up * y / height) * region * farSize;
+	float3 nearPos = nearStart + (camRight * x / width - camUp * y / height) * region * nearSize;
+	float3 farPos = farStart + (camRight * x / width - camUp * y / height) * region * farSize;
 	nearPos = TransformToRegion(nearPos);
 	farPos = TransformToRegion(farPos);
     

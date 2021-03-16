@@ -156,7 +156,7 @@ public class RenderPanel : MonoBehaviour
         queuedDisplaysText.text = "" + RendererManager.displayOrders.Count;
     }
 
-    private void UpdateProcessTex(int minX, int minY, int maxX, int maxY, Renderer renderer)
+    private void UpdateProcessTex(int minX, int minY, int maxX, int maxY, AbstractRenderer renderer)
     {
 
         if (renderer.IsRenderingChildren && renderer.children != null)
@@ -189,7 +189,7 @@ public class RenderPanel : MonoBehaviour
 
 #region Homogeneity
 
-    private void UpdateHomogeneityTex(int minX, int minY, int maxX, int maxY, Renderer renderer)
+    private void UpdateHomogeneityTex(int minX, int minY, int maxX, int maxY, AbstractRenderer renderer)
     {
 
         if (renderer.IsRenderingChildren && renderer.children != null)
