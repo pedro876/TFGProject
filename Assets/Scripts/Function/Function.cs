@@ -20,7 +20,7 @@ public class Function
     public int numOperations;
     public int resultIndex;
 
-    public const int maxMemorySize = 64;
+    public const int maxMemorySize = 32;
     public const int maxOperationsSize = 256;
 
     public Function(string name, string declaration,string originalDefinition, string definition)

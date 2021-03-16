@@ -74,11 +74,11 @@ public class ViewController : MonoBehaviour, IPointerDownHandler
         CheckFocus();
         CheckCamInfo();
 
-        //if (focused)
-        //{
+        if (focused)
+        {
             GetInput();
             MoveCamera();
-        //}
+        }
         CalculatePlanes();
 
         if (changed || firstFrame) OnChanged();
@@ -165,8 +165,10 @@ public class ViewController : MonoBehaviour, IPointerDownHandler
 
     private void GetInput()
     {
-        x = 10f;//Input.GetAxis("Mouse X");
-        y = 0f;//Input.GetAxis("Mouse Y");
+        //x = 10f;
+        //y = 0f;
+        x = Input.GetAxis("Mouse X");
+        y = Input.GetAxis("Mouse Y");
         if (Mathf.Abs(x) > 0.001f || Mathf.Abs(y) > 0.001f) changed = true;
     }
 

@@ -28,9 +28,9 @@ public class GPURenderer : AbstractRenderer
     RenderTexture normalTex2D;
     static ComputeShader volumeShader;
     static int volumeKernel;
-    static uint numThreadsX;
-    static uint numThreadsY;
-    static uint numThreadsZ;
+    static int numThreadsX;
+    static int numThreadsY;
+    static int numThreadsZ;
 
     Thread processorThread;
     float[,] depths;
@@ -52,7 +52,10 @@ public class GPURenderer : AbstractRenderer
         {
             volumeShader = Resources.Load("Shaders/VolumeShader") as ComputeShader;
             volumeKernel = volumeShader.FindKernel("CSMain");
-            volumeShader.GetKernelThreadGroupSizes(volumeKernel, out numThreadsX, out numThreadsY, out numThreadsZ);
+            volumeShader.GetKernelThreadGroupSizes(volumeKernel, out var nx, out var ny, out var nz);
+            numThreadsX = (int)nx;
+            numThreadsY = (int)ny;
+            numThreadsZ = (int)nz;
 
             bytecodeMemoryBuffer = new ComputeBuffer(Function.maxMemorySize, sizeof(float));
             bytecodeOperationsBuffer = new ComputeBuffer(Function.maxOperationsSize, sizeof(int));
@@ -65,6 +68,7 @@ public class GPURenderer : AbstractRenderer
             PrepareCameraInfo();
             PrepareRegionInfo();
             PrepareExplorationInfo();
+            if (FunctionElement.hasValidFunc) PrepareFunctionInfo();
         }
 
         homogeneityCoords = new Coord[4, homogeneityPoints];
@@ -239,6 +243,7 @@ public class GPURenderer : AbstractRenderer
     {
         //Debug.Log("Preparing function info");
         functionInfoPrepared = true;
+        if (!FunctionElement.hasValidFunc) return;
         Function func = FunctionElement.selectedFunc.func;
         float[] gpuBytecodeMemory = func.CreateBytecodeMemory();
         int[] operations = func.GetBytecode();
