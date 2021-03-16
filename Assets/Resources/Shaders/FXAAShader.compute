@@ -7,26 +7,19 @@ Texture2D<float4> InputTex;
 RWTexture2D<float4> ResultTex;
 int maxRes;
 
-[numthreads(16,16,1)]
-void CSMain (uint3 id : SV_DispatchThreadID)
-{
+float GetEdge(uint2 texCoord) {
     const static float edgeMask[] = {
         -1,-1,-1,
         -1,8,-1,
         -1,-1,-1
     };
 
-    const static float gaussianMask[] = {
-        1.0 / 16.0, 2.0 / 16.0, 1.0 / 16.0,
-        2.0 / 16.0, 4.0 / 16.0, 2.0 / 16.0,
-        1.0 / 16.0, 2.0 / 16.0, 1.0 / 16.0
-    };
-    float inputEdge = float3(0, 0, 0);
+    float3 inputEdge = float3(0, 0, 0);
 
-    for(uint x = 0; x < 3; x++) {
+    for (uint x = 0; x < 3; x++) {
         for (uint y = 0; y < 3; y++) {
-            uint rx = clamp(id.x+(x-1)* edgeRadius, 0, maxRes);
-            uint ry = clamp(id.y+(y-1)* edgeRadius, 0, maxRes);
+            uint rx = clamp(texCoord.x + (x - 1) * edgeRadius, 0, maxRes);
+            uint ry = clamp(texCoord.y + (y - 1) * edgeRadius, 0, maxRes);
             int index = x + y * 3;
             float weight = edgeMask[index];
             float3 inputValue = InputTex[uint2(rx, ry)].xyz;
@@ -34,15 +27,23 @@ void CSMain (uint3 id : SV_DispatchThreadID)
         }
     }
 
-    float edge = clamp(length(inputEdge), 0,1);
+    float edge = clamp(length(inputEdge), 0, 1);
+    return edge;
+}
 
-    float3 originalColor = InputTex[id.xy].xyz;
+float3 ApplyGaussianBlur(float3 originalColor, uint2 texCoord) {
+    const static float gaussianMask[] = {
+        1.0 / 16.0, 2.0 / 16.0, 1.0 / 16.0,
+        2.0 / 16.0, 4.0 / 16.0, 2.0 / 16.0,
+        1.0 / 16.0, 2.0 / 16.0, 1.0 / 16.0
+    };
+
     float3 gaussianColor = float3(0, 0, 0);
 
     for (uint x = 0; x < 3; x++) {
         for (uint y = 0; y < 3; y++) {
-            uint rx = clamp(id.x + (x - 1) * gaussianRadius, 0, maxRes);
-            uint ry = clamp(id.y + (y - 1) * gaussianRadius, 0, maxRes);
+            uint rx = clamp(texCoord.x + (x - 1) * gaussianRadius, 0, maxRes);
+            uint ry = clamp(texCoord.y + (y - 1) * gaussianRadius, 0, maxRes);
             int index = x + y * 3;
             float weight = gaussianMask[index];
             float3 value = InputTex[uint2(rx, ry)].xyz;
@@ -50,6 +51,21 @@ void CSMain (uint3 id : SV_DispatchThreadID)
         }
     }
 
-    float3 finalColor = lerp(originalColor, gaussianColor, edge);
+    return gaussianColor;
+}
+
+float3 ApplyFXAA(float3 originalColor, uint2 texCoord)
+{
+    float edge = GetEdge(texCoord);
+    float3 gaussianColor = ApplyGaussianBlur(originalColor, texCoord);
+    float3 fxaaColor = lerp(originalColor, gaussianColor, edge);
+    return fxaaColor;
+}
+
+[numthreads(16,16,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    float3 originalColor = InputTex[id.xy].xyz;
+    float3 finalColor = ApplyFXAA(originalColor, id.xy);
     ResultTex[id.xy] = float4(finalColor, 1);
 }

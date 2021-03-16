@@ -78,6 +78,15 @@ public class GPURenderer : Renderer
         base.Init(level, parent, startX, startY, region);
     }
 
+    private void OnDestroy()
+    {
+        if(level == 0)
+        {
+            bytecodeMemoryBuffer.Release();
+            bytecodeOperationsBuffer.Release();
+        }
+    }
+
     override protected void CreateTextures()
     {
         base.CreateTextures();
@@ -157,7 +166,7 @@ public class GPURenderer : Renderer
                         doneSemaphore.Wait();
                         done = true;
                     }
-                    catch (ThreadAbortException e)
+                    catch (ThreadAbortException)
                     {
                         done = false;
                     }
