@@ -8,7 +8,6 @@ using System;
 
 public class ViewController : MonoBehaviour, IPointerDownHandler
 {
-
     [SerializeField] bool DEBUG = false;
     [SerializeField] GameObject pressSpaceText;
     bool focused = false;
@@ -21,7 +20,6 @@ public class ViewController : MonoBehaviour, IPointerDownHandler
     [SerializeField] float orbitSpeed = 1f;
     [SerializeField] float rotSpeed = 1f;
     [SerializeField] float moveSpeed = 1f;
-    [SerializeField] float moveAc = 1f;
 
     public static Vector2 regionX = new Vector2(-5f, 5f);
     public static Vector2 regionY = new Vector2(-5f, 5f);
@@ -49,6 +47,8 @@ public class ViewController : MonoBehaviour, IPointerDownHandler
     [SerializeField] CamMode camMode = CamMode.Orbit;
 
     float x, y;
+    float horizontalMovement = 0f;
+    float forwardMovement = 0f;
 
     public static bool changed = false;
     public static event Action onChanged;
@@ -169,6 +169,17 @@ public class ViewController : MonoBehaviour, IPointerDownHandler
         //y = 0f;
         x = Input.GetAxis("Mouse X");
         y = Input.GetAxis("Mouse Y");
+        if(camMode == CamMode.Orbit)
+        {
+            forwardMovement = 0f;
+            horizontalMovement = 0f;
+        } else
+        {
+            forwardMovement = Input.GetAxis("Vertical");
+            horizontalMovement = Input.GetAxis("Horizontal");
+        }
+
+        if (forwardMovement != 0f || horizontalMovement != 0f) changed = true;
         if (Mathf.Abs(x) > 0.001f || Mathf.Abs(y) > 0.001f) changed = true;
     }
 
@@ -205,7 +216,25 @@ public class ViewController : MonoBehaviour, IPointerDownHandler
 
     private void FlyMove()
     {
+        Vector3 upVec = Vector3.up;
+        float degreesX = x * rotSpeed * Time.fixedDeltaTime;
+        camTransform.RotateAround(camTransform.position, upVec, degreesX);
+        float degreesY = -y * rotSpeed * Time.fixedDeltaTime;
 
+        const float limit = 89.5f;
+        float currentDegreesY = Vector3.SignedAngle(camTransform.forward, Vector3.ProjectOnPlane(camTransform.forward, upVec), -camTransform.right);
+        if (currentDegreesY + degreesY >= limit && degreesY > 0f)
+        {
+            degreesY = limit - currentDegreesY;
+        }
+        else if (currentDegreesY + degreesY <= -limit && degreesY < 0f)
+        {
+            degreesY = -limit - currentDegreesY;
+        }
+        camTransform.RotateAround(camTransform.position, camTransform.right, degreesY);
+
+        camTransform.position += camTransform.forward * forwardMovement * moveSpeed * Time.fixedDeltaTime;
+        camTransform.position += camTransform.right * horizontalMovement * moveSpeed * Time.fixedDeltaTime;
     }
 
     #endregion

@@ -314,7 +314,6 @@ public class GPURenderer : AbstractRenderer
 
     private void RenderRegion()
     {
-        
         Vector3 right = (ViewController.nearTopRight - ViewController.nearTopLeft).normalized;
         Vector3 up = (ViewController.nearTopLeft - ViewController.nearBottomLeft).normalized;
 
