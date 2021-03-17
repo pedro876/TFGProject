@@ -20,7 +20,7 @@ public class Function
     public int numOperations;
     public int resultIndex;
 
-    public const int maxMemorySize = 32;
+    public const int maxMemorySize = 256;
     public const int maxOperationsSize = 256;
 
     public Function(string name, string declaration,string originalDefinition, string definition)
@@ -45,8 +45,8 @@ public class Function
     {
         bool outOfRegion = ViewController.IsOutOfRegion(ref p);
         if (outOfRegion) return false;
-        float eval = SolveByteCode(memory, p.x, p.y, p.z);
-        //float eval = Solve(p.x, p.y, p.z);
+        //float eval = SolveByteCode(memory, p.x, p.y, p.z);
+        float eval = Solve(p.x, p.y, p.z);
         return VolumeInterpreter.Interpretate(ref p, eval);
     }
 
