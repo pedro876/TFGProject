@@ -344,18 +344,35 @@ float3 TransformToRegion(float3 pos)
 	return float3(pos.x * regionScale.x, pos.z * regionScale.y, pos.y * regionScale.z) + regionCenter;
 }
 
+float3 ScreenToCameraCoords(float2 screenPosition, float depth)
+{
+    float scale = lerp(nearSize, farSize, depth);
+    return (camRight * screenPosition.x / width - camUp * screenPosition.y / height) * region * scale;
+}
+
+#define NEAR_DEPTH 0
 float3 GetOriginFromScreenPos(float2 screenPosition)
 {
-	float3 origin = nearStart + (camRight * screenPosition.x / width - camUp * screenPosition.y / height) * region * nearSize;
+    float3 origin = nearStart + ScreenToCameraCoords(screenPosition, NEAR_DEPTH);
 	origin = TransformToRegion(origin);
 	return origin;
 }
 
+#define FAR_DEPTH 1
 float3 GetDestinyFromScreenPos(float2 screenPosition)
 {
-	float3 destiny = farStart + (camRight * screenPosition.x / width - camUp * screenPosition.y / height) * region * farSize;
+    float3 destiny = farStart + ScreenToCameraCoords(screenPosition, FAR_DEPTH);
 	destiny = TransformToRegion(destiny);
 	return destiny;
+}
+
+Ray CreateRayForId(uint3 id)
+{
+    float2 screenPosition = float2(id.x, id.y);
+    float3 origin = GetOriginFromScreenPos(screenPosition);
+    float3 destiny = GetDestinyFromScreenPos(screenPosition);
+    Ray ray = MakeRay(origin, destiny);
+    return ray;
 }
 
 // COLOR FORMAT
@@ -375,10 +392,7 @@ float4 FormatNormalColorFromHit(RayHit hit)
 [numthreads(8,8,1)]
 void CSMain(uint3 id : SV_DispatchThreadID)
 {
-	float2 screenPosition = float2(id.x, id.y);
-	float3 origin = GetOriginFromScreenPos(screenPosition);
-	float3 destiny = GetDestinyFromScreenPos(screenPosition);
-	Ray ray = MakeRay(origin, destiny);
+    Ray ray = CreateRayForId(id);
 	RayHit hit = RayCast(ray);
     
 	if (hit.grounded)
