@@ -1,0 +1,37 @@
+﻿#pragma kernel CSMain
+#include "RayCasting.compute"
+
+RWTexture2D<float4> DepthTex;
+RWTexture2D<float4> NormalTex;
+
+Ray CreateRayForId(uint3 id)
+{
+    float2 screenPosition = float2(id.x, id.y);
+    float3 origin = GetOriginFromScreenPos(screenPosition);
+    float3 destiny = GetDestinyFromScreenPos(screenPosition);
+    Ray ray = MakeRay(origin, destiny);
+    return ray;
+}
+
+float4 FormatDepthColorFromHit(RayHit hit)
+{
+	return float4(hit.normDepth, (float) hit.grounded, 0, 1);
+}
+
+float4 FormatNormalColorFromHit(RayHit hit)
+{
+	return float4(hit.normal.xzy*0.5f+0.5f, 1);
+}
+
+[numthreads(8,8,1)]
+void CSMain(uint3 id : SV_DispatchThreadID)
+{
+    Ray ray = CreateRayForId(id);
+	RayHit hit = RayCast(ray);
+    
+	uint2 texCoord = uint2(id.x, height - id.y - 1);
+	DepthTex[texCoord] = FormatDepthColorFromHit(hit);
+	NormalTex[texCoord] = FormatNormalColorFromHit(hit);
+}
+
+

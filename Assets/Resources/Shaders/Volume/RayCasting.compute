@@ -1,0 +1,73 @@
+#include "Exploration.compute"
+#include "RayStructs.compute"
+#define MAX_DEPTH_SAMPLES 2048
+
+float normalPlaneMultiplier;
+float normalExplorationMultiplier;
+
+RayHit ReachSurface(Ray ray, RayHit hit)
+{
+    float3 origin = hit.pos;
+    float3 destiny = hit.pos + ray.dir * ray.step * depthExplorationMult;
+    float4 surface = ExploreDirectionDAC(origin, destiny, true);
+    
+    hit.pos = surface.xyz;
+    hit.normDepth = length(ray.origin - surface.xyz) / ray.magitude;
+    
+    return hit;
+}
+
+RayHit CalculateNormal(Ray ray, RayHit hit)
+{
+    float explorationRadius = ray.step;
+    float3 right = normalize(float3(1, 1, (-ray.dir.x - ray.dir.y) / ray.dir.z));
+    float3 forward = normalize(cross(ray.dir, right));
+
+    float3 points[4] =
+    {
+        hit.pos + right * explorationRadius * normalPlaneMultiplier,
+        hit.pos + forward * explorationRadius * normalPlaneMultiplier,
+        hit.pos - right * explorationRadius * normalPlaneMultiplier,
+        hit.pos - forward * explorationRadius * normalPlaneMultiplier
+    };
+    
+    float3 rayExplorationDir = normalize(ray.dir) * explorationRadius * normalExplorationMultiplier;
+    for (int i = 0; i < 4; i++)
+    {
+        bool pointIsMass = IsMass(points[i]);
+        float3 dirToSurface = lerp(-rayExplorationDir, rayExplorationDir, pointIsMass);
+        float4 surface = ExploreDirectionDAC(points[i], points[i] + dirToSurface, pointIsMass);
+        points[i] = normalize(surface.xyz - hit.pos);
+    }
+
+    float3 crossSum = float3(0, 0, 0);
+    for (int j = 0; j < 3; j++)
+    {
+        crossSum += cross(points[j], points[j + 1]);
+    }
+    hit.normal = normalize(crossSum);
+    return hit;
+}
+
+RayHit RayCast(Ray ray)
+{
+    RayHit hit = MakeRayHit();
+    
+    static int clampedDepth = clamp(depth, 0, MAX_DEPTH_SAMPLES);
+    static float maxDepth = (float) clampedDepth;
+    
+    for (int z = 0; z < clampedDepth && !hit.grounded; z++)
+    {
+        hit.normDepth = z / maxDepth;
+        hit.pos = lerp(ray.origin, ray.destiny, hit.normDepth);
+        hit.grounded = IsMass(hit.pos);
+    }
+    
+    if (hit.grounded)
+    {
+        hit = ReachSurface(ray, hit);
+        hit = CalculateNormal(ray, hit);
+    }
+    
+    return hit;
+}

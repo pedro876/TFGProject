@@ -251,10 +251,11 @@ public class RendererManager : MonoBehaviour
 
     private static List<RendererQuality> GPUSetting = new List<RendererQuality>()
     {
-        new RendererQuality(RendererType.GPU, 256, 128),
-        new RendererQuality(RendererType.GPU, 176, 128),
+        new RendererQuality(RendererType.GPU, 512, 512),
+        new RendererQuality(RendererType.GPU, 720, 1024),
+        /*new RendererQuality(RendererType.GPU, 176, 128),
         new RendererQuality(RendererType.GPU, 128, 200),
-        new RendererQuality(RendererType.GPU, 176, 700),
+        new RendererQuality(RendererType.GPU, 176, 700),*/
     };
 
     private static List<RendererQuality> CPUSetting = new List<RendererQuality>()
@@ -262,7 +263,7 @@ public class RendererManager : MonoBehaviour
         new RendererQuality(RendererType.CPU, 64, 90),
         new RendererQuality(RendererType.CPU, 128, 128),
         new RendererQuality(RendererType.CPU, 128, 200),
-        new RendererQuality(RendererType.CPU, 128, 700),
+        new RendererQuality(RendererType.CPU, 128, 1024),
     };
 
 #endregion

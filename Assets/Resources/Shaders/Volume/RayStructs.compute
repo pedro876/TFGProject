@@ -1,0 +1,38 @@
+struct Ray
+{
+    float3 origin;
+    float3 destiny;
+    float3 dir;
+    float magitude;
+    float step;
+};
+
+Ray MakeRay(float3 origin, float3 destiny)
+{
+    Ray ray;
+    ray.origin = origin;
+    ray.destiny = destiny;
+    ray.dir = origin - destiny;
+    ray.magitude = length(ray.dir);
+    ray.step = ray.magitude / depth;
+    ray.dir = normalize(ray.dir);
+    return ray;
+}
+
+struct RayHit
+{
+    float normDepth;
+    float3 pos;
+    bool grounded;
+    float3 normal;
+};
+
+RayHit MakeRayHit()
+{
+    RayHit hit;
+    hit.grounded = false;
+    hit.normDepth = 0.0f;
+    hit.pos = float3(0, 0, 0);
+    hit.normal = float3(1, 1, 1);
+    return hit;
+}

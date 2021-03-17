@@ -50,7 +50,7 @@ public class GPURenderer : AbstractRenderer
     {
         if (level == 0)
         {
-            volumeShader = Resources.Load("Shaders/VolumeShader") as ComputeShader;
+            volumeShader = Resources.Load("Shaders/Volume/VolumeShader") as ComputeShader;
             volumeKernel = volumeShader.FindKernel("CSMain");
             volumeShader.GetKernelThreadGroupSizes(volumeKernel, out var nx, out var ny, out var nz);
             numThreadsX = (int)nx;

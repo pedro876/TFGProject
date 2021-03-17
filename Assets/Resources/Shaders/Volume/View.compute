@@ -1,0 +1,56 @@
+float3 camRight;
+float3 camUp;
+
+float nearSize;
+float farSize;
+
+float3 nearStart;
+float3 farStart;
+
+float width;
+float height;
+float region;
+int depth;
+
+bool clampToRegion;
+float2 regionX;
+float2 regionY;
+float2 regionZ;
+float3 regionScale;
+float3 regionCenter;
+
+bool IsPositionOutOfBounds(float3 pos)
+{
+    bool outOfRegion = pos.x < regionX.x || pos.x > regionX.y ||
+        pos.y < regionY.x || pos.y > regionY.y ||
+        pos.z < regionZ.x || pos.z > regionZ.y;
+
+    return outOfRegion && clampToRegion;
+}
+
+float3 TransformToRegion(float3 pos)
+{
+    return float3(pos.x * regionScale.x, pos.z * regionScale.y, pos.y * regionScale.z) + regionCenter;
+}
+
+float3 ScreenToCameraCoords(float2 screenPosition, float depth)
+{
+    float scale = lerp(nearSize, farSize, depth);
+    return (camRight * screenPosition.x / width - camUp * screenPosition.y / height) * region * scale;
+}
+
+#define NEAR_DEPTH 0
+float3 GetOriginFromScreenPos(float2 screenPosition)
+{
+    float3 origin = nearStart + ScreenToCameraCoords(screenPosition, NEAR_DEPTH);
+    origin = TransformToRegion(origin);
+    return origin;
+}
+
+#define FAR_DEPTH 1
+float3 GetDestinyFromScreenPos(float2 screenPosition)
+{
+    float3 destiny = farStart + ScreenToCameraCoords(screenPosition, FAR_DEPTH);
+    destiny = TransformToRegion(destiny);
+    return destiny;
+}

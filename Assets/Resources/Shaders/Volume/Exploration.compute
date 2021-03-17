@@ -1,0 +1,40 @@
+#include "View.compute"
+#include "BytecodeSolver.compute"
+#define MAX_EXPLORATION_SAMPLES 20
+
+int explorationSamples;
+float depthExplorationMult;
+
+bool IsMass(float3 pos)
+{
+    bool outOfBounds = IsPositionOutOfBounds(pos);
+    if (outOfBounds)
+    {
+        return false;
+    }
+    else
+    {
+        float functionResult = SolveByteCode(pos);
+        return functionResult;
+    }
+}
+
+float4 ExploreDirectionDAC(float3 origin, float3 destiny, bool originInside)
+{
+    float3 middle = destiny;
+    bool reachedSurface = IsMass(destiny) != originInside;
+
+    if (reachedSurface)
+    {
+        int clampedExplorationSamples = clamp(explorationSamples, 0, MAX_EXPLORATION_SAMPLES);
+        for (int i = 0; i < clampedExplorationSamples; i++)
+        {
+            middle = lerp(origin, destiny, 0.5f);
+            float mass = IsMass(middle) == originInside;
+            origin = middle * mass + origin * (1.0 - mass);
+            destiny = middle * (1.0 - mass) + destiny * mass;
+        }
+    }
+
+    return float4(middle, reachedSurface);
+}
