@@ -57,8 +57,8 @@ public class GPURenderer : AbstractRenderer
             numThreadsY = (int)ny;
             numThreadsZ = (int)nz;
 
-            bytecodeMemoryBuffer = new ComputeBuffer(Function.maxMemorySize, sizeof(float));
-            bytecodeOperationsBuffer = new ComputeBuffer(Function.maxOperationsSize, sizeof(int));
+            bytecodeMemoryBuffer = new ComputeBuffer(FunctionC.maxMemorySize, sizeof(float));
+            bytecodeOperationsBuffer = new ComputeBuffer(FunctionC.maxOperationsSize, sizeof(int));
 
             ViewController.onPreChanged += PrepareCameraInfo;
             ViewController.onPreChanged += PrepareRegionInfo;
@@ -238,7 +238,7 @@ public class GPURenderer : AbstractRenderer
         //Debug.Log("Preparing function info");
         functionInfoPrepared = true;
         if (!FunctionElement.HasValidFunc) return;
-        Function func = FunctionElement.selectedFunc.func;
+        FunctionC func = FunctionElement.selectedFunc.func;
         float[] gpuBytecodeMemory = func.CreateBytecodeMemory();
         int[] operations = func.GetBytecode();
         bytecodeMemoryBuffer.SetData(gpuBytecodeMemory);
@@ -315,7 +315,7 @@ public class GPURenderer : AbstractRenderer
         float farSize = Vector3.Distance(ViewController.farTopLeft, ViewController.farTopRight);
         Vector3 nearStart = Vector3.Lerp(ViewController.nearTopLeft, ViewController.nearTopRight, startX) - up * (1f - startY) * nearSize;
         Vector3 farStart = Vector3.Lerp(ViewController.farTopLeft, ViewController.farTopRight, startX) - up * (1f - startY) * farSize;
-        Function func = FunctionElement.selectedFunc.func;
+        FunctionC func = FunctionElement.selectedFunc.func;
         bytecodeMemory = func.CreateBytecodeMemory();
         for(int r = 0; r < 4; r++)
         {

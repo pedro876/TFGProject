@@ -1,0 +1,82 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace FuncSpace
+{
+    public class ConstantNode : LeafNode
+    {
+        private static Dictionary<string, float> symbolValues = new Dictionary<string, float>()
+        {
+            { "pi", Mathf.PI },
+            { "e", Mathf.Exp(1) },
+        };
+
+        private float value;
+        private bool usesSymbol;
+        private string symbol;
+
+        public ConstantNode(float value)
+        {
+            this.value = value;
+            this.usesSymbol = false;
+            this.symbol = "";
+        }
+
+        public ConstantNode(string symbol)
+        {
+            this.symbol = symbol.ToLower();
+            this.usesSymbol = symbolValues.ContainsKey(this.symbol);
+            if (usesSymbol)
+            {
+                value = symbolValues[this.symbol];
+            } else if(float.TryParse(symbol.Replace(",","."), out float result))
+            {
+                value = result;
+            }
+            else value = 1f;
+        }
+
+        public float GetValue()
+        {
+            return value;
+        }
+
+        public override float Solve(float x, float y, float z)
+        {
+            return value;
+        }
+
+        public override bool NeedsRepresentation()
+        {
+            if(value == 0f)
+            {
+                IFuncNode parent = GetParent();
+                if (parent is OperatorAddNode || parent is OperatorSubNode)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public override bool NeedsParenthesis()
+        {
+            if (!HasParent()) return false;
+            else return value < 0f;
+            /*else
+            {
+                IFuncNode parent = GetParent();
+                if (parent is OperatorSubNode)
+                {
+                    OperatorSubNode parentOp = (OperatorSubNode)parent;
+                    if (parentOp.GetChildRight() == this)
+                    {
+                        return value < 0f;
+                    }
+                }
+                return value < 0f;
+            }*/
+        }
+    }
+}

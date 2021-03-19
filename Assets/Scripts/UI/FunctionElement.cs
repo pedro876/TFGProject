@@ -11,7 +11,7 @@ public class FunctionElement : MonoBehaviour
     [SerializeField] Button selectBtn;
     [SerializeField] Image camImage;
     [SerializeField] TMP_InputField inputField;
-    public Function func;
+    public FunctionC func;
     FunctionPanel panel;
 
     public bool isBeingEdit { get => inputField.isFocused; }
@@ -41,7 +41,7 @@ public class FunctionElement : MonoBehaviour
         inputField.Select();
     }
 
-    public void SetFunction(Function function)
+    public void SetFunction(FunctionC function)
     {
         if (func != null && !func.Equals(function))
         {
@@ -59,7 +59,7 @@ public class FunctionElement : MonoBehaviour
 
     public void UpdateFunction()
     {
-        Function f = FunctionManager.AddFunction(inputField.text);
+        FunctionC f = FunctionManager.AddFunction(inputField.text);
         if(f != null)
         {
             SetFunction(f);

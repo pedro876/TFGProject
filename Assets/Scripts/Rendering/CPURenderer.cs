@@ -119,7 +119,7 @@ public class CPURenderer : AbstractRenderer
         float farSize = Vector3.Distance(ViewController.farTopLeft, ViewController.farTopRight);
         Vector3 nearStart = Vector3.Lerp(ViewController.nearTopLeft, ViewController.nearTopRight, startX) - up * (1f - startY) * nearSize;
         Vector3 farStart = Vector3.Lerp(ViewController.farTopLeft, ViewController.farTopRight, startX) - up * (1f - startY) * farSize;
-        Function func = FunctionElement.selectedFunc.func;
+        FunctionC func = FunctionElement.selectedFunc.func;
         bytecodeMemory = func.CreateBytecodeMemory();
 
         for (int y = minY; y < maxY; y++)
@@ -168,7 +168,7 @@ public class CPURenderer : AbstractRenderer
         }
     }
 
-    private Vector3 CalculateNormal(Vector3 pos, Vector3 up, float explorationRadius, Function func)
+    private Vector3 CalculateNormal(Vector3 pos, Vector3 up, float explorationRadius, FunctionC func)
     {
         Vector3 n = Vector3.zero;
 
@@ -205,7 +205,7 @@ public class CPURenderer : AbstractRenderer
         return n;
     }
 
-    private Vector3 ExploreDirectionDAC(Vector3 origin, Vector3 destiny, Function func, bool originInside, out bool reachedSurface)
+    private Vector3 ExploreDirectionDAC(Vector3 origin, Vector3 destiny, FunctionC func, bool originInside, out bool reachedSurface)
     {
         Vector3 middle = destiny;
 

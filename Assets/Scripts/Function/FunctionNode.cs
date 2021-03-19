@@ -127,29 +127,28 @@ public class FunctionNode
 
     #region functionProcessing
 
-    public void ProcessFunc(string func)
+    public void ProcessFunc(string definition)
     {
         //Remove external parenthesis
-        if(func.Length >= 2)
+        if(definition.Length >= 2)
         {
             woreParenthesis = false;
-            if ((func.StartsWith("(") || func.StartsWith(")")) && (func.EndsWith("(") || func.EndsWith(")")))
+            if ((definition.StartsWith("(") || definition.StartsWith(")")) && (definition.EndsWith("(") || definition.EndsWith(")")))
             {
-                func = func.Substring(1, func.Length - 2);
+                definition = definition.Substring(1, definition.Length - 2);
                 woreParenthesis = true;
                 //parenthesisLevel++;
             }
         }
-        
 
         //Find possible breakpoints
         int[] coincidences = new int[operators.Count];
         for (int i = 0; i < coincidences.Length; i++) coincidences[i] = -1;
-        int funcLength = func.Length;
+        int funcLength = definition.Length;
         int depth = 0;
         for(int i = 0; i < funcLength; i++)
         {
-            char c = func[i];
+            char c = definition[i];
             if (c == '(') depth++;
             if (c == ')') depth--;
             if (depth != 0) continue;
@@ -171,8 +170,8 @@ public class FunctionNode
             {
                 foundBreakPoint = true;
                 int breakPoint = coincidences[cIdx];
-                string left = breakPoint == 0 ? "0.0" : func.Substring(0, breakPoint);
-                string right = breakPoint == func.Length-1 ? "0.0" : func.Substring(breakPoint + 1);
+                string left = breakPoint == 0 ? "0.0" : definition.Substring(0, breakPoint);
+                string right = breakPoint == definition.Length-1 ? "0.0" : definition.Substring(breakPoint + 1);
                 childLeft = new FunctionNode(this/*, parenthesisLevel*/);
                 childRight = new FunctionNode(this/*, parenthesisLevel*/);
                 childLeft.ProcessFunc(left);
@@ -207,7 +206,7 @@ public class FunctionNode
             Value = 0f;
             foreach (var n in FunctionManager.functions.Keys)
             {
-                if (func.StartsWith(n))
+                if (definition.StartsWith(n))
                 {
                     isSubFunction = true;
                     subFunction = n;
@@ -219,7 +218,7 @@ public class FunctionNode
             {
                 foreach (var n in subFunctions)
                 {
-                    if (func.StartsWith(n))
+                    if (definition.StartsWith(n))
                     {
                         isSubFunction = true;
                         subFunction = n;
@@ -230,7 +229,7 @@ public class FunctionNode
             }
             if (isSubFunction)
             {
-                string content = func.Substring(subFunction.Length);
+                string content = definition.Substring(subFunction.Length);
                 if (content.Length > 2 && content[0] == '(' && content[content.Length - 1] == ')')
                 {
                     content = content.Substring(1, content.Length - 2);
@@ -252,9 +251,9 @@ public class FunctionNode
 
             else
             {
-                if (variables.Contains(func) || FunctionManager.HasVariable(func))
+                if (variables.Contains(definition) || FunctionManager.HasVariable(definition))
                 {
-                    variable = func;
+                    variable = definition;
                     isVariable = true;
                 }
 
@@ -262,7 +261,7 @@ public class FunctionNode
 
                 try
                 {
-                    Value = float.Parse(func.Replace(",", "."), CultureInfo.InvariantCulture);
+                    Value = float.Parse(definition.Replace(",", "."), CultureInfo.InvariantCulture);
                 } catch (Exception)
                 {
                     Value = 0f;
@@ -423,7 +422,7 @@ public class FunctionNode
                 return SolveSubFunction(subFunctionIndex, values[0], values[1], values[2]);
             } else
             {
-                Function subF;
+                FunctionC subF;
                 if (FunctionManager.functions.TryGetValue(subFunction, out subF))
                 {
                     return subF.Solve(values[0], values[1], values[2]);
@@ -514,7 +513,7 @@ public class FunctionNode
                 }
                 if (!subFunctions.Contains(subFunction))
                 {
-                    Function subF;
+                    FunctionC subF;
                     if (FunctionManager.functions.TryGetValue(subFunction, out subF))
                     {
                         if (!subFuncs.Contains(subF.name))

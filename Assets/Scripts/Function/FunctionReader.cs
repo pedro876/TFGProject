@@ -9,7 +9,7 @@ public class FunctionReader
     /*
      * Creates a function based on a human-comprehensible mathematical function
      */
-    public Function ProcessFunc(string funcText)
+    public FunctionC ProcessFunc(string funcText)
     {
         funcText = funcText.ToLower();
         string trimmedFunc = funcText.Replace(" ", "");
@@ -19,7 +19,7 @@ public class FunctionReader
         string declaration = ProcessDeclaration(parts[0], ref parts[1], out name);
         string definition = ProcessDefinition(parts[1]);
 
-        Function func = new Function(name, declaration, parts[1], definition);
+        FunctionC func = new FunctionC(name, declaration, parts[1], definition);
         
         return func;
     }

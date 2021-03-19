@@ -122,7 +122,7 @@ public class InterpretationPanel : MonoBehaviour
         if (!useAuto.isOn) return;
         if (!FunctionElement.HasValidFunc) return;
 
-        Function func = FunctionElement.selectedFunc.func;
+        FunctionC func = FunctionElement.selectedFunc.func;
         bool hasX = func.variables.Contains("x");
         bool hasY = func.variables.Contains("y");
         bool hasZ = func.variables.Contains("z");

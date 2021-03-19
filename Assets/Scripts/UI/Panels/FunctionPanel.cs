@@ -27,7 +27,7 @@ public class FunctionPanel : MonoBehaviour
         FunctionManager.AddFunction("g(x)=x^2");
         FunctionManager.AddFunction("t(x)=x");
         FunctionElement elem;
-        foreach(Function f in FunctionManager.functions.Values)
+        foreach(FunctionC f in FunctionManager.functions.Values)
         {
             elem = AddFunctionElement();
             elem.SetFunction(f);

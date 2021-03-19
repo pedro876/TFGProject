@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
-public class Function
+public class FunctionC
 {
     public FunctionNode rootNode;
     public string name;
@@ -23,15 +23,15 @@ public class Function
     public const int maxMemorySize = 256;
     public const int maxOperationsSize = 256;
 
-    public Function(string name, string declaration,string originalDefinition, string definition)
+    public FunctionC(string name, string declaration,string originalDefinition, string definition)
     {
         variables = new List<string>();
         SetData(name,  declaration, originalDefinition, definition);
     }
 
-    public Function Clone()
+    public FunctionC Clone()
     {
-        return new Function(name, originalDeclaration, originalDefinition, finalDefinition);
+        return new FunctionC(name, originalDeclaration, originalDefinition, finalDefinition);
     }
 
     public float Solve(float x = 0f, float y = 0f, float z = 0f)
@@ -199,7 +199,7 @@ public class Function
         return originalDeclaration + " = " + originalDeclaration;
     }
 
-    public bool Equals(Function f)
+    public bool Equals(FunctionC f)
     {
         return finalDefinition.Equals(f.finalDefinition);
     }

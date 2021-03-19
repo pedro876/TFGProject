@@ -6,7 +6,7 @@ public class FunctionManager
 {
     private static FunctionReader reader = new FunctionReader();
 
-    public static Dictionary<string, Function> functions = new Dictionary<string, Function>();
+    public static Dictionary<string, FunctionC> functions = new Dictionary<string, FunctionC>();
 
     private static Dictionary<string, float> variables = new Dictionary<string, float>()
     {
@@ -26,14 +26,14 @@ public class FunctionManager
         return variables.ContainsKey(key);
     }
 
-    public static Function AddFunction(Function func)
+    public static FunctionC AddFunction(FunctionC func)
     {
         functions[func.name] = func;
         return func;
     }
-    public static Function AddFunction(string func)
+    public static FunctionC AddFunction(string func)
     {
-        Function f = reader.ProcessFunc(func);
+        FunctionC f = reader.ProcessFunc(func);
         if(f != null)
         {
             functions[f.name] = f;
