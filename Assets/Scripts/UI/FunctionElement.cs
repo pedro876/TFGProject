@@ -15,7 +15,7 @@ public class FunctionElement : MonoBehaviour
     FunctionPanel panel;
 
     public bool isBeingEdit { get => inputField.isFocused; }
-    public static bool hasValidFunc { get => selectedFunc != null && selectedFunc.func != null; }
+    public static bool HasValidFunc { get => selectedFunc != null && selectedFunc.func != null; }
 
     private void Awake()
     {

@@ -181,7 +181,7 @@ public abstract class AbstractRenderer : MonoBehaviour
         renderCount = 0;
 
         if (level > 0) image.enabled = false;
-        if (FunctionElement.selectedFunc == null || FunctionElement.selectedFunc.func == null)
+        if (!FunctionElement.HasValidFunc)
         {
             done = true;
             rendering = false;

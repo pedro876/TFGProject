@@ -18,11 +18,11 @@ float GetEdge(uint2 texCoord) {
 
     for (uint x = 0; x < 3; x++) {
         for (uint y = 0; y < 3; y++) {
-            uint rx = clamp(texCoord.x + (x - 1) * edgeRadius, 0, maxRes);
-            uint ry = clamp(texCoord.y + (y - 1) * edgeRadius, 0, maxRes);
+            uint texCoordX = clamp(texCoord.x + (x - 1) * edgeRadius, 0, maxRes);
+            uint texCoordY = clamp(texCoord.y + (y - 1) * edgeRadius, 0, maxRes);
             int index = x + y * 3;
             float weight = edgeMask[index];
-            float3 inputValue = InputTex[uint2(rx, ry)].xyz;
+            float3 inputValue = InputTex[uint2(texCoordX, texCoordY)].xyz;
             inputEdge += weight * inputValue;
         }
     }
@@ -42,11 +42,11 @@ float3 ApplyGaussianBlur(float3 originalColor, uint2 texCoord) {
 
     for (uint x = 0; x < 3; x++) {
         for (uint y = 0; y < 3; y++) {
-            uint rx = clamp(texCoord.x + (x - 1) * gaussianRadius, 0, maxRes);
-            uint ry = clamp(texCoord.y + (y - 1) * gaussianRadius, 0, maxRes);
+            uint texCoordX = clamp(texCoord.x + (x - 1) * gaussianRadius, 0, maxRes);
+            uint texCoordY = clamp(texCoord.y + (y - 1) * gaussianRadius, 0, maxRes);
             int index = x + y * 3;
             float weight = gaussianMask[index];
-            float3 value = InputTex[uint2(rx, ry)].xyz;
+            float3 value = InputTex[uint2(texCoordX, texCoordY)].xyz;
             gaussianColor += weight * value;
         }
     }
@@ -62,7 +62,7 @@ float3 ApplyFXAA(float3 originalColor, uint2 texCoord)
     return fxaaColor;
 }
 
-[numthreads(16,16,1)]
+[numthreads(8,8,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
     float3 originalColor = InputTex[id.xy].xyz;

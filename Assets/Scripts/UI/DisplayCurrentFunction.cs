@@ -36,8 +36,8 @@ public class DisplayCurrentFunction : MonoBehaviour
     {
         if (mustUpdateDisplay)
         {
-            mustUpdateDisplay = !FunctionElement.hasValidFunc;
-            text.text = FunctionElement.hasValidFunc ? FunctionElement.selectedFunc.func.ToString() : "";
+            mustUpdateDisplay = !FunctionElement.HasValidFunc;
+            text.text = FunctionElement.HasValidFunc ? FunctionElement.selectedFunc.func.ToString() : "";
         }
     }
 

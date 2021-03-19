@@ -25,6 +25,7 @@ public class FunctionPanel : MonoBehaviour
         allFunctions = new List<FunctionElement>();
         FunctionManager.AddFunction("f(x) = cos(x) + cos(y)");
         FunctionManager.AddFunction("g(x)=x^2");
+        FunctionManager.AddFunction("t(x)=x");
         FunctionElement elem;
         foreach(Function f in FunctionManager.functions.Values)
         {

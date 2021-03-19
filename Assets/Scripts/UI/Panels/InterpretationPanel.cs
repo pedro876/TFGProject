@@ -120,7 +120,7 @@ public class InterpretationPanel : MonoBehaviour
     private void ChooseInterpretation()
     {
         if (!useAuto.isOn) return;
-        if (!FunctionElement.hasValidFunc) return;
+        if (!FunctionElement.HasValidFunc) return;
 
         Function func = FunctionElement.selectedFunc.func;
         bool hasX = func.variables.Contains("x");

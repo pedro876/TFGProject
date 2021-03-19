@@ -73,22 +73,12 @@ public class CPURenderer : AbstractRenderer
     {
         base.Render();
         if (done) return;
-        if(FunctionElement.selectedFunc == null || FunctionElement.selectedFunc.func == null)
-        {
-            done = true;
-            rendering = false;
-        }
         if(level == 0)
         {
             RenderRegion(0, 0, width, height);
             done = true;
             rendering = false;
             MemoryToTex();
-            /*RendererManager.displayOrders.Enqueue(() =>
-            {
-                MemoryToTex();
-                RenderChildren();
-            });*/
         } else
         {
             queued = true;
@@ -172,8 +162,8 @@ public class CPURenderer : AbstractRenderer
                 }
                 depths[x, y] = landed ? normDepth : 2f;
                 int row = height - y - 1;
-                depthMemory[x + row * height] = new Color(Mathf.Lerp(0f, 1f, normDepth), landed ? 1f : 0f, 0f,1f); //Color.Lerp(Color.black, Color.white, normDepth);
-                normalMemory[x + row * height] = normalColor;//new Color(normal.x/*+0.5f*/, /*normal.y+0.5f*/0f, /*normal.z+0.5f*/0f, 1f);
+                depthMemory[x + row * height] = new Color(Mathf.Lerp(0f, 1f, normDepth), landed ? 1f : 0f, 0f,1f);
+                normalMemory[x + row * height] = normalColor;
             }
         }
     }
@@ -195,8 +185,6 @@ public class CPURenderer : AbstractRenderer
             pos-forward*explorationRadius*normalPlaneMultiplier,
         };
 
-        //Vector3[] dirs = new Vector3[points.Length];
-
         up = up.normalized * explorationRadius * normalExplorationMultiplier;
 
         for(int i = 0; i < points.Length; i++)
@@ -205,9 +193,6 @@ public class CPURenderer : AbstractRenderer
             bool reachedSurface;
             Vector3 s = ExploreDirectionDAC(points[i], points[i] + (pointInside ? up : -up), func, pointInside, out reachedSurface);
             points[i] = (s - pos).normalized;
-
-
-            //dirs[i] = (points[i] - pos).normalized;
         }
 
         for(int i = 0; i < points.Length - 1; i++)
@@ -243,24 +228,6 @@ public class CPURenderer : AbstractRenderer
         
         return middle;
     }
-
-    /*private Vector3 ExploreDirectionLinear(Vector3 origin, Vector3 destiny, Function func, out bool reachedSurface)
-    {
-        Vector3 pos = Vector3.zero;
-        reachedSurface = false;
-        Vector3 lastPos = pos;
-        for (float i = 0f; i < explorationSamples; i++)
-        {
-            lastPos = pos;
-            pos = Vector3.Lerp(origin, destiny, i / explorationSamples);
-            if(!IsMass(ref pos, func))
-            {
-                reachedSurface = true;
-                return lastPos;
-            }
-        }
-        return destiny;
-    }*/
 
     #endregion
 }

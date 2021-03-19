@@ -68,7 +68,7 @@ public class GPURenderer : AbstractRenderer
             PrepareCameraInfo();
             PrepareRegionInfo();
             PrepareExplorationInfo();
-            if (FunctionElement.hasValidFunc) PrepareFunctionInfo();
+            if (FunctionElement.HasValidFunc) PrepareFunctionInfo();
         }
 
         homogeneityCoords = new Coord[4, homogeneityPoints];
@@ -131,11 +131,6 @@ public class GPURenderer : AbstractRenderer
     {
         base.Render();
         if (done) return;
-        if(FunctionElement.selectedFunc == null || FunctionElement.selectedFunc.func == null)
-        {
-            done = true;
-            rendering = false;
-        }
         CalculateHomogeneityPoints();
         if (level == 0)
         {
@@ -195,7 +190,6 @@ public class GPURenderer : AbstractRenderer
     
     private void PrepareExplorationInfo()
     {
-        //Debug.Log("Preparing exploration info");
         volumeShader.SetFloat("depthExplorationMult", depthExplorationMultiplier);
         volumeShader.SetFloat("normalPlaneMultiplier", normalPlaneMultiplier);
         volumeShader.SetFloat("normalExplorationMultiplier", normalExplorationMultiplier);
@@ -243,7 +237,7 @@ public class GPURenderer : AbstractRenderer
     {
         //Debug.Log("Preparing function info");
         functionInfoPrepared = true;
-        if (!FunctionElement.hasValidFunc) return;
+        if (!FunctionElement.HasValidFunc) return;
         Function func = FunctionElement.selectedFunc.func;
         float[] gpuBytecodeMemory = func.CreateBytecodeMemory();
         int[] operations = func.GetBytecode();
