@@ -5,13 +5,13 @@ using UnityEngine;
 
 namespace FuncSpace
 {
-    public class FuncReader
+    public class FuncReader : IFuncReader
     {
-        private FuncFactory factory;
+        private IFuncFactory factory;
 
-        public FuncReader()
+        public FuncReader(IFuncFactory factory)
         {
-            factory = FuncFactory.Instance;
+            this.factory = factory;
         }
 
         public IFunc ExtractOriginalFuncInfo(string textFunc, IFunc func)

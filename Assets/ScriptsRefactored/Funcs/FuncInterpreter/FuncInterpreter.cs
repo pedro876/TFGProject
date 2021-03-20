@@ -4,14 +4,14 @@ using UnityEngine;
 
 namespace FuncSpace
 {
-    public class FuncInterpreter
+    public class FuncInterpreter : IFuncInterpreter
     {
-        FuncFactory factory;
+        IFuncFactory factory;
         IFunc funcBeingProcessed;
 
-        public FuncInterpreter()
+        public FuncInterpreter(IFuncFactory factory)
         {
-            factory = FuncFactory.Instance;
+            this.factory = factory;
         }
 
         public void CreateNodeTreeForFunc(IFunc func)

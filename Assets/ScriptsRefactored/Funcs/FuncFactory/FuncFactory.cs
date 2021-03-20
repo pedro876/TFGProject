@@ -4,9 +4,9 @@ using UnityEngine;
 
 namespace FuncSpace
 {
-    public class FuncFactory
+    public class FuncFactory : IFuncFactory
     {
-        private static FuncFactory instance = null;
+        /*private static FuncFactory instance = null;
         public static FuncFactory Instance
         {
             get
@@ -20,9 +20,9 @@ namespace FuncSpace
                 return instance; ;
             }
         }
-
-        private FuncReader reader;
-        private FuncInterpreter interpreter;
+        */
+        private IFuncReader reader;
+        private IFuncInterpreter interpreter;
 
         private Dictionary<string, IFunc> userDefinedFuncs;
         private HashSet<string> allFuncNames;
@@ -31,7 +31,7 @@ namespace FuncSpace
         private Dictionary<string, int> operatorPriorities;
         private IFunc dummyFunc;
 
-        private void Init()
+        public FuncFactory()
         {
             allFuncNames = new HashSet<string>()
             {
@@ -51,8 +51,8 @@ namespace FuncSpace
                 { "*", 1 }, { "/", 1 }, { "^", 1 },
             };
             userDefinedFuncs = new Dictionary<string, FuncSpace.IFunc>();
-            reader = new FuncReader();
-            interpreter = new FuncInterpreter();
+            reader = new FuncReader(factory: this);
+            interpreter = new FuncInterpreter(factory: this);
             dummyFunc = CreateFunc("dummy(x) = x");
         }
 

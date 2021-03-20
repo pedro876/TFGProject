@@ -1,10 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using FuncSpace;
 
-public class FuncFacade
+public class FuncFacade : IFuncFacade
 {
-    #region SetUp
+    /*#region SetUp
 
     private static FuncFacade instance = null;
     public static FuncFacade Instance
@@ -16,13 +14,10 @@ public class FuncFacade
                 instance = new FuncFacade();
                 instance.Init();
             }
-                
+
             return instance;
         }
     }
-
-    private FuncSpace.FuncFactory factory;
-    private FuncSpace.IFunc selectedFunc;
 
     private void Init()
     {
@@ -30,7 +25,16 @@ public class FuncFacade
         selectedFunc = factory.DummyFunc;
     }
 
-    #endregion
+    #endregion*/
+
+    FuncFactory factory;
+    public FuncFacade()
+    {
+        factory = new FuncFactory();
+    }
+
+    /*private FuncSpace.FuncFactory factory;*/
+    private FuncSpace.IFunc selectedFunc;
 
     #region selection
 

@@ -40,7 +40,7 @@ public class FuncFacadeTest : MonoBehaviour
 
     bool TestInstantSolve()
     {
-        FuncFacade facade = FuncFacade.Instance;
+        IFuncFacade facade = ServiceLocator.Instance.GetService<IFuncFacade>();
         facade.Reset();
         string result = facade.Solve(1, 0, 0).ToString();
         string expectedResult = "1";
@@ -51,7 +51,7 @@ public class FuncFacadeTest : MonoBehaviour
 
     bool TestFacadeCreation()
     {
-        FuncFacade facade = FuncFacade.Instance;
+        IFuncFacade facade = ServiceLocator.Instance.GetService<IFuncFacade>();
         facade.Reset();
         string expectedResult = "dummy(x) = x";
 
@@ -65,7 +65,7 @@ public class FuncFacadeTest : MonoBehaviour
 
     bool TestCreateFunc1()
     {
-        FuncFacade facade = FuncFacade.Instance;
+        IFuncFacade facade = ServiceLocator.Instance.GetService<IFuncFacade>();
         facade.Reset();
         string expectedResult = "f(x) = x^2";
         facade.CreateFunc(expectedResult);
@@ -80,7 +80,7 @@ public class FuncFacadeTest : MonoBehaviour
 
     bool TestCreateFunc2()
     {
-        FuncFacade facade = FuncFacade.Instance;
+        IFuncFacade facade = ServiceLocator.Instance.GetService<IFuncFacade>();
         facade.Reset();
         string expectedResult = "f(x) = x^2*-(5*x)";
         facade.CreateFunc(expectedResult);
@@ -95,7 +95,7 @@ public class FuncFacadeTest : MonoBehaviour
 
     bool TestCreateFunc3()
     {
-        FuncFacade facade = FuncFacade.Instance;
+        IFuncFacade facade = ServiceLocator.Instance.GetService<IFuncFacade>();
         facade.Reset();
         string expectedResult = "g(x) = cos(x)+cos(y)";
         facade.CreateFunc(expectedResult);
@@ -110,7 +110,7 @@ public class FuncFacadeTest : MonoBehaviour
     }
     bool TestCreateFunc4()
     {
-        FuncFacade facade = FuncFacade.Instance;
+        IFuncFacade facade = ServiceLocator.Instance.GetService<IFuncFacade>();
         facade.Reset();
         string expectedResult = "g(x) = x-+y";
         facade.CreateFunc(expectedResult);
@@ -126,7 +126,7 @@ public class FuncFacadeTest : MonoBehaviour
 
     bool TestCreateFunc5()
     {
-        FuncFacade facade = FuncFacade.Instance;
+        IFuncFacade facade = ServiceLocator.Instance.GetService<IFuncFacade>();
         facade.Reset();
         string expectedResult = "g(x) = x+-y";
         facade.CreateFunc(expectedResult);
@@ -142,7 +142,7 @@ public class FuncFacadeTest : MonoBehaviour
 
     bool TestCreateFunc6()
     {
-        FuncFacade facade = FuncFacade.Instance;
+        IFuncFacade facade = ServiceLocator.Instance.GetService<IFuncFacade>();
         facade.Reset();
         string expectedResult = "g(x) = -x-y";
         facade.CreateFunc(expectedResult);
@@ -158,7 +158,7 @@ public class FuncFacadeTest : MonoBehaviour
 
     bool TestCreateFunc7()
     {
-        FuncFacade facade = FuncFacade.Instance;
+        IFuncFacade facade = ServiceLocator.Instance.GetService<IFuncFacade>();
         facade.Reset();
         string expectedResult = "g(x,y) = sin((x+y)*20)*0.5";
         facade.CreateFunc(expectedResult);
@@ -175,7 +175,7 @@ public class FuncFacadeTest : MonoBehaviour
 
     bool TestSolve1()
     {
-        FuncFacade facade = FuncFacade.Instance;
+        IFuncFacade facade = ServiceLocator.Instance.GetService<IFuncFacade>();
         facade.Reset();
         string func = "g(x) = cos(x)+cos(y)";
         facade.CreateFunc(func);
@@ -192,7 +192,7 @@ public class FuncFacadeTest : MonoBehaviour
 
     bool TestNonReference()
     {
-        FuncFacade facade = FuncFacade.Instance;
+        IFuncFacade facade = ServiceLocator.Instance.GetService<IFuncFacade>();
         facade.Reset();
         string func = "f(x) = g(x)";
         facade.CreateFunc(func);
@@ -207,7 +207,7 @@ public class FuncFacadeTest : MonoBehaviour
 
     bool TestCrossReference1()
     {
-        FuncFacade facade = FuncFacade.Instance;
+        IFuncFacade facade = ServiceLocator.Instance.GetService<IFuncFacade>();
         facade.Reset();
         string func1 = "f(x) = g(x)";
         string func2 = "g(x) = x";
@@ -224,7 +224,7 @@ public class FuncFacadeTest : MonoBehaviour
 
     bool TestCrossReference2()
     {
-        FuncFacade facade = FuncFacade.Instance;
+        IFuncFacade facade = ServiceLocator.Instance.GetService<IFuncFacade>();
         facade.Reset();
         string func1 = "f(x) = g(x)";
         string func2 = "g(x) = f(x)";
@@ -241,7 +241,7 @@ public class FuncFacadeTest : MonoBehaviour
 
     bool TestSolveCrossReference1()
     {
-        FuncFacade facade = FuncFacade.Instance;
+        IFuncFacade facade = ServiceLocator.Instance.GetService<IFuncFacade>();
         facade.Reset();
         string func1 = "f(x) = x";
         string func2 = "g(x) = f(x)";
@@ -258,7 +258,7 @@ public class FuncFacadeTest : MonoBehaviour
 
     bool TestSolveCrossReference2()
     {
-        FuncFacade facade = FuncFacade.Instance;
+        IFuncFacade facade = ServiceLocator.Instance.GetService<IFuncFacade>();
         facade.Reset();
         string func1 = "f(x) = g(x)";
         string func2 = "g(x) = f(x)";
