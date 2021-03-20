@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 
 namespace FuncSpace
@@ -30,7 +31,7 @@ namespace FuncSpace
             if (usesSymbol)
             {
                 value = symbolValues[this.symbol];
-            } else if(float.TryParse(symbol.Replace(",","."), out float result))
+            } else if(float.TryParse(symbol.Replace(".",","), out float result))
             {
                 value = result;
             }
@@ -51,8 +52,7 @@ namespace FuncSpace
         {
             if(value == 0f)
             {
-                IFuncNode parent = GetParent();
-                if (parent is OperatorAddNode || parent is OperatorSubNode)
+                if (Parent is OperatorAddNode || Parent is OperatorSubNode)
                 {
                     return false;
                 }
@@ -62,7 +62,7 @@ namespace FuncSpace
 
         public override bool NeedsParenthesis()
         {
-            if (!HasParent()) return false;
+            if (!HasParent) return false;
             else return value < 0f;
             /*else
             {
@@ -77,6 +77,17 @@ namespace FuncSpace
                 }
                 return value < 0f;
             }*/
+        }
+
+        public override void ToStringDeep(StringBuilder builder)
+        {
+            if (NeedsRepresentation())
+            {
+                bool needsParenthesis = NeedsParenthesis();
+                if (needsParenthesis) builder.Append('(');
+                builder.Append(value.ToString());
+                if (needsParenthesis) builder.Append(')');
+            }
         }
     }
 }

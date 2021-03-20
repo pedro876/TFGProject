@@ -1,26 +1,18 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System.Collections.Generic;
 
 namespace FuncSpace
 {
     public interface IFunc
     {
-        string GetName();
-        void SetName(string name);
-        void SetVariables(List<string> variables);
-        List<string> GetVariables();
-        void SetSubfunctions(List<string> subfunctions);
-        List<string> GetSubfunctions();
-        string GetOriginalDeclaration();
-        string GetFinalDeclaration();
-        void SetOriginalDeclaration(string originalDeclaration);
-        void SetFinalDeclaration(string originalDeclaration);
-        string GetOriginalDefinition();
-        string GetFinalDefinition();
-        void SetOriginalDefinition(string originalDefintion);
-        void SetFinalDefinition(string originalDefinition);
+        string Name { get; set; }
+        List<string> Variables { get; set; }
+        List<string> Subfunctions { get; set; }
+        string OriginalDeclaration { get; set; }
+        string OriginalDefinition { get; set; }
+        string FinalDeclaration { get; set; }
+        string FinalDefinition { get; set; }
+        IFuncNode RootNode { get; set; }
         string ComputeDefinitionString();
-        void SetRootNode(IFuncNode root);
+        float Solve(float x, float y, float z);
     }
 }

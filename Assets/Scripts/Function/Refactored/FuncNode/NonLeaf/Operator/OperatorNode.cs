@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 
 namespace FuncSpace
@@ -7,6 +8,7 @@ namespace FuncSpace
     public abstract class OperatorNode : NonLeafNode
     {
         private int operatorPriority = -1;
+        protected string operatorSymbol;
 
         public OperatorNode(List<IFuncNode> children, int operatorPriority) : base(children)
         {
@@ -24,26 +26,38 @@ namespace FuncSpace
 
         public override bool NeedsParenthesis()
         {
-            if (!HasParent()) return false;
+            if (!HasParent) return false;
             else
             {
-                IFuncNode parent = GetParent();
-                if(parent is OperatorSubNode)
+                if(Parent is OperatorSubNode)
                 {
-                    OperatorSubNode parentOpSub = (OperatorSubNode)parent;
+                    OperatorSubNode parentOpSub = (OperatorSubNode)Parent;
                     if(parentOpSub.GetChildRight() == this)
                     {
                         return true;
                     }
                 }
-                if (parent is OperatorNode)
+                if (Parent is OperatorNode)
                 {
-                    OperatorNode parentOp = (OperatorNode)parent;
-                    return operatorPriority < parentOp.operatorPriority;
+                    OperatorNode parentOp = (OperatorNode)Parent;
+                    if (!GetChildLeft().NeedsRepresentation() || !GetChildRight().NeedsRepresentation())
+                        return false;
+                    else
+                        return operatorPriority < parentOp.operatorPriority;
                 }
                 else
                     return false;
             }
+        }
+
+        public override void ToStringDeep(StringBuilder builder)
+        {
+            bool needsParenthesis = NeedsParenthesis();
+            if (needsParenthesis) builder.Append('(');
+            GetChildLeft().ToStringDeep(builder);
+            builder.Append(operatorSymbol);
+            GetChildRight().ToStringDeep(builder);
+            if (needsParenthesis) builder.Append(')');
         }
     }
 }

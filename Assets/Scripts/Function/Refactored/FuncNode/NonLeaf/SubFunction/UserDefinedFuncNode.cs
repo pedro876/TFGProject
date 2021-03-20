@@ -6,20 +6,23 @@ namespace FuncSpace
 {
     public class UserDefinedFuncNode : SubFuncNode
     {
-        string function;
-        public UserDefinedFuncNode(string function, List<IFuncNode> children) : base(children)
+        IFunc func;
+        bool preventRecursive;
+        public UserDefinedFuncNode(string function, IFunc func, bool preventRecursive, List<IFuncNode> children) : base(children)
         {
-            this.function = function;
+            this.functionName = function;
+            this.func = func;
+            this.preventRecursive = preventRecursive;
         }
 
         protected override float SolveSelf(float[] values)
         {
-            switch (function)
+            if (preventRecursive)
             {
-                case "cos": return Mathf.Cos(values[0]);
-                case "sin": return Mathf.Sin(values[0]);
-                case "abs": return Mathf.Abs(values[0]);
-                default: return 0f;
+                return 1f;
+            } else
+            {
+                return func.Solve(values[0], values[1], values[2]);
             }
         }
     }

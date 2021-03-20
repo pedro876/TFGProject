@@ -6,15 +6,14 @@ namespace FuncSpace
 {
     public class PredefinedFuncNode : SubFuncNode
     {
-        string function;
         public PredefinedFuncNode(string function, List<IFuncNode> children) : base(children)
         {
-            this.function = function;
+            this.functionName = function;
         }
 
         protected override float SolveSelf(float[] values)
         {
-            switch (function)
+            switch (functionName)
             {
                 case "cos": return Mathf.Cos(values[0]);
                 case "sin": return Mathf.Sin(values[0]);

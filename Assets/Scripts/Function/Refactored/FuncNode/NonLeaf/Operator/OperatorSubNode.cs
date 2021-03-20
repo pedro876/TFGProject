@@ -6,8 +6,10 @@ namespace FuncSpace
 {
     public class OperatorSubNode : OperatorNode
     {
-        public OperatorSubNode(List<IFuncNode> children) : base(children, 0) { }
-
+        public OperatorSubNode(List<IFuncNode> children) : base(children, 0)
+        {
+            operatorSymbol = "-";
+        }
         protected override float SolveSelf(float[] values)
         {
             return values[0] - values[1];

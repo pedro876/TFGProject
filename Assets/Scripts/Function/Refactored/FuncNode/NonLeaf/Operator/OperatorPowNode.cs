@@ -6,7 +6,10 @@ namespace FuncSpace
 {
     public class OperatorPowNode : OperatorNode
     {
-        public OperatorPowNode(List<IFuncNode> children) : base(children, 1) { }
+        public OperatorPowNode(List<IFuncNode> children) : base(children, 1)
+        {
+            operatorSymbol = "^";
+        }
 
         protected override float SolveSelf(float[] values)
         {

@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using UnityEngine;
+﻿using System.Text;
 
 namespace FuncSpace
 {
@@ -32,7 +31,7 @@ namespace FuncSpace
 
         public override bool NeedsParenthesis()
         {
-            if (!HasParent()) return false;
+            if (!HasParent) return false;
             else return !positive;
             /*else
             {
@@ -48,6 +47,15 @@ namespace FuncSpace
                 return !positive;
             }*/
 
+        }
+
+        public override void ToStringDeep(StringBuilder builder)
+        {
+            bool needsParenthesis = NeedsParenthesis();
+            if (needsParenthesis) builder.Append('(');
+            if (!positive) builder.Append('-');
+            builder.Append(variable);
+            if (needsParenthesis) builder.Append(')');
         }
     }
 }

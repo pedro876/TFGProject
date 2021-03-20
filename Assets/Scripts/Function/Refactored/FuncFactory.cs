@@ -12,7 +12,11 @@ namespace FuncSpace
             get
             {
                 if (instance == null)
+                {
                     instance = new FuncFactory();
+                    instance.Init();
+                }
+                    
                 return instance; ;
             }
         }
@@ -22,19 +26,13 @@ namespace FuncSpace
 
         private Dictionary<string, IFunc> userDefinedFuncs;
         private HashSet<string> allFuncNames;
-        private readonly HashSet<string> variables;
-        private readonly List<string> operators;
-        private readonly Dictionary<string, int> operatorPriorities;
-        private readonly IFunc dummyFunc;
+        private HashSet<string> variables;
+        private List<string> operators;
+        private Dictionary<string, int> operatorPriorities;
+        private IFunc dummyFunc;
 
-        public FuncFactory()
+        private void Init()
         {
-            //provider = FuncProvider.Instance;
-            reader = new FuncReader();
-            interpreter = new FuncInterpreter();
-
-            userDefinedFuncs = new Dictionary<string, FuncSpace.IFunc>();
-            dummyFunc = new DummyFunc();
             allFuncNames = new HashSet<string>()
             {
                 "cos", "sin", "abs"
@@ -49,12 +47,13 @@ namespace FuncSpace
             };
             operatorPriorities = new Dictionary<string, int>()
             {
-                { "-", 0 },
-                { "+", 0 },
-                { "*", 1 },
-                { "/", 1 },
-                { "^", 1 },
+                { "-", 0 }, { "+", 0 },
+                { "*", 1 }, { "/", 1 }, { "^", 1 },
             };
+            userDefinedFuncs = new Dictionary<string, FuncSpace.IFunc>();
+            reader = new FuncReader();
+            interpreter = new FuncInterpreter();
+            dummyFunc = CreateFunc("dummy(x) = x");
         }
 
         public IFunc DummyFunc => dummyFunc;
@@ -62,6 +61,16 @@ namespace FuncSpace
         public HashSet<string> AllFuncNames => allFuncNames;
         public HashSet<string> Variables => variables;
         public List<string> Operators => operators;
+        
+        public int GetOperatorPriority(string op)
+        {
+            if (operatorPriorities.ContainsKey(op))
+            {
+                return operatorPriorities[op];
+            }
+            else
+                return -1;
+        }
 
         public IFunc CreateFunc(string textFunc)
         {
@@ -72,28 +81,39 @@ namespace FuncSpace
 
         private IFunc CreateFuncFromText(string textFunc)
         {
+            IFunc func = CreateFuncIfDidntExist(textFunc);
+            reader.ExtractOriginalFuncInfo(textFunc, func);
+            interpreter.CreateNodeTreeForFunc(func);
+            reader.ExtractFinalFuncInfo(func);
+            return func;
+        }
+
+        private IFunc CreateFuncIfDidntExist(string textFunc)
+        {
             IFunc func = new Func();
-            IFunc processedFunc = reader.ExtractOriginalFuncInfo(textFunc, func);
-            interpreter.CreateNodeTreeForFunc(processedFunc);
-            processedFunc = reader.ExtractFinalFuncInfo(func);
+            reader.ExtractOriginalFuncInfo(textFunc, func);
+            if (ContainsFunc(func.Name))
+            {
+                func = GetFunc(func.Name);
+            }
             return func;
         }
 
         private void AddFunc(IFunc func)
         {
-            userDefinedFuncs[func.GetName()] = func;
-            allFuncNames.Add(func.GetName());
-            CheckIfPreviousFuncsMustBeUpdated(func);
+            userDefinedFuncs[func.Name] = func;
+            allFuncNames.Add(func.Name);
+            UpdateCrossReferences(func);
         }
 
-        private void CheckIfPreviousFuncsMustBeUpdated(IFunc func)
+        private void UpdateCrossReferences(IFunc func)
         {
             foreach (var otherFunc in userDefinedFuncs.Values)
             {
                 if (otherFunc != func)
                 {
-                    string definition = otherFunc.GetOriginalDefinition();
-                    bool mustBeUpdated = definition.Contains(func.GetName()) && !func.GetSubfunctions().Contains(func.GetName());
+                    string definition = otherFunc.OriginalDefinition;
+                    bool mustBeUpdated = definition.Contains(func.Name);/* && !func.Subfunctions.Contains(func.Name);*/
                     if (mustBeUpdated)
                         UpdateFunc(otherFunc);
                 }
@@ -111,10 +131,43 @@ namespace FuncSpace
             return userDefinedFuncs.ContainsKey(name);
         }
 
+        public void RemoveAllFuncs()
+        {
+            List<string> toRemove = new List<string>();
+            foreach(string func in userDefinedFuncs.Keys)
+            {
+                toRemove.Add(func);
+            }
+            foreach(string func in toRemove)
+            {
+                RemoveFunc(func);
+            }
+        }
+
         public void RemoveFunc(string name)
         {
-            userDefinedFuncs.Remove(name);
-            allFuncNames.Remove(name);
+            if (ContainsFunc(name))
+            {
+                IFunc func = userDefinedFuncs[name];
+                if(func != dummyFunc)
+                {
+                    userDefinedFuncs.Remove(name);
+                    allFuncNames.Remove(name);
+                    RemoveCrossReferences(func);
+                }
+            }
+        }
+
+        private void RemoveCrossReferences(IFunc func)
+        {
+            foreach (var otherFunc in userDefinedFuncs.Values)
+            {
+                string definition = otherFunc.OriginalDefinition;
+                if (otherFunc.Subfunctions.Contains(func.Name))
+                {
+                    UpdateFunc(otherFunc);
+                }
+            }
         }
 
         public IFunc GetFunc(string name)
@@ -127,11 +180,6 @@ namespace FuncSpace
             {
                 return dummyFunc;
             }
-        }
-
-        public bool IsFuncUserDefined(string name)
-        {
-            return userDefinedFuncs.ContainsKey(name);
         }
     }
 }

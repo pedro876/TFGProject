@@ -7,6 +7,7 @@ namespace FuncSpace
     public class FuncInterpreter
     {
         FuncFactory factory;
+        IFunc funcBeingProcessed;
 
         public FuncInterpreter()
         {
@@ -15,19 +16,23 @@ namespace FuncSpace
 
         public void CreateNodeTreeForFunc(IFunc func)
         {
-            string definition = func.GetOriginalDefinition();
+            funcBeingProcessed = func;
+            string definition = func.OriginalDefinition;
+            if (definition.Length == 0) definition = "0";
             IFuncNode root = ProcessDefinition(definition);
-            func.SetRootNode(root);
+            func.RootNode = root;
+            funcBeingProcessed = null;
         }
 
         private IFuncNode ProcessDefinition(string definition)
         {
             IFuncNode node;
             bool insideParenthesis = CheckExternalParenthesis(ref definition);
+            TrimIrrelevantSymbols(ref definition);
             int[] breakpoints = FindPossibleBreakpoints(ref definition);
             int breakpoint = SelectBreakPoint(breakpoints);
 
-            bool isOperation = breakpoint > 0;
+            bool isOperation = breakpoint >= 0;
             if (isOperation)
             {
                 node = ProcessOperation(ref definition, breakpoint, breakpoints[breakpoint]);
@@ -45,6 +50,7 @@ namespace FuncSpace
                     node = ProcessConstant(ref definition);
                 }
             }
+            node.IsInsideParenthesis = insideParenthesis;
             return node;
         }
 
@@ -59,6 +65,17 @@ namespace FuncSpace
                 }
             }
             return false;
+        }
+
+        private void TrimIrrelevantSymbols(ref string definition)
+        {
+            if(definition.Length > 1)
+            {
+                if (definition[0] != '-' && factory.Operators.Contains(definition[0].ToString()))
+                    definition = definition.Substring(1);
+                if (factory.Operators.Contains(definition[definition.Length - 1].ToString()))
+                    definition = definition.Substring(0, definition.Length - 1);
+            }
         }
 
         #region breakpoint
@@ -78,9 +95,19 @@ namespace FuncSpace
                 if (depth != 0) continue;
                 for (int j = 0; j < breakPoints.Length; j++)
                 {
-                    if (breakPoints[j] == -1 && ("" + c) == operators[j])
+                    string op = "" + c;
+                    if (breakPoints[j] == -1 && op == operators[j])
                     {
-                        breakPoints[j] = i;
+                        if(i > 0 && operators.Contains(definition[i-1].ToString())) //Check if operator is preceded by a more relevant operator
+                        {
+                            int priority = factory.GetOperatorPriority(op);
+                            int lastPriority = factory.GetOperatorPriority(definition[i - 1].ToString());
+                            if(priority >= lastPriority)
+                            {
+                                breakPoints[j] = i;
+                            }
+                        } else
+                            breakPoints[j] = i;
                     }
                 }
             }
@@ -107,7 +134,7 @@ namespace FuncSpace
             IFuncNode node = CreateOperatorNodeFromString(operation, children);
             foreach (var child in children)
             {
-                child.SetParent(node);
+                child.Parent = node;
             }
             if (node is OperatorSubNode)
             {
@@ -144,19 +171,23 @@ namespace FuncSpace
 
         private void CheckRightChildNegation(List<IFuncNode> children)
         {
-            OperatorNode opNode = (OperatorNode)children[1];
-            if (opNode.NeedsParenthesis() && !opNode.IsInsideParenthesis())
+            if(children[1] is OperatorNode)
             {
-                if (opNode is OperatorSubNode)
+                OperatorNode opNode = (OperatorNode)children[1];
+                if (opNode.NeedsParenthesis() && !opNode.IsInsideParenthesis)
                 {
-                    opNode = new OperatorAddNode(opNode.GetChildren());
+                    if (opNode is OperatorSubNode)
+                    {
+                        opNode = new OperatorAddNode(opNode.GetChildren());
+                    }
+                    else if (opNode is OperatorAddNode)
+                    {
+                        opNode = new OperatorSubNode(opNode.GetChildren());
+                    }
                 }
-                else if (opNode is OperatorAddNode)
-                {
-                    opNode = new OperatorSubNode(opNode.GetChildren());
-                }
+                opNode.Parent = children[1].Parent;
+                children[1] = opNode;
             }
-            children[1] = opNode;
         }
 
         #endregion
@@ -183,9 +214,11 @@ namespace FuncSpace
             var children = ProcessSubfunctionChildren(content);
            
             IFuncNode node;
-            if (factory.IsFuncUserDefined(subfunction))
+            if (factory.ContainsFunc(subfunction))
             {
-                node = new UserDefinedFuncNode(subfunction, children);
+                IFunc func = factory.GetFunc(subfunction);
+                bool preventRecursive = func.OriginalDefinition.Contains(funcBeingProcessed.Name);
+                node = new UserDefinedFuncNode(subfunction, func, preventRecursive, children);
             } else
             {
                 node = new PredefinedFuncNode(subfunction, children);
@@ -193,7 +226,7 @@ namespace FuncSpace
 
             foreach (var child in children)
             {
-                child.SetParent(node);
+                child.Parent = node;
             }
             return node;
         }

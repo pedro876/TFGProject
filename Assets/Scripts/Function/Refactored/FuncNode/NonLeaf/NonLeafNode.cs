@@ -12,12 +12,12 @@ namespace FuncSpace
         public NonLeafNode(List<IFuncNode> children)
         {
             this.children = children;
-            childrenResults = new float[this.children.Count];
+            childrenResults = new float[System.Math.Max(3, this.children.Count)];
         }
 
         public IFuncNode GetChild(int childIndex)
         {
-            return children[0];
+            return children[childIndex];
         }
 
         public List<IFuncNode> GetChildren()

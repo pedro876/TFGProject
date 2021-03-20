@@ -35,19 +35,19 @@ namespace FuncSpace
             string[] parts = input.Split('=');
             string originalDeclaration = parts[0];
             string originalDefinition = parts[1];
-            func.SetOriginalDeclaration(originalDeclaration);
-            func.SetOriginalDefinition(originalDefinition);
+            func.OriginalDeclaration = originalDeclaration;
+            func.OriginalDefinition = originalDefinition;
         }
 
         private void ExtractNameFromDeclaration(IFunc func)
         {
-            string name = func.GetOriginalDeclaration().Split('(')[0];
-            func.SetName(name);
+            string name = func.OriginalDeclaration.Split('(')[0];
+            func.Name = name;
         }
 
         private void FixOriginalDefinition(IFunc func)
         {
-            string definition = func.GetOriginalDefinition();
+            string definition = func.OriginalDefinition;
             if (definition.Length == 0)
                 definition = "0";
             else
@@ -56,13 +56,13 @@ namespace FuncSpace
                 definition = CheckIfMulOmittedForVariables(definition);
             }
 
-            func.SetOriginalDefinition(definition);
+            func.OriginalDefinition = definition;
         }
 
         private string CheckIfMulOmittedForParenthesis(string definition)
         {
             string aux = "";
-            string symbols = "+-*^/()";
+            
             string cut = definition;
             for (int i = 0; i < definition.Length - 1; i++)
             {
@@ -76,8 +76,8 @@ namespace FuncSpace
                 }
                 else
                 {
-                    bool mustAddMulSymbolLeft = i > 0 && definition[i] == '(' && !symbols.Contains("" + definition[i - 1]);
-                    bool mustAddMulSymbolRight = definition[i] == ')' && !symbols.Contains("" + definition[i + 1]);
+                    bool mustAddMulSymbolLeft = i > 0 && definition[i] == '(' && IsNumberOrVariable(definition[i - 1].ToString());
+                    bool mustAddMulSymbolRight = definition[i] == ')' && IsNumberOrVariable(definition[i + 1].ToString());
                     
                     if (mustAddMulSymbolLeft) aux += '*';
                     aux += definition[i];
@@ -90,6 +90,19 @@ namespace FuncSpace
             aux += definition[definition.Length - 1];
             definition = aux;
             return definition;
+        }
+
+        private bool IsNumberOrVariable(string c)
+        {
+            const string symbols = "+-*^/()";
+            const string numberSymbols = "0123456789.";
+            var variables = factory.Variables;
+
+            bool isOperator = symbols.Contains(c);
+            bool isVariable = variables.Contains(c);
+            bool isNumber = numberSymbols.Contains(c);
+
+            return (isVariable || isNumber) && !isOperator;
         }
 
         private bool StartsWithSubFunction(string text, out string subFunction)
@@ -168,28 +181,28 @@ namespace FuncSpace
         private void ExtractFinalDefinition(IFunc func)
         {
             string finalDefinition = func.ComputeDefinitionString();
-            func.SetFinalDefinition(finalDefinition);
+            func.FinalDefinition = finalDefinition;
         }
 
         private void ExtractVariables(IFunc func)
         {
             List<string> variables = new List<string>();
-            string finalDefinition = func.GetFinalDefinition();
+            string finalDefinition = func.FinalDefinition;
             foreach (var variable in factory.Variables)
             {
                 if (finalDefinition.Contains(variable))
                     variables.Add(variable);
             }
-            func.SetVariables(variables);
+            func.Variables = variables;
         }
 
         private void ExtractSubfunctions(IFunc func)
         {
             List<string> subfunctions = new List<string>();
-            string finalDefinition = func.GetFinalDefinition();
+            string finalDefinition = func.FinalDefinition;
             foreach (var subfunction in factory.AllFuncNames)
             {
-                if (factory.IsFuncUserDefined(subfunction))
+                if (factory.ContainsFunc(subfunction))
                 {
                     if (finalDefinition.Contains(subfunction))
                     {
@@ -197,24 +210,24 @@ namespace FuncSpace
                     }
                 }
             }
-            func.SetSubfunctions(subfunctions);
+            func.Subfunctions = subfunctions;
         }
 
         private void ExtractFinalDeclaration(IFunc func)
         {
-            StringBuilder finalDeclaration = new StringBuilder(func.GetName());
-            int variableCount = func.GetVariables().Count;
+            StringBuilder finalDeclaration = new StringBuilder(func.Name);
+            int variableCount = func.Variables.Count;
             if (variableCount > 0)
             {
                 finalDeclaration.Append("(");
                 for (int i = 0; i < variableCount; i++)
                 {
-                    finalDeclaration.Append(func.GetVariables()[i]);
                     if (i > 0) finalDeclaration.Append(",");
+                    finalDeclaration.Append(func.Variables[i]);
                 }
                 finalDeclaration.Append(")");
             }
-            func.SetFinalDeclaration(finalDeclaration.ToString());
+            func.FinalDeclaration = finalDeclaration.ToString();
         }
     }
 }

@@ -1,89 +1,35 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Text;
 
 namespace FuncSpace
 {
     public class Func : IFunc
     {
+        public string Name { get; set; }
+        public List<string> Variables { get; set; }
+        public List<string> Subfunctions { get; set; }
+        public string OriginalDeclaration { get; set; }
+        public string OriginalDefinition { get; set; }
+        public string FinalDeclaration { get; set; }
+        public string FinalDefinition { get; set; }
+        public IFuncNode RootNode { get; set; }
         public string ComputeDefinitionString()
         {
-            throw new System.NotImplementedException();
+            return RootNode.ToString();
         }
 
-        public string GetFinalDeclaration()
+        public float Solve(float x, float y, float z)
         {
-            throw new System.NotImplementedException();
+            return RootNode.Solve(x, y, z);
         }
-
-        public string GetFinalDefinition()
+        public override string ToString()
         {
-            throw new System.NotImplementedException();
-        }
-
-        public string GetName()
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public string GetOriginalDeclaration()
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public string GetOriginalDefinition()
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public List<string> GetSubfunctions()
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public List<string> GetVariables()
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public void SetFinalDeclaration(string originalDeclaration)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public void SetFinalDefinition(string originalDefinition)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public void SetName(string name)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public void SetOriginalDeclaration(string originalDeclaration)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public void SetOriginalDefinition(string originalDefintion)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public void SetRootNode(IFuncNode root)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public void SetSubfunctions(List<string> subfunctions)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public void SetVariables(List<string> variables)
-        {
-            throw new System.NotImplementedException();
+            StringBuilder builder = new StringBuilder(FinalDeclaration);
+            builder.Append(" = ");
+            builder.Append(FinalDefinition);
+            return builder.ToString();
         }
     }
 }

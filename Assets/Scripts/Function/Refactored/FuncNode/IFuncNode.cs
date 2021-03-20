@@ -1,18 +1,17 @@
+using System.Text;
+
 namespace FuncSpace
 {
     public interface IFuncNode
     {
-        IFuncNode GetParent();
-        bool HasParent();
-        void SetParent(IFuncNode parent);
+        IFuncNode Parent { get; set; }
+        bool HasParent { get; }
+        bool IsInsideParenthesis { get; set; }
         float Solve(float x, float y, float z);
-        //int CalculateBytecode();
         bool Equals(IFuncNode otherNode);
-
-        bool IsInsideParenthesis();
-        void SetParenthesis(bool hasParenthesis);
         bool NeedsParenthesis();
         bool NeedsRepresentation();
+        void ToStringDeep(StringBuilder builder);
     }
 }
 
