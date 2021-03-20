@@ -11,6 +11,7 @@ namespace FuncSpace
         {
             { "pi", Mathf.PI },
             { "e", Mathf.Exp(1) },
+            {"inf", Mathf.Infinity },
         };
 
         private float value;
@@ -41,6 +42,11 @@ namespace FuncSpace
         public float GetValue()
         {
             return value;
+        }
+
+        public void NegateValue()
+        {
+            value = -Mathf.Abs(value);
         }
 
         public override float Solve(float x, float y, float z)

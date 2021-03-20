@@ -15,14 +15,8 @@ namespace FuncSpace
             this.operatorPriority = operatorPriority;
         }
 
-        public IFuncNode GetChildLeft()
-        {
-            return GetChild(0);
-        }
-        public IFuncNode GetChildRight()
-        {
-            return GetChild(1);
-        }
+        public IFuncNode LeftChild => GetChild(0);
+        public IFuncNode RightChild => GetChild(1);
 
         public override bool NeedsParenthesis()
         {
@@ -32,7 +26,7 @@ namespace FuncSpace
                 if(Parent is OperatorSubNode)
                 {
                     OperatorSubNode parentOpSub = (OperatorSubNode)Parent;
-                    if(parentOpSub.GetChildRight() == this)
+                    if(parentOpSub.RightChild == this)
                     {
                         return true;
                     }
@@ -40,7 +34,7 @@ namespace FuncSpace
                 if (Parent is OperatorNode)
                 {
                     OperatorNode parentOp = (OperatorNode)Parent;
-                    if (!GetChildLeft().NeedsRepresentation() || !GetChildRight().NeedsRepresentation())
+                    if (!LeftChild.NeedsRepresentation() || !RightChild.NeedsRepresentation())
                         return false;
                     else
                         return operatorPriority < parentOp.operatorPriority;
@@ -54,9 +48,9 @@ namespace FuncSpace
         {
             bool needsParenthesis = NeedsParenthesis();
             if (needsParenthesis) builder.Append('(');
-            GetChildLeft().ToStringDeep(builder);
+            LeftChild.ToStringDeep(builder);
             builder.Append(operatorSymbol);
-            GetChildRight().ToStringDeep(builder);
+            RightChild.ToStringDeep(builder);
             if (needsParenthesis) builder.Append(')');
         }
     }

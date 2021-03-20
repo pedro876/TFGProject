@@ -20,6 +20,7 @@ public class FuncFacadeTest : MonoBehaviour
             new KeyValuePair<string, Func<bool>>("TestCreateFunc5", TestCreateFunc5),
             new KeyValuePair<string, Func<bool>>("TestCreateFunc6", TestCreateFunc6),
             new KeyValuePair<string, Func<bool>>("TestCreateFunc7", TestCreateFunc7),
+            new KeyValuePair<string, Func<bool>>("TestSimplifyFunc1", TestSimplifyFunc1),
             new KeyValuePair<string, Func<bool>>("TestSolve1", TestSolve1),
             new KeyValuePair<string, Func<bool>>("TestNonReference", TestNonReference),
             new KeyValuePair<string, Func<bool>>("TestCrossReference1", TestCrossReference1),
@@ -166,6 +167,22 @@ public class FuncFacadeTest : MonoBehaviour
         string result = facade.SelectedFunc;
 
         expectedResult = "g(x,y) = sin((x+y)*20)*0,5";
+        Debug.Log("expected:\t" + expectedResult);
+        Debug.Log("got:\t\t" + result);
+
+        return expectedResult.Equals(result);
+    }
+
+    bool TestSimplifyFunc1()
+    {
+        IFuncFacade facade = ServiceLocator.Instance.GetService<IFuncFacade>();
+        facade.Reset();
+        string expectedResult = "g(x,y) = cos(x*0) + y*1 + y*0 + y^0 + 1^4 + 0 - y";
+        facade.CreateFunc(expectedResult);
+        facade.SelectFunc("g");
+        string result = facade.SelectedFunc;
+
+        expectedResult = "g(y) = cos(0)+y+2-y";
         Debug.Log("expected:\t" + expectedResult);
         Debug.Log("got:\t\t" + result);
 

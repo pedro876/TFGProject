@@ -23,6 +23,7 @@ namespace FuncSpace
         */
         private IFuncReader reader;
         private IFuncInterpreter interpreter;
+        private IFuncSimplifier simplifier;
 
         private Dictionary<string, IFunc> userDefinedFuncs;
         private HashSet<string> allFuncNames;
@@ -53,6 +54,7 @@ namespace FuncSpace
             userDefinedFuncs = new Dictionary<string, FuncSpace.IFunc>();
             reader = new FuncReader(factory: this);
             interpreter = new FuncInterpreter(factory: this);
+            simplifier = new FuncSimplifier();
             dummyFunc = CreateFunc("dummy(x) = x");
         }
 
@@ -84,6 +86,7 @@ namespace FuncSpace
             IFunc func = CreateFuncIfDidntExist(textFunc);
             reader.ExtractOriginalFuncInfo(textFunc, func);
             interpreter.CreateNodeTreeForFunc(func);
+            simplifier.SimplifyFunc(func);
             reader.ExtractFinalFuncInfo(func);
             return func;
         }
