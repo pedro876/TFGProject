@@ -202,7 +202,7 @@ namespace FuncSpace
             string finalDefinition = func.FinalDefinition;
             foreach (var subfunction in factory.AllFuncNames)
             {
-                if (factory.ContainsFunc(subfunction))
+                if (factory.IsFuncDefinedByUser(subfunction))
                 {
                     if (finalDefinition.Contains(subfunction))
                     {

@@ -7,6 +7,7 @@ namespace FuncSpace
     public class UserDefinedFuncNode : SubFuncNode
     {
         IFunc func;
+        public IFunc Func => func;
         bool preventRecursive;
         public UserDefinedFuncNode(string function, IFunc func, bool preventRecursive, List<IFuncNode> children) : base(children)
         {

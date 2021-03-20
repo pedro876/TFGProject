@@ -9,6 +9,7 @@ namespace FuncSpace
     {
         private int operatorPriority = -1;
         protected string operatorSymbol;
+        public string OperatorSymbol => operatorSymbol;
 
         public OperatorNode(List<IFuncNode> children, int operatorPriority) : base(children)
         {

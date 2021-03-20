@@ -43,7 +43,7 @@ public class FuncFacade : IFuncFacade
 
     public bool SelectFunc(string funcName)
     {
-        if (factory.ContainsFunc(funcName))
+        if (factory.IsFuncDefinedByUser(funcName))
         {
             selectedFunc = factory.GetFunc(funcName);
             return true;
@@ -68,7 +68,7 @@ public class FuncFacade : IFuncFacade
 
     public bool RemoveFunc(string funcName)
     {
-        if (factory.ContainsFunc(funcName))
+        if (factory.IsFuncDefinedByUser(funcName))
         {
             var func = factory.GetFunc(funcName);
             if (selectedFunc == func)

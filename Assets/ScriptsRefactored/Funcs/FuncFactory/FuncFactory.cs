@@ -24,20 +24,27 @@ namespace FuncSpace
         private IFuncReader reader;
         private IFuncInterpreter interpreter;
         private IFuncSimplifier simplifier;
+        private IFuncEncoder encoder;
 
         private Dictionary<string, IFunc> userDefinedFuncs;
         private HashSet<string> allFuncNames;
         private HashSet<string> variables;
         private List<string> operators;
+        private List<string> predefinedFuncs;
         private Dictionary<string, int> operatorPriorities;
         private IFunc dummyFunc;
 
         public FuncFactory()
         {
-            allFuncNames = new HashSet<string>()
+            predefinedFuncs = new List<string>()
             {
                 "cos", "sin", "abs"
             };
+            allFuncNames = new HashSet<string>();
+            foreach (var f in predefinedFuncs)
+            {
+                allFuncNames.Add(f);
+            }
             variables = new HashSet<string>()
             {
                 "x","y","z"
@@ -55,12 +62,14 @@ namespace FuncSpace
             reader = new FuncReader(factory: this);
             interpreter = new FuncInterpreter(factory: this);
             simplifier = new FuncSimplifier();
+            encoder = new FuncEncoder(this);
             dummyFunc = CreateFunc("dummy(x) = x");
         }
 
         public IFunc DummyFunc => dummyFunc;
         public int MaxOperatorIndex => operators.Count;
         public HashSet<string> AllFuncNames => allFuncNames;
+        public List<string> PredefinedFuncs => predefinedFuncs;
         public HashSet<string> Variables => variables;
         public List<string> Operators => operators;
         
@@ -74,13 +83,14 @@ namespace FuncSpace
                 return -1;
         }
 
+        #region CreateFunc
+
         public IFunc CreateFunc(string textFunc)
         {
             IFunc func = CreateFuncFromText(textFunc);
             AddFunc(func);
             return func;
         }
-
         private IFunc CreateFuncFromText(string textFunc)
         {
             IFunc func = CreateFuncIfDidntExist(textFunc);
@@ -88,27 +98,25 @@ namespace FuncSpace
             interpreter.CreateNodeTreeForFunc(func);
             simplifier.SimplifyFunc(func);
             reader.ExtractFinalFuncInfo(func);
+            encoder.Encode(func);
             return func;
         }
-
         private IFunc CreateFuncIfDidntExist(string textFunc)
         {
             IFunc func = new Func();
             reader.ExtractOriginalFuncInfo(textFunc, func);
-            if (ContainsFunc(func.Name))
+            if (IsFuncDefinedByUser(func.Name))
             {
                 func = GetFunc(func.Name);
             }
             return func;
         }
-
         private void AddFunc(IFunc func)
         {
             userDefinedFuncs[func.Name] = func;
             allFuncNames.Add(func.Name);
             UpdateCrossReferences(func);
         }
-
         private void UpdateCrossReferences(IFunc func)
         {
             foreach (var otherFunc in userDefinedFuncs.Values)
@@ -122,17 +130,19 @@ namespace FuncSpace
                 }
             }
         }
-
+        #endregion
         private void UpdateFunc(IFunc func)
         {
             interpreter.CreateNodeTreeForFunc(func);
             reader.ExtractFinalFuncInfo(func);
         }
 
-        public bool ContainsFunc(string name)
+        public bool IsFuncDefinedByUser(string name)
         {
             return userDefinedFuncs.ContainsKey(name);
         }
+
+        #region RemoveFuncs
 
         public void RemoveAllFuncs()
         {
@@ -146,10 +156,9 @@ namespace FuncSpace
                 RemoveFunc(func);
             }
         }
-
         public void RemoveFunc(string name)
         {
-            if (ContainsFunc(name))
+            if (IsFuncDefinedByUser(name))
             {
                 IFunc func = userDefinedFuncs[name];
                 if(func != dummyFunc)
@@ -160,7 +169,6 @@ namespace FuncSpace
                 }
             }
         }
-
         private void RemoveCrossReferences(IFunc func)
         {
             foreach (var otherFunc in userDefinedFuncs.Values)
@@ -173,9 +181,11 @@ namespace FuncSpace
             }
         }
 
+        #endregion
+
         public IFunc GetFunc(string name)
         {
-            if (ContainsFunc(name))
+            if (IsFuncDefinedByUser(name))
             {
                 return userDefinedFuncs[name];
             }

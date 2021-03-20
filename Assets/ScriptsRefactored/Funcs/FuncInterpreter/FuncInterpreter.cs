@@ -214,7 +214,7 @@ namespace FuncSpace
             var children = ProcessSubfunctionChildren(content);
            
             IFuncNode node;
-            if (factory.ContainsFunc(subfunction))
+            if (factory.IsFuncDefinedByUser(subfunction))
             {
                 IFunc func = factory.GetFunc(subfunction);
                 bool preventRecursive = func.OriginalDefinition.Contains(funcBeingProcessed.Name);

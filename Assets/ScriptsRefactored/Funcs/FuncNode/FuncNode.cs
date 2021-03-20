@@ -4,7 +4,6 @@ namespace FuncSpace
 {
     public abstract class FuncNode : IFuncNode
     {
-        bool insideParenthesis = false;
         public IFuncNode Parent { get; set; }
         public bool HasParent { get => Parent != null; }
         public bool IsInsideParenthesis { get; set; }

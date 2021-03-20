@@ -7,6 +7,7 @@ namespace FuncSpace
         private string variable;
         private bool positive;
         public bool IsPositive { get; set; }
+        public string Variable { get => variable; }
         public VariableNode(string variable)
         {
             this.variable = variable;

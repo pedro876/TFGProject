@@ -8,6 +8,7 @@ namespace FuncSpace
     public abstract class SubFuncNode : NonLeafNode
     {
         protected string functionName;
+        public string FunctionName { get => functionName; }
         public SubFuncNode(List<IFuncNode> children) : base(children) { }
 
         public override bool NeedsParenthesis()

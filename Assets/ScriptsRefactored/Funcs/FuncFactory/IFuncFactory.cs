@@ -11,8 +11,9 @@ namespace FuncSpace
         HashSet<string> AllFuncNames { get; }
         HashSet<string> Variables { get; }
         List<string> Operators { get; }
+        List<string> PredefinedFuncs { get; }
         int GetOperatorPriority(string op);
-        bool ContainsFunc(string name);
+        bool IsFuncDefinedByUser(string name);
         IFunc CreateFunc(string textFunc);
         IFunc GetFunc(string name);
         void RemoveAllFuncs();

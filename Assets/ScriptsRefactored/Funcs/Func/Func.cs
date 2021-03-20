@@ -15,6 +15,8 @@ namespace FuncSpace
         public string FinalDeclaration { get; set; }
         public string FinalDefinition { get; set; }
         public IFuncNode RootNode { get; set; }
+        public Bytecode BytecodeInfo { get; set; }
+
         public string ComputeDefinitionString()
         {
             return RootNode.ToString();
@@ -24,6 +26,7 @@ namespace FuncSpace
         {
             return RootNode.Solve(x, y, z);
         }
+
         public override string ToString()
         {
             StringBuilder builder = new StringBuilder(FinalDeclaration);
