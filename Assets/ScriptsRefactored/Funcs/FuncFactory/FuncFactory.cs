@@ -63,10 +63,7 @@ namespace FuncSpace
         {
             IFunc func = CreateFuncIfDidntExist(textFunc);
             reader.ExtractOriginalFuncInfo(textFunc, func);
-            func.RootNode = interpreter.CreateNodeTreeForFunc(func.OriginalDefinition, func.Name);
-            func.RootNode = simplifier.SimplifyFuncFromRoot(func.RootNode);
-            reader.ExtractFinalFuncInfo(func);
-            func.BytecodeInfo = encoder.Encode(func.RootNode);
+            UpdateFunc(func);
             return func;
         }
         private IFunc CreateFuncIfDidntExist(string textFunc)
@@ -79,6 +76,15 @@ namespace FuncSpace
             }
             return func;
         }
+
+        private void UpdateFunc(IFunc func)
+        {
+            func.RootNode = interpreter.CreateNodeTreeForFunc(func.OriginalDefinition, func.Name);
+            func.RootNode = simplifier.SimplifyFuncFromRoot(func.RootNode);
+            reader.ExtractFinalFuncInfo(func);
+            func.BytecodeInfo = encoder.Encode(func.RootNode);
+        }
+
         private void AddFunc(IFunc func)
         {
             userDefinedFuncs[func.Name] = func;
@@ -98,17 +104,10 @@ namespace FuncSpace
                 }
             }
         }
-        #endregion
-        private void UpdateFunc(IFunc func)
-        {
-            func.RootNode = interpreter.CreateNodeTreeForFunc(func.OriginalDefinition, func.Name);
-            reader.ExtractFinalFuncInfo(func);
-        }
+        
+        
 
-        public bool IsFuncDefinedByUser(string name)
-        {
-            return userDefinedFuncs.ContainsKey(name);
-        }
+        #endregion
 
         #region RemoveFuncs
 
@@ -161,6 +160,11 @@ namespace FuncSpace
             {
                 return dummyFunc;
             }
+        }
+
+        public bool IsFuncDefinedByUser(string name)
+        {
+            return userDefinedFuncs.ContainsKey(name);
         }
     }
 }
