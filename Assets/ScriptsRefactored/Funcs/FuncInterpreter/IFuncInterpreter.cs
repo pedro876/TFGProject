@@ -1,12 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-namespace FuncSpace
+﻿namespace FuncSpace
 {
     public interface IFuncInterpreter
     {
-        void CreateNodeTreeForFunc(IFunc func);
-
+        IFuncNode CreateNodeTreeForFunc(string definition, string funcName);
     }
 }

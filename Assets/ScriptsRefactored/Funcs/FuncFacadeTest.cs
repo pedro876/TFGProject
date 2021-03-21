@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
@@ -23,6 +22,7 @@ public class FuncFacadeTest : MonoBehaviour
             new KeyValuePair<string, Func<bool>>("TestCreateFunc7", TestCreateFunc7),
             new KeyValuePair<string, Func<bool>>("TestSimplifyFunc1", TestSimplifyFunc1),
             new KeyValuePair<string, Func<bool>>("TestSolve1", TestSolve1),
+            new KeyValuePair<string, Func<bool>>("TestSolveExternalMemory", TestSolveExternalMemory),
             new KeyValuePair<string, Func<bool>>("TestNonReference", TestNonReference),
             new KeyValuePair<string, Func<bool>>("TestCrossReference1", TestCrossReference1),
             new KeyValuePair<string, Func<bool>>("TestCrossReference2", TestCrossReference2),
@@ -47,7 +47,7 @@ public class FuncFacadeTest : MonoBehaviour
     {
         IFuncFacade facade = ServiceLocator.Instance.GetService<IFuncFacade>();
         facade.Reset();
-        string result = facade.Solve(new Vector3(1,0,0)).ToString();
+        string result = facade.Solve(1,0,0).ToString();
         string expectedResult = "1";
         Debug.Log("expected:\t" + expectedResult);
         Debug.Log("got:\t\t" + result);
@@ -60,7 +60,7 @@ public class FuncFacadeTest : MonoBehaviour
         facade.Reset();
         string expectedResult = "dummy(x) = x";
 
-        string result = facade.SelectedFunc;
+        string result = facade.GetSelectedFunc();
 
         Debug.Log("expected:\t" + expectedResult);
         Debug.Log("got:\t\t" + result);
@@ -75,7 +75,7 @@ public class FuncFacadeTest : MonoBehaviour
         string expectedResult = "f(x) = x^2";
         facade.CreateFunc(expectedResult);
         facade.SelectFunc("f");
-        string result = facade.SelectedFunc;
+        string result = facade.GetSelectedFunc();
 
         Debug.Log("expected:\t" + expectedResult);
         Debug.Log("got:\t\t" + result);
@@ -90,7 +90,7 @@ public class FuncFacadeTest : MonoBehaviour
         string expectedResult = "f(x) = x^2*-(5*x)";
         facade.CreateFunc(expectedResult);
         facade.SelectFunc("f");
-        string result = facade.SelectedFunc;
+        string result = facade.GetSelectedFunc();
 
         Debug.Log("expected:\t" + expectedResult);
         Debug.Log("got:\t\t" + result);
@@ -105,7 +105,7 @@ public class FuncFacadeTest : MonoBehaviour
         string expectedResult = "g(x) = cos(x)+cos(y)";
         facade.CreateFunc(expectedResult);
         facade.SelectFunc("g");
-        string result = facade.SelectedFunc;
+        string result = facade.GetSelectedFunc();
 
         expectedResult = "g(x,y) = cos(x)+cos(y)";
         Debug.Log("expected:\t" + expectedResult);
@@ -120,7 +120,7 @@ public class FuncFacadeTest : MonoBehaviour
         string expectedResult = "g(x) = x-+y";
         facade.CreateFunc(expectedResult);
         facade.SelectFunc("g");
-        string result = facade.SelectedFunc;
+        string result = facade.GetSelectedFunc();
 
         expectedResult = "g(x,y) = x-y";
         Debug.Log("expected:\t" + expectedResult);
@@ -136,7 +136,7 @@ public class FuncFacadeTest : MonoBehaviour
         string expectedResult = "g(x) = x+-y";
         facade.CreateFunc(expectedResult);
         facade.SelectFunc("g");
-        string result = facade.SelectedFunc;
+        string result = facade.GetSelectedFunc();
 
         expectedResult = "g(x,y) = x-y";
         Debug.Log("expected:\t" + expectedResult);
@@ -152,7 +152,7 @@ public class FuncFacadeTest : MonoBehaviour
         string expectedResult = "g(x) = -x-y";
         facade.CreateFunc(expectedResult);
         facade.SelectFunc("g");
-        string result = facade.SelectedFunc;
+        string result = facade.GetSelectedFunc();
 
         expectedResult = "g(x,y) = -(x+y)";
         Debug.Log("expected:\t" + expectedResult);
@@ -168,7 +168,7 @@ public class FuncFacadeTest : MonoBehaviour
         string expectedResult = "g(x,y) = sin((x+y)*20)*0.5";
         facade.CreateFunc(expectedResult);
         facade.SelectFunc("g");
-        string result = facade.SelectedFunc;
+        string result = facade.GetSelectedFunc();
 
         expectedResult = "g(x,y) = sin((x+y)*20)*0,5";
         Debug.Log("expected:\t" + expectedResult);
@@ -184,7 +184,7 @@ public class FuncFacadeTest : MonoBehaviour
         string expectedResult = "g(x,y) = cos(x*0) + y*1 + y*0 + y^0 + 1^4 + 0 - y";
         facade.CreateFunc(expectedResult);
         facade.SelectFunc("g");
-        string result = facade.SelectedFunc;
+        string result = facade.GetSelectedFunc();
 
         expectedResult = "g(y) = cos(0)+y+2-y";
         Debug.Log("expected:\t" + expectedResult);
@@ -204,7 +204,25 @@ public class FuncFacadeTest : MonoBehaviour
         float x = 3.9f;
         float y = 2f;
         string expectedResult = (Mathf.Cos(x)+Mathf.Cos(y)).ToString();
-        string result = facade.Solve(new Vector3(x, y, 0f)).ToString();
+        string result = facade.Solve(x, y, 0f).ToString();
+
+        Debug.Log("expected:\t" + expectedResult);
+        Debug.Log("got:\t\t" + result);
+        return expectedResult.Equals(result);
+    }
+
+    bool TestSolveExternalMemory()
+    {
+        IFuncFacade facade = ServiceLocator.Instance.GetService<IFuncFacade>();
+        facade.Reset();
+        string func = "g(x) = cos(x)+cos(y)";
+        facade.CreateFunc(func);
+        facade.SelectFunc("g");
+        float x = 3.9f;
+        float y = 2f;
+        string expectedResult = (Mathf.Cos(x) + Mathf.Cos(y)).ToString();
+        float[] mem = facade.GetBytecodeMemCopy();
+        string result = facade.Solve(x, y, 0f, mem).ToString();
 
         Debug.Log("expected:\t" + expectedResult);
         Debug.Log("got:\t\t" + result);
@@ -219,7 +237,7 @@ public class FuncFacadeTest : MonoBehaviour
         facade.CreateFunc(func);
         facade.SelectFunc("f");
         string expectedResult = "f = 1";
-        string result = facade.SelectedFunc;
+        string result = facade.GetSelectedFunc();
 
         Debug.Log("expected:\t" + expectedResult);
         Debug.Log("got:\t\t" + result);
@@ -236,7 +254,7 @@ public class FuncFacadeTest : MonoBehaviour
         facade.CreateFunc(func2);
         facade.SelectFunc("f");
         string expectedResult = "f(x) = g(x)";
-        string result = facade.SelectedFunc;
+        string result = facade.GetSelectedFunc();
 
         Debug.Log("expected:\t" + expectedResult);
         Debug.Log("got:\t\t" + result);
@@ -253,7 +271,7 @@ public class FuncFacadeTest : MonoBehaviour
         facade.CreateFunc(func2);
         facade.SelectFunc("g");
         string expectedResult = func2;
-        string result = facade.SelectedFunc;
+        string result = facade.GetSelectedFunc();
 
         Debug.Log("expected:\t" + expectedResult);
         Debug.Log("got:\t\t" + result);
@@ -270,7 +288,7 @@ public class FuncFacadeTest : MonoBehaviour
         facade.CreateFunc(func2);
         facade.SelectFunc("g");
         string expectedResult = "2";
-        string result = facade.Solve(new Vector3(2,0,0)).ToString();
+        string result = facade.Solve(2,0,0).ToString();
 
         Debug.Log("expected:\t" + expectedResult);
         Debug.Log("got:\t\t" + result);
@@ -286,8 +304,8 @@ public class FuncFacadeTest : MonoBehaviour
         facade.CreateFunc(func1);
         facade.CreateFunc(func2);
         facade.SelectFunc("g");
-        string expectedResult = "1";
-        string result = facade.Solve(new Vector3(2, 0, 0)).ToString();
+        string expectedResult = "0";
+        string result = facade.Solve(2, 0, 0).ToString();
 
         Debug.Log("expected:\t" + expectedResult);
         Debug.Log("got:\t\t" + result);

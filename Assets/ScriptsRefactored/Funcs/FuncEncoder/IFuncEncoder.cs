@@ -1,10 +1,7 @@
-﻿using System.Collections;
-using UnityEngine;
-
-namespace FuncSpace
+﻿namespace FuncSpace
 {
     public interface IFuncEncoder
     {
-        void Encode(IFunc func);
+        Bytecode Encode(IFuncNode rootNode);
     }
 }

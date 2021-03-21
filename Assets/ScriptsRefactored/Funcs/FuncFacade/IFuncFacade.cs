@@ -1,13 +1,20 @@
-﻿using UnityEngine;
-
+﻿using System.Collections.Generic;
 public interface IFuncFacade
 {
-    string SelectedFunc { get; }
-    string SelectedFuncName { get; }
+    string GetSelectedFunc();
+    string GetSelectedFuncName();
     bool SelectFunc(string funcName);
     bool IsFuncSelected(string funcName);
+
     void CreateFunc(string textFunc);
     bool RemoveFunc(string funcName);
     void Reset();
-    float Solve(Vector3 vec);
+
+    float Solve(float x, float y, float z);
+    float Solve(float x, float y, float z, float[] memory);
+
+    float[] GetBytecodeMemCopy();
+    List<int> GetBytecodeOperations();
+    int GetBytecodeResultIndex();
+    int GetMaxOperatorIndex();
 }

@@ -1,13 +1,12 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text;
-using UnityEngine;
 
 namespace FuncSpace
 {
     public class FuncReader : IFuncReader
     {
-        private IFuncFactory factory;
+
+        IFuncFactory factory;
 
         public FuncReader(IFuncFactory factory)
         {
@@ -96,10 +95,9 @@ namespace FuncSpace
         {
             const string symbols = "+-*^/()";
             const string numberSymbols = "0123456789.";
-            var variables = factory.Variables;
 
             bool isOperator = symbols.Contains(c);
-            bool isVariable = variables.Contains(c);
+            bool isVariable = FuncGeneralInfo.VariableExists(c);
             bool isNumber = numberSymbols.Contains(c);
 
             return (isVariable || isNumber) && !isOperator;
@@ -108,16 +106,16 @@ namespace FuncSpace
         private bool StartsWithSubFunction(string text, out string subFunction)
         {
             bool startsWithSubFunc = false;
-            subFunction = "";
-            foreach (var n in factory.AllFuncNames)
+            string auxSub = "";
+            factory.ForEachFuncName((name) =>
             {
-                if (text.StartsWith(n))
+                if (text.StartsWith(name))
                 {
                     startsWithSubFunc = true;
-                    subFunction = n;
-                    break;
+                    auxSub = name;
                 }
-            }
+            });
+            subFunction = auxSub;
             return startsWithSubFunc;
         }
 
@@ -156,17 +154,19 @@ namespace FuncSpace
 
         private bool StartsWithVariable(string text, out string variable)
         {
-            var variables = factory.Variables;
-            variable = "";
-            foreach (string v in variables)
+            //var variables = FuncGeneralInfo.variables;
+            string aux = "";
+            bool foundCoincidence = false;
+            FuncGeneralInfo.ForEachVariable((variable) =>
             {
-                if (text.StartsWith(v))
+                if (text.StartsWith(variable))
                 {
-                    variable = v;
-                    return true;
+                    aux = variable;
+                    foundCoincidence = true;
                 }
-            }
-            return false;
+            });
+            variable = aux;
+            return foundCoincidence;
         }
 
         public IFunc ExtractFinalFuncInfo(IFunc func)
@@ -188,11 +188,11 @@ namespace FuncSpace
         {
             List<string> variables = new List<string>();
             string finalDefinition = func.FinalDefinition;
-            foreach (var variable in factory.Variables)
+            FuncGeneralInfo.ForEachVariable((variable) =>
             {
                 if (finalDefinition.Contains(variable))
                     variables.Add(variable);
-            }
+            });
             func.Variables = variables;
         }
 
@@ -200,16 +200,16 @@ namespace FuncSpace
         {
             List<string> subfunctions = new List<string>();
             string finalDefinition = func.FinalDefinition;
-            foreach (var subfunction in factory.AllFuncNames)
+            factory.ForEachFuncName((name) =>
             {
-                if (factory.IsFuncDefinedByUser(subfunction))
+                if (factory.IsFuncDefinedByUser(name))
                 {
-                    if (finalDefinition.Contains(subfunction))
+                    if (finalDefinition.Contains(name))
                     {
-                        subfunctions.Add(subfunction);
+                        subfunctions.Add(name);
                     }
                 }
-            }
+            });
             func.Subfunctions = subfunctions;
         }
 

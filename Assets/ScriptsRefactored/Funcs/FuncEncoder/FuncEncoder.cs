@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System.Collections.Generic;
 using System;
 
 namespace FuncSpace
@@ -23,23 +21,24 @@ namespace FuncSpace
             subFuncsRecord = new HashSet<string>();
         }
 
-        public void Encode(IFunc func)
+        public Bytecode Encode(IFuncNode rootNode)
         {
-            CreateBytecode(func);
-            func.BytecodeInfo = bytecode;
+            Bytecode code = CreateBytecode(rootNode);
             Reset();
+            return code;
         }
 
-        private void CreateBytecode(IFunc func)
+        private Bytecode CreateBytecode(IFuncNode rootNode)
         {
             lastMemoryIndex = memoryStart;
             bytecode = new Bytecode();
             int[] variablesIndex = new int[] { 1, 2, 3 };
 
-            DeepEncode(variablesIndex, func.RootNode);
+            DeepEncode(variablesIndex, rootNode);
             FillByteCodeMemory();
 
-            bytecode.resultIndex = memoryNodes[func.RootNode];
+            bytecode.resultIndex = memoryNodes[rootNode];
+            return bytecode;
         }
 
         private void Reset()
@@ -62,15 +61,17 @@ namespace FuncSpace
             }
         }
 
+        #region DeepEnconde
+
         private void DeepEncode(int[] varIdx, IFuncNode node)
         {
             if (lastMemoryIndex < Bytecode.maxMemorySize)
             {
                 int memoryIndex = 0;
 
-                if(node is LeafNode leafNode)
+                if (node is LeafNode leafNode)
                     memoryIndex = DeepEncodeLeafNode(varIdx, leafNode);
-                else if(node is NonLeafNode nonLeafNode)
+                else if (node is NonLeafNode nonLeafNode)
                     memoryIndex = DeepEncodeNonLeafNode(varIdx, nonLeafNode);
                 
                 memoryNodes[node] = memoryIndex;
@@ -197,11 +198,13 @@ namespace FuncSpace
 
         private int GetPredefinedFuncIndex(PredefinedFuncNode node)
         {
-            return factory.Operators.Count + factory.PredefinedFuncs.IndexOf(node.FunctionName);
+            return FuncGeneralInfo.NumOperators + factory.IndexOfPredefinedFunc(node.FunctionName);
         }
         private int GetOperationIndex(OperatorNode node)
         {
-            return factory.Operators.IndexOf(node.OperatorSymbol);
+            return FuncGeneralInfo.IndexOfOperator(node.OperatorSymbol);
         }
+
+        #endregion
     }
 }

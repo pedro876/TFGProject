@@ -1,10 +1,7 @@
-﻿using System.Collections;
-using UnityEngine;
-
-namespace FuncSpace
+﻿namespace FuncSpace
 {
     public interface IFuncSimplifier
     {
-        void SimplifyFunc(IFunc func);
+        IFuncNode SimplifyFuncFromRoot(IFuncNode rootNode);
     }
 }

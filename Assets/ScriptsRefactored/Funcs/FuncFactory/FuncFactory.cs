@@ -1,26 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System.Collections.Generic;
+using System;
 
 namespace FuncSpace
 {
     public class FuncFactory : IFuncFactory
     {
-        /*private static FuncFactory instance = null;
-        public static FuncFactory Instance
-        {
-            get
-            {
-                if (instance == null)
-                {
-                    instance = new FuncFactory();
-                    instance.Init();
-                }
-                    
-                return instance; ;
-            }
-        }
-        */
         private IFuncReader reader;
         private IFuncInterpreter interpreter;
         private IFuncSimplifier simplifier;
@@ -28,10 +12,7 @@ namespace FuncSpace
 
         private Dictionary<string, IFunc> userDefinedFuncs;
         private HashSet<string> allFuncNames;
-        private HashSet<string> variables;
-        private List<string> operators;
         private List<string> predefinedFuncs;
-        private Dictionary<string, int> operatorPriorities;
         private IFunc dummyFunc;
 
         public FuncFactory()
@@ -45,42 +26,29 @@ namespace FuncSpace
             {
                 allFuncNames.Add(f);
             }
-            variables = new HashSet<string>()
-            {
-                "x","y","z"
-            };
-            operators = new List<string>()
-            {
-                "-", "+", "*", "/", "^",
-            };
-            operatorPriorities = new Dictionary<string, int>()
-            {
-                { "-", 0 }, { "+", 0 },
-                { "*", 1 }, { "/", 1 }, { "^", 1 },
-            };
             userDefinedFuncs = new Dictionary<string, FuncSpace.IFunc>();
             reader = new FuncReader(factory: this);
             interpreter = new FuncInterpreter(factory: this);
             simplifier = new FuncSimplifier();
-            encoder = new FuncEncoder(this);
+            encoder = new FuncEncoder(factory:this);
             dummyFunc = CreateFunc("dummy(x) = x");
         }
 
-        public IFunc DummyFunc => dummyFunc;
-        public int MaxOperatorIndex => operators.Count;
-        public HashSet<string> AllFuncNames => allFuncNames;
-        public List<string> PredefinedFuncs => predefinedFuncs;
-        public HashSet<string> Variables => variables;
-        public List<string> Operators => operators;
-        
-        public int GetOperatorPriority(string op)
+        public IFunc GetDummy()
         {
-            if (operatorPriorities.ContainsKey(op))
+            return dummyFunc;
+        }
+        public void ForEachFuncName(Action<string> action)
+        {
+            foreach(var str in allFuncNames)
             {
-                return operatorPriorities[op];
+                action(str);
             }
-            else
-                return -1;
+        }
+
+        public int IndexOfPredefinedFunc(string funcName)
+        {
+            return predefinedFuncs.IndexOf(funcName);
         }
 
         #region CreateFunc
@@ -95,10 +63,10 @@ namespace FuncSpace
         {
             IFunc func = CreateFuncIfDidntExist(textFunc);
             reader.ExtractOriginalFuncInfo(textFunc, func);
-            interpreter.CreateNodeTreeForFunc(func);
-            simplifier.SimplifyFunc(func);
+            func.RootNode = interpreter.CreateNodeTreeForFunc(func.OriginalDefinition, func.Name);
+            func.RootNode = simplifier.SimplifyFuncFromRoot(func.RootNode);
             reader.ExtractFinalFuncInfo(func);
-            encoder.Encode(func);
+            func.BytecodeInfo = encoder.Encode(func.RootNode);
             return func;
         }
         private IFunc CreateFuncIfDidntExist(string textFunc)
@@ -133,7 +101,7 @@ namespace FuncSpace
         #endregion
         private void UpdateFunc(IFunc func)
         {
-            interpreter.CreateNodeTreeForFunc(func);
+            func.RootNode = interpreter.CreateNodeTreeForFunc(func.OriginalDefinition, func.Name);
             reader.ExtractFinalFuncInfo(func);
         }
 

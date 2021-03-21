@@ -18,6 +18,5 @@ namespace FuncSpace
         IFuncNode RootNode { get; set; }
         string ComputeDefinitionString();
         float Solve(float x, float y, float z);
-
     }
 }

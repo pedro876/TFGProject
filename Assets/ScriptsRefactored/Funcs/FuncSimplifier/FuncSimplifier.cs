@@ -5,9 +5,10 @@ namespace FuncSpace
 {
     public class FuncSimplifier : IFuncSimplifier
     {
-        public void SimplifyFunc(IFunc func)
+        public IFuncNode SimplifyFuncFromRoot(IFuncNode rootNode)
         {
-            func.RootNode = DeepSimplify(func.RootNode);
+            IFuncNode simplifiedNode = DeepSimplify(rootNode);
+            return simplifiedNode;
         }
 
         #region DeepSimplify

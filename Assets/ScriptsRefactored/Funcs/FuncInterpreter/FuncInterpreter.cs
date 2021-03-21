@@ -1,13 +1,11 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System.Collections.Generic;
 
 namespace FuncSpace
 {
     public class FuncInterpreter : IFuncInterpreter
     {
         IFuncFactory factory;
-        IFunc funcBeingProcessed;
+        string currentFuncName;
 
         public FuncInterpreter(IFuncFactory factory)
         {
@@ -16,14 +14,13 @@ namespace FuncSpace
 
         #region Processing
 
-        public void CreateNodeTreeForFunc(IFunc func)
+        public IFuncNode CreateNodeTreeForFunc(string definition, string funcName)
         {
-            funcBeingProcessed = func;
-            string definition = func.OriginalDefinition;
+            currentFuncName = funcName;
             if (definition.Length == 0) definition = "0";
             IFuncNode root = ProcessDefinition(definition);
-            func.RootNode = root;
-            funcBeingProcessed = null;
+            currentFuncName = null;
+            return root;
         }
 
         private IFuncNode ProcessDefinition(string definition)
@@ -71,9 +68,9 @@ namespace FuncSpace
         {
             if(definition.Length > 1)
             {
-                if (definition[0] != '-' && factory.Operators.Contains(definition[0].ToString()))
+                if (definition[0] != '-' && FuncGeneralInfo.OperatorExists(definition[0].ToString()))
                     definition = definition.Substring(1);
-                if (factory.Operators.Contains(definition[definition.Length - 1].ToString()))
+                if (FuncGeneralInfo.OperatorExists(definition[definition.Length - 1].ToString()))
                     definition = definition.Substring(0, definition.Length - 1);
             }
         }
@@ -84,8 +81,8 @@ namespace FuncSpace
 
         private int[] FindPossibleBreakpoints(ref string definition)
         {
-            var operators = factory.Operators;
-            int[] breakPoints = new int[operators.Count];
+            //var operators = FuncGeneralInfo.operators;
+            int[] breakPoints = new int[FuncGeneralInfo.NumOperators];
             for (int i = 0; i < breakPoints.Length; i++) breakPoints[i] = -1;
             int funcLength = definition.Length;
             int depth = 0;
@@ -98,12 +95,12 @@ namespace FuncSpace
                 for (int j = 0; j < breakPoints.Length; j++)
                 {
                     string op = "" + c;
-                    if (breakPoints[j] == -1 && op == operators[j])
+                    if (breakPoints[j] == -1 && op == FuncGeneralInfo.GetOperatorAtIndex(j))
                     {
-                        if(i > 0 && operators.Contains(definition[i-1].ToString())) //Check if operator is preceded by a more relevant operator
+                        if(i > 0 && FuncGeneralInfo.OperatorExists(definition[i-1].ToString())) //Check if operator is preceded by a more relevant operator
                         {
-                            int priority = factory.GetOperatorPriority(op);
-                            int lastPriority = factory.GetOperatorPriority(definition[i - 1].ToString());
+                            int priority = FuncGeneralInfo.GetOperatorPriority(op);
+                            int lastPriority = FuncGeneralInfo.GetOperatorPriority(definition[i - 1].ToString());
                             if(priority >= lastPriority)
                             {
                                 breakPoints[j] = i;
@@ -131,7 +128,7 @@ namespace FuncSpace
 
         private IFuncNode ProcessOperation(ref string definition, int breakpoint, int splitPoint)
         {
-            string operation = factory.Operators[breakpoint];
+            string operation = FuncGeneralInfo.GetOperatorAtIndex(breakpoint);
             var children = ProcessOperatorChildren(ref definition, splitPoint);
             IFuncNode node = CreateOperatorNodeFromString(operation, children);
             foreach (var child in children)
@@ -190,16 +187,19 @@ namespace FuncSpace
 
         private bool IsSubfunction(ref string definition, out string subfunction)
         {
-            foreach(var name in factory.AllFuncNames)
+            string auxDef = definition;
+            string auxSub = "";
+            bool foundCoincidence = false;
+            factory.ForEachFuncName((name) =>
             {
-                if (definition.StartsWith(name))
+                if (auxDef.StartsWith(name))
                 {
-                    subfunction = name;
-                    return true;
+                    auxSub = name;
+                    foundCoincidence = true;
                 }
-            }
-            subfunction = "";
-            return false;
+            });
+            subfunction = auxSub;
+            return foundCoincidence;
         }
 
         private IFuncNode ProcessSubfunction(ref string definition, ref string subfunction)
@@ -211,7 +211,7 @@ namespace FuncSpace
             if (factory.IsFuncDefinedByUser(subfunction))
             {
                 IFunc func = factory.GetFunc(subfunction);
-                bool preventRecursive = func.OriginalDefinition.Contains(funcBeingProcessed.Name);
+                bool preventRecursive = func.OriginalDefinition.Contains(currentFuncName);
                 node = new UserDefinedFuncNode(subfunction, func, preventRecursive, children);
             }
             else
@@ -247,7 +247,7 @@ namespace FuncSpace
 
         private bool IsVariable(ref string definition)
         {
-            return factory.Variables.Contains(definition);
+            return FuncGeneralInfo.VariableExists(definition);
         }
 
         private IFuncNode ProcessVariable(ref string definition)

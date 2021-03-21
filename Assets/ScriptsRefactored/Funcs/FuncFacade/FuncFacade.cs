@@ -1,26 +1,30 @@
 ﻿using FuncSpace;
-using UnityEngine;
+using System.Collections.Generic;
 
 public class FuncFacade : IFuncFacade
 {
 
-    IFuncFactory factory;
-    IFuncSolver funcSolver;
-    IBytecodeSolver bytecodeSolver;
+    private IFuncFactory factory;
+    private IFuncSolver bytecodeSolver;
+    private IFunc selectedFunc;
 
     public FuncFacade()
     {
         factory = new FuncFactory();
-        funcSolver = new FuncSolver();
-        bytecodeSolver = new BytecodeSolver();
+        bytecodeSolver = new FuncSolver();
     }
-
-    private FuncSpace.IFunc selectedFunc;
 
     #region selection
 
-    public string SelectedFunc => selectedFunc.ToString();
-    public string SelectedFuncName => selectedFunc.Name;
+    public string GetSelectedFunc()
+    {
+        return selectedFunc.ToString();
+    }
+
+    public string GetSelectedFuncName()
+    {
+        return selectedFunc.Name;
+    }
 
     public bool SelectFunc(string funcName)
     {
@@ -51,9 +55,9 @@ public class FuncFacade : IFuncFacade
     {
         if (factory.IsFuncDefinedByUser(funcName))
         {
-            var func = factory.GetFunc(funcName);
-            if (selectedFunc == func)
-                selectedFunc = factory.DummyFunc;
+            if (selectedFunc.Name.Equals(funcName))
+                selectedFunc = factory.GetDummy();
+
             factory.RemoveFunc(funcName);
             return true;
         }
@@ -64,23 +68,22 @@ public class FuncFacade : IFuncFacade
     public void Reset()
     {
         factory.RemoveAllFuncs();
-        selectedFunc = factory.DummyFunc;
+        selectedFunc = factory.GetDummy(); ;
     }
 
     #endregion
 
     #region Solve
 
-    public float Solve(Vector3 vec)
+    public float Solve(float x, float y, float z)
     {
-        return funcSolver.Solve(vec, selectedFunc);
+        var memory = selectedFunc.BytecodeInfo.memory;
+        return bytecodeSolver.Solve(x,y,z, selectedFunc.BytecodeInfo, memory);
     }
 
-    public float SolveBytecode(Vector3 vec, float[] memory = null)
+    public float Solve(float x, float y, float z, float[] memory)
     {
-        if (memory == null)
-            memory = selectedFunc.BytecodeInfo.memory;
-        return bytecodeSolver.Solve(vec, selectedFunc.BytecodeInfo, memory);
+        return bytecodeSolver.Solve(x,y,z, selectedFunc.BytecodeInfo, memory);
     }
 
     public float[] GetBytecodeMemCopy()
@@ -89,6 +92,21 @@ public class FuncFacade : IFuncFacade
         for (int i = 0; i < Bytecode.maxMemorySize; i++)
             copy[i] = selectedFunc.BytecodeInfo.memory[i];
         return copy;
+    }
+
+    public List<int> GetBytecodeOperations()
+    {
+        return selectedFunc.BytecodeInfo.operations;
+    }
+
+    public int GetBytecodeResultIndex()
+    {
+        return selectedFunc.BytecodeInfo.resultIndex;
+    }
+
+    public int GetMaxOperatorIndex()
+    {
+        return FuncGeneralInfo.MaxOperatorIndex;
     }
 
     #endregion

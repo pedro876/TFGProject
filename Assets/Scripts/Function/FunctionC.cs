@@ -45,8 +45,8 @@ public class FunctionC
     {
         bool outOfRegion = ViewController.IsOutOfRegion(ref p);
         if (outOfRegion) return false;
-        //float eval = SolveByteCode(memory, p.x, p.y, p.z);
-        float eval = Solve(p.x, p.y, p.z);
+        float eval = SolveByteCode(memory, p.x, p.y, p.z);
+        //float eval = Solve(p.x, p.y, p.z);
         return VolumeInterpreter.Interpretate(ref p, eval);
     }
 
