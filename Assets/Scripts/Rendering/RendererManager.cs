@@ -62,7 +62,7 @@ public class RendererManager : MonoBehaviour
         texObjProto = localTexObjProto;
         cpuRendererProto = localCpuRendererProto;
         gpuRendererProto = localGpuRendererProto;
-        spaceView = FindObjectOfType<ViewController>().GetComponent<RectTransform>();
+        spaceView = FindObjectOfType<ViewControllerC>().GetComponent<RectTransform>();
         quadContainer = GameObject.FindGameObjectWithTag("QuadContainer").GetComponent<RectTransform>();
 #if UNITY_WEBGL
         ChangeRenderMode(RendererType.CPU);
@@ -70,7 +70,7 @@ public class RendererManager : MonoBehaviour
         ChangeRenderMode(RendererType.GPU);
 #endif
         //StartRender();
-        ViewController.onChanged += () => StartRender(false);
+        ViewControllerC.onChanged += () => StartRender(false);
         FunctionPanel.onChanged += () => StartRender(true);
         VolumeInterpreter.onChanged += () => StartRender(true);
         RenderPanel.onRestartRender += () => StartRender(true);

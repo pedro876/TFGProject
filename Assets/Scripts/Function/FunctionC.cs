@@ -43,7 +43,7 @@ public class FunctionC
 
     public bool IsMass(ref Vector3 p, float[] memory)
     {
-        bool outOfRegion = ViewController.IsOutOfRegion(ref p);
+        bool outOfRegion = ViewControllerC.IsOutOfRegion(ref p);
         if (outOfRegion) return false;
         float eval = SolveByteCode(memory, p.x, p.y, p.z);
         //float eval = Solve(p.x, p.y, p.z);

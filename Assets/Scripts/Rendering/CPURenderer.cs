@@ -112,13 +112,13 @@ public class CPURenderer : AbstractRenderer
     private void RenderRegion(int minX, int minY, int maxX, int maxY)
     {
         
-        Vector3 right = (ViewController.nearTopRight - ViewController.nearTopLeft).normalized;
-        Vector3 up = (ViewController.nearTopLeft - ViewController.nearBottomLeft).normalized;
+        Vector3 right = (ViewControllerC.nearTopRight - ViewControllerC.nearTopLeft).normalized;
+        Vector3 up = (ViewControllerC.nearTopLeft - ViewControllerC.nearBottomLeft).normalized;
 
-        float nearSize = Vector3.Distance(ViewController.nearTopLeft, ViewController.nearTopRight);
-        float farSize = Vector3.Distance(ViewController.farTopLeft, ViewController.farTopRight);
-        Vector3 nearStart = Vector3.Lerp(ViewController.nearTopLeft, ViewController.nearTopRight, startX) - up * (1f - startY) * nearSize;
-        Vector3 farStart = Vector3.Lerp(ViewController.farTopLeft, ViewController.farTopRight, startX) - up * (1f - startY) * farSize;
+        float nearSize = Vector3.Distance(ViewControllerC.nearTopLeft, ViewControllerC.nearTopRight);
+        float farSize = Vector3.Distance(ViewControllerC.farTopLeft, ViewControllerC.farTopRight);
+        Vector3 nearStart = Vector3.Lerp(ViewControllerC.nearTopLeft, ViewControllerC.nearTopRight, startX) - up * (1f - startY) * nearSize;
+        Vector3 farStart = Vector3.Lerp(ViewControllerC.farTopLeft, ViewControllerC.farTopRight, startX) - up * (1f - startY) * farSize;
         FunctionC func = FunctionElement.selectedFunc.func;
         bytecodeMemory = func.CreateBytecodeMemory();
 
@@ -130,8 +130,8 @@ public class CPURenderer : AbstractRenderer
                 Vector3 nearPos = nearStart + (right * ((float)x / width) - up * ((float)y / height)) * region * nearSize;
                 Vector3 farPos = farStart + (right * ((float)x / width) - up * ((float)y / height)) * region * farSize;
 
-                nearPos = ViewController.TransformToRegion(ref nearPos);
-                farPos = ViewController.TransformToRegion(ref farPos);
+                nearPos = ViewControllerC.TransformToRegion(ref nearPos);
+                farPos = ViewControllerC.TransformToRegion(ref farPos);
 
                 bool landed = false;
                 float normDepth = 0f;

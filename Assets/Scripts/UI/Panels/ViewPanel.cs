@@ -40,12 +40,12 @@ public class ViewPanel : MonoBehaviour
     private void Start()
     {
         pp = FindObjectOfType<PostProcess>();
-        minXField.text = ""+ViewController.regionX.x;
-        minYField.text = ""+ViewController.regionY.x;
-        minZField.text = ""+ViewController.regionZ.x;
-        maxXField.text = ""+ViewController.regionX.y;
-        maxYField.text = ""+ViewController.regionY.y;
-        maxZField.text = ""+ViewController.regionZ.y;
+        minXField.text = ""+ViewControllerC.regionX.x;
+        minYField.text = ""+ViewControllerC.regionY.x;
+        minZField.text = ""+ViewControllerC.regionZ.x;
+        maxXField.text = ""+ViewControllerC.regionX.y;
+        maxYField.text = ""+ViewControllerC.regionY.y;
+        maxZField.text = ""+ViewControllerC.regionZ.y;
 
         minXField.onValueChanged.AddListener((s) => UpdateRegion());
         maxXField.onValueChanged.AddListener((s) => UpdateRegion());
@@ -54,16 +54,16 @@ public class ViewPanel : MonoBehaviour
         minZField.onValueChanged.AddListener((s) => UpdateRegion());
         maxZField.onValueChanged.AddListener((s) => UpdateRegion());
 
-        clampToRegion.isOn = ViewController.GetClampToRegion();
-        clampToRegion.onValueChanged.AddListener(ViewController.SetClampToRegion);
+        clampToRegion.isOn = ViewControllerC.GetClampToRegion();
+        clampToRegion.onValueChanged.AddListener(ViewControllerC.SetClampToRegion);
 
         axesImage = axes.GetComponentInChildren<RawImage>();
         showAxes.isOn = axes.gameObject.activeSelf;
         showAxes.onValueChanged.AddListener((val) => axes.gameObject.SetActive(val));
         axesOpacity.value = axesImage.color.a;
         axesOpacity.onValueChanged.AddListener((val) => axesImage.color = new Color(axesImage.color.r, axesImage.color.g, axesImage.color.b, val));
-        perspectiveView.onValueChanged.AddListener((val) => ViewController.cam.orthographic = !val);
-        nearField.text = ""+ViewController.cam.nearClipPlane;
+        perspectiveView.onValueChanged.AddListener((val) => ViewControllerC.cam.orthographic = !val);
+        nearField.text = ""+ViewControllerC.cam.nearClipPlane;
         nearField.onValueChanged.AddListener((val) =>
         {
             val = val.Replace(".", ",");
@@ -71,21 +71,21 @@ public class ViewPanel : MonoBehaviour
             if(float.TryParse(val, out v))
             {
                 v = Mathf.Max(0.01f, v);
-                ViewController.cam.nearClipPlane = v;
+                ViewControllerC.cam.nearClipPlane = v;
             }
         });
-        farField.text = "" + ViewController.cam.farClipPlane;
+        farField.text = "" + ViewControllerC.cam.farClipPlane;
         farField.onValueChanged.AddListener((val) =>
         {
             val = val.Replace(".", ",");
             float v;
             if (float.TryParse(val, out v))
             {
-                v = Mathf.Max(ViewController.cam.nearClipPlane+0.01f, v);
-                ViewController.cam.farClipPlane = v;
+                v = Mathf.Max(ViewControllerC.cam.nearClipPlane+0.01f, v);
+                ViewControllerC.cam.farClipPlane = v;
             }
         });
-        ortographicSizeField.text = "" + ViewController.cam.orthographicSize;
+        ortographicSizeField.text = "" + ViewControllerC.cam.orthographicSize;
         ortographicSizeField.onValueChanged.AddListener((val) =>
         {
             val = val.Replace(".", ",");
@@ -93,10 +93,10 @@ public class ViewPanel : MonoBehaviour
             if (float.TryParse(val, out v))
             {
                 v = Mathf.Max(v, 0.1f);
-                ViewController.cam.orthographicSize = v;
+                ViewControllerC.cam.orthographicSize = v;
             }
         });
-        fovField.text = "" + ViewController.cam.fieldOfView;
+        fovField.text = "" + ViewControllerC.cam.fieldOfView;
         fovField.onValueChanged.AddListener((val) =>
         {
             val = val.Replace(".", ",");
@@ -104,7 +104,7 @@ public class ViewPanel : MonoBehaviour
             if (float.TryParse(val, out v))
             {
                 v = Mathf.Clamp(v, 1f, 180f);
-                ViewController.cam.fieldOfView = v;
+                ViewControllerC.cam.fieldOfView = v;
             }
         });
 
@@ -151,6 +151,6 @@ public class ViewPanel : MonoBehaviour
         float.TryParse(maxYField.text.Replace(".",","), out maxY);
         float.TryParse(minZField.text.Replace(".",","), out minZ);
         float.TryParse(maxZField.text.Replace(".", ","), out maxZ);
-        ViewController.SetRegion(minX, maxX, minY, maxY, minZ, maxZ);
+        ViewControllerC.SetRegion(minX, maxX, minY, maxY, minZ, maxZ);
     }
 }

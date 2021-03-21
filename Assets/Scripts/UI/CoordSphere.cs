@@ -16,7 +16,7 @@ public class CoordSphere : MonoBehaviour
     {
         cam = GameObject.FindGameObjectWithTag("3dCam").transform;
         text = GetComponentInChildren<TextMeshProUGUI>();
-        ViewController.onChanged += () =>
+        ViewControllerC.onChanged += () =>
         {
             LookAtCam();
             UpdateInfo();
@@ -26,7 +26,7 @@ public class CoordSphere : MonoBehaviour
     private void UpdateInfo()
     {
         Vector3 pos = transform.position;
-        Vector3 finalPos = ViewController.TransformToRegion(ref pos);
+        Vector3 finalPos = ViewControllerC.TransformToRegion(ref pos);
 
         const float mult = 100f;
         if (axisX) text.text = "x: " + Mathf.RoundToInt(finalPos.x * mult) / mult;

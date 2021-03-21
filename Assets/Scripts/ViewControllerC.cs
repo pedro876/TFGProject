@@ -6,7 +6,7 @@ using UnityEngine.UI;
 using System;
 
 
-public class ViewController : MonoBehaviour, IPointerDownHandler
+public class ViewControllerC : MonoBehaviour, IPointerDownHandler
 {
     [SerializeField] bool DEBUG = false;
     [SerializeField] GameObject pressSpaceText;

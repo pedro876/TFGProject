@@ -60,8 +60,8 @@ public class GPURenderer : AbstractRenderer
             bytecodeMemoryBuffer = new ComputeBuffer(FunctionC.maxMemorySize, sizeof(float));
             bytecodeOperationsBuffer = new ComputeBuffer(FunctionC.maxOperationsSize, sizeof(int));
 
-            ViewController.onPreChanged += PrepareCameraInfo;
-            ViewController.onPreChanged += PrepareRegionInfo;
+            ViewControllerC.onPreChanged += PrepareCameraInfo;
+            ViewControllerC.onPreChanged += PrepareRegionInfo;
             FunctionPanel.onPreChanged += PrepareFunctionInfo;
             VolumeInterpreter.onPreChanged += PrepareInterpretationInfo;
             PrepareInterpretationInfo();
@@ -199,10 +199,10 @@ public class GPURenderer : AbstractRenderer
     private void PrepareCameraInfo()
     {
         //Debug.Log("Preparing camera info");
-        Vector3 right = (ViewController.nearTopRight - ViewController.nearTopLeft).normalized;
-        Vector3 up = (ViewController.nearTopLeft - ViewController.nearBottomLeft).normalized;
-        float nearSize = Vector3.Distance(ViewController.nearTopLeft, ViewController.nearTopRight);
-        float farSize = Vector3.Distance(ViewController.farTopLeft, ViewController.farTopRight);
+        Vector3 right = (ViewControllerC.nearTopRight - ViewControllerC.nearTopLeft).normalized;
+        Vector3 up = (ViewControllerC.nearTopLeft - ViewControllerC.nearBottomLeft).normalized;
+        float nearSize = Vector3.Distance(ViewControllerC.nearTopLeft, ViewControllerC.nearTopRight);
+        float farSize = Vector3.Distance(ViewControllerC.farTopLeft, ViewControllerC.farTopRight);
         volumeShader.SetFloats("camRight", new float[] { right.x, right.y, right.z });
         volumeShader.SetFloats("camUp", new float[] { up.x, up.y, up.z });
         volumeShader.SetFloat("nearSize", nearSize);
@@ -211,13 +211,13 @@ public class GPURenderer : AbstractRenderer
 
     private void PrepareRegionInfo()
     {
-        volumeShader.SetBool("clampToRegion", ViewController.GetClampToRegion());
-        volumeShader.SetFloats("regionX", new float[] { ViewController.regionX.x, ViewController.regionX.y });
-        volumeShader.SetFloats("regionY", new float[] { ViewController.regionY.x, ViewController.regionY.y });
-        volumeShader.SetFloats("regionZ", new float[] { ViewController.regionZ.x, ViewController.regionZ.y });
+        volumeShader.SetBool("clampToRegion", ViewControllerC.GetClampToRegion());
+        volumeShader.SetFloats("regionX", new float[] { ViewControllerC.regionX.x, ViewControllerC.regionX.y });
+        volumeShader.SetFloats("regionY", new float[] { ViewControllerC.regionY.x, ViewControllerC.regionY.y });
+        volumeShader.SetFloats("regionZ", new float[] { ViewControllerC.regionZ.x, ViewControllerC.regionZ.y });
 
-        Vector3 regionScale = ViewController.GetRegionScale();
-        Vector3 regionCenter = ViewController.GetRegionCenter();
+        Vector3 regionScale = ViewControllerC.GetRegionScale();
+        Vector3 regionCenter = ViewControllerC.GetRegionCenter();
         volumeShader.SetFloats("regionScale", new float[] { regionScale.x, regionScale.y, regionScale.z });
         volumeShader.SetFloats("regionCenter", new float[] { regionCenter.x, regionCenter.y, regionCenter.z });
     }
@@ -262,11 +262,11 @@ public class GPURenderer : AbstractRenderer
             else return;
         }
 
-        Vector3 up = (ViewController.nearTopLeft - ViewController.nearBottomLeft).normalized;
-        float nearSize = Vector3.Distance(ViewController.nearTopLeft, ViewController.nearTopRight);
-        float farSize = Vector3.Distance(ViewController.farTopLeft, ViewController.farTopRight);
-        Vector3 nearStart = Vector3.Lerp(ViewController.nearTopLeft, ViewController.nearTopRight, startX) - up * (1f - startY) * nearSize;
-        Vector3 farStart = Vector3.Lerp(ViewController.farTopLeft, ViewController.farTopRight, startX) - up * (1f - startY) * farSize;
+        Vector3 up = (ViewControllerC.nearTopLeft - ViewControllerC.nearBottomLeft).normalized;
+        float nearSize = Vector3.Distance(ViewControllerC.nearTopLeft, ViewControllerC.nearTopRight);
+        float farSize = Vector3.Distance(ViewControllerC.farTopLeft, ViewControllerC.farTopRight);
+        Vector3 nearStart = Vector3.Lerp(ViewControllerC.nearTopLeft, ViewControllerC.nearTopRight, startX) - up * (1f - startY) * nearSize;
+        Vector3 farStart = Vector3.Lerp(ViewControllerC.farTopLeft, ViewControllerC.farTopRight, startX) - up * (1f - startY) * farSize;
 
         /*if(ViewController.changed && level == 0)
         {
@@ -308,13 +308,13 @@ public class GPURenderer : AbstractRenderer
 
     private void RenderRegion()
     {
-        Vector3 right = (ViewController.nearTopRight - ViewController.nearTopLeft).normalized;
-        Vector3 up = (ViewController.nearTopLeft - ViewController.nearBottomLeft).normalized;
+        Vector3 right = (ViewControllerC.nearTopRight - ViewControllerC.nearTopLeft).normalized;
+        Vector3 up = (ViewControllerC.nearTopLeft - ViewControllerC.nearBottomLeft).normalized;
 
-        float nearSize = Vector3.Distance(ViewController.nearTopLeft, ViewController.nearTopRight);
-        float farSize = Vector3.Distance(ViewController.farTopLeft, ViewController.farTopRight);
-        Vector3 nearStart = Vector3.Lerp(ViewController.nearTopLeft, ViewController.nearTopRight, startX) - up * (1f - startY) * nearSize;
-        Vector3 farStart = Vector3.Lerp(ViewController.farTopLeft, ViewController.farTopRight, startX) - up * (1f - startY) * farSize;
+        float nearSize = Vector3.Distance(ViewControllerC.nearTopLeft, ViewControllerC.nearTopRight);
+        float farSize = Vector3.Distance(ViewControllerC.farTopLeft, ViewControllerC.farTopRight);
+        Vector3 nearStart = Vector3.Lerp(ViewControllerC.nearTopLeft, ViewControllerC.nearTopRight, startX) - up * (1f - startY) * nearSize;
+        Vector3 farStart = Vector3.Lerp(ViewControllerC.farTopLeft, ViewControllerC.farTopRight, startX) - up * (1f - startY) * farSize;
         FunctionC func = FunctionElement.selectedFunc.func;
         bytecodeMemory = func.CreateBytecodeMemory();
         for(int r = 0; r < 4; r++)
@@ -326,8 +326,8 @@ public class GPURenderer : AbstractRenderer
                 Vector3 nearPos = nearStart + (right * ((float)x / width) - up * ((float)y / height)) * region * nearSize;
                 Vector3 farPos = farStart + (right * ((float)x / width) - up * ((float)y / height)) * region * farSize;
 
-                nearPos = ViewController.TransformToRegion(ref nearPos);
-                farPos = ViewController.TransformToRegion(ref farPos);
+                nearPos = ViewControllerC.TransformToRegion(ref nearPos);
+                farPos = ViewControllerC.TransformToRegion(ref farPos);
 
                 bool landed = false;
                 float normDepth = 0f;

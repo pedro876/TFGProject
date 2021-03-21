@@ -151,11 +151,11 @@ public abstract class AbstractRenderer : MonoBehaviour
 
     private void LateUpdate()
     {
-        if(level == 0 && !IsRenderingChildren && done && !ViewController.changed)
+        if(level == 0 && !IsRenderingChildren && done && !ViewControllerC.changed)
         {
             RenderChildren();
         }
-        if(!sentDisplayOrder && rendering && done && !ViewController.changed && level > 0)
+        if(!sentDisplayOrder && rendering && done && !ViewControllerC.changed && level > 0)
         {
             sentDisplayOrder = true;
             RendererManager.displayOrders.Enqueue(() =>
