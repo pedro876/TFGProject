@@ -14,6 +14,8 @@ namespace FuncSpace
             this.factory = factory;
         }
 
+        #region Processing
+
         public void CreateNodeTreeForFunc(IFunc func)
         {
             funcBeingProcessed = func;
@@ -34,25 +36,23 @@ namespace FuncSpace
 
             bool isOperation = breakpoint >= 0;
             if (isOperation)
-            {
                 node = ProcessOperation(ref definition, breakpoint, breakpoints[breakpoint]);
-            } else
+            else
             {
                 if(IsSubfunction(ref definition, out string subfunction))
-                {
                     node = ProcessSubfunction(ref definition, ref subfunction);
-                }
                 else if (IsVariable(ref definition))
-                {
                     node = ProcessVariable(ref definition);
-                } else
-                {
+                else
                     node = ProcessConstant(ref definition);
-                }
             }
             node.IsInsideParenthesis = insideParenthesis;
             return node;
         }
+
+        #endregion
+
+        #region Cleaning
 
         private bool CheckExternalParenthesis(ref string definition)
         {
@@ -77,6 +77,8 @@ namespace FuncSpace
                     definition = definition.Substring(0, definition.Length - 1);
             }
         }
+
+        #endregion
 
         #region breakpoint
 
@@ -133,13 +135,9 @@ namespace FuncSpace
             var children = ProcessOperatorChildren(ref definition, splitPoint);
             IFuncNode node = CreateOperatorNodeFromString(operation, children);
             foreach (var child in children)
-            {
                 child.Parent = node;
-            }
             if (node is OperatorSubNode)
-            {
                 CheckRightChildNegation(children);
-            }
             return node;
         }
 
@@ -177,13 +175,9 @@ namespace FuncSpace
                 if (opNode.NeedsParenthesis() && !opNode.IsInsideParenthesis)
                 {
                     if (opNode is OperatorSubNode)
-                    {
                         opNode = new OperatorAddNode(opNode.GetChildren());
-                    }
                     else if (opNode is OperatorAddNode)
-                    {
                         opNode = new OperatorSubNode(opNode.GetChildren());
-                    }
                 }
                 opNode.Parent = children[1].Parent;
                 children[1] = opNode;
@@ -219,15 +213,12 @@ namespace FuncSpace
                 IFunc func = factory.GetFunc(subfunction);
                 bool preventRecursive = func.OriginalDefinition.Contains(funcBeingProcessed.Name);
                 node = new UserDefinedFuncNode(subfunction, func, preventRecursive, children);
-            } else
-            {
-                node = new PredefinedFuncNode(subfunction, children);
             }
+            else
+                node = new PredefinedFuncNode(subfunction, children);
 
             foreach (var child in children)
-            {
                 child.Parent = node;
-            }
             return node;
         }
 
@@ -235,10 +226,9 @@ namespace FuncSpace
         {
             string content = definition.Substring(subfunction.Length);
             if (content.Length > 2 && content[0] == '(' && content[content.Length - 1] == ')')
-            {
                 content = content.Substring(1, content.Length - 2);
-            }
-            else content = "0";
+            else
+                content = "0";
             return content;
         }
 
@@ -247,9 +237,7 @@ namespace FuncSpace
             string[] inputs = content.Split(',');
             List<IFuncNode> children = new List<IFuncNode>();
             foreach (var input in inputs)
-            {
                 children.Add(ProcessDefinition(input));
-            }
             return children;
         }
 

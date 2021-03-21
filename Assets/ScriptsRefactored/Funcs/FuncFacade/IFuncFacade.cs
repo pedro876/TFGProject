@@ -1,4 +1,6 @@
-﻿public interface IFuncFacade
+﻿using UnityEngine;
+
+public interface IFuncFacade
 {
     string SelectedFunc { get; }
     string SelectedFuncName { get; }
@@ -7,5 +9,5 @@
     void CreateFunc(string textFunc);
     bool RemoveFunc(string funcName);
     void Reset();
-    float Solve(float x, float y, float z);
+    float Solve(Vector3 vec);
 }

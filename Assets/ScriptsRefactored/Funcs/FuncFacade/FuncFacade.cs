@@ -1,39 +1,20 @@
 ﻿using FuncSpace;
+using UnityEngine;
 
 public class FuncFacade : IFuncFacade
 {
-    /*#region SetUp
 
-    private static FuncFacade instance = null;
-    public static FuncFacade Instance
-    {
-        get
-        {
-            if (instance == null)
-            {
-                instance = new FuncFacade();
-                instance.Init();
-            }
+    IFuncFactory factory;
+    IFuncSolver funcSolver;
+    IBytecodeSolver bytecodeSolver;
 
-            return instance;
-        }
-    }
-
-    private void Init()
-    {
-        factory = FuncSpace.FuncFactory.Instance;
-        selectedFunc = factory.DummyFunc;
-    }
-
-    #endregion*/
-
-    FuncFactory factory;
     public FuncFacade()
     {
         factory = new FuncFactory();
+        funcSolver = new FuncSolver();
+        bytecodeSolver = new BytecodeSolver();
     }
 
-    /*private FuncSpace.FuncFactory factory;*/
     private FuncSpace.IFunc selectedFunc;
 
     #region selection
@@ -90,9 +71,24 @@ public class FuncFacade : IFuncFacade
 
     #region Solve
 
-    public float Solve(float x, float y, float z)
+    public float Solve(Vector3 vec)
     {
-        return selectedFunc.Solve(x, y, z);
+        return funcSolver.Solve(vec, selectedFunc);
+    }
+
+    public float SolveBytecode(Vector3 vec, float[] memory = null)
+    {
+        if (memory == null)
+            memory = selectedFunc.BytecodeInfo.memory;
+        return bytecodeSolver.Solve(vec, selectedFunc.BytecodeInfo, memory);
+    }
+
+    public float[] GetBytecodeMemCopy()
+    {
+        float[] copy = new float[Bytecode.maxMemorySize];
+        for (int i = 0; i < Bytecode.maxMemorySize; i++)
+            copy[i] = selectedFunc.BytecodeInfo.memory[i];
+        return copy;
     }
 
     #endregion

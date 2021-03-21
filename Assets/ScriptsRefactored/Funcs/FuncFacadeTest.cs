@@ -9,6 +9,7 @@ public class FuncFacadeTest : MonoBehaviour
 
     void Start()
     {
+        DateTime initTime = DateTime.Now;
         tests = new KeyValuePair<string, Func<bool>>[]
         {
             new KeyValuePair<string, Func<bool>>("TestInstantSolve", TestInstantSolve),
@@ -37,13 +38,16 @@ public class FuncFacadeTest : MonoBehaviour
             if (success) Debug.Log("SUCCESS");
             else Debug.LogError("FAILURE");
         }
+        DateTime endTime = DateTime.Now;
+        double elapsed = (endTime - initTime).TotalMilliseconds;
+        Debug.Log($"Total facade test time: {elapsed}ms");
     }
 
     bool TestInstantSolve()
     {
         IFuncFacade facade = ServiceLocator.Instance.GetService<IFuncFacade>();
         facade.Reset();
-        string result = facade.Solve(1, 0, 0).ToString();
+        string result = facade.Solve(new Vector3(1,0,0)).ToString();
         string expectedResult = "1";
         Debug.Log("expected:\t" + expectedResult);
         Debug.Log("got:\t\t" + result);
@@ -200,7 +204,7 @@ public class FuncFacadeTest : MonoBehaviour
         float x = 3.9f;
         float y = 2f;
         string expectedResult = (Mathf.Cos(x)+Mathf.Cos(y)).ToString();
-        string result = facade.Solve(x, y, 0f).ToString();
+        string result = facade.Solve(new Vector3(x, y, 0f)).ToString();
 
         Debug.Log("expected:\t" + expectedResult);
         Debug.Log("got:\t\t" + result);
@@ -266,7 +270,7 @@ public class FuncFacadeTest : MonoBehaviour
         facade.CreateFunc(func2);
         facade.SelectFunc("g");
         string expectedResult = "2";
-        string result = facade.Solve(2,0,0).ToString();
+        string result = facade.Solve(new Vector3(2,0,0)).ToString();
 
         Debug.Log("expected:\t" + expectedResult);
         Debug.Log("got:\t\t" + result);
@@ -283,7 +287,7 @@ public class FuncFacadeTest : MonoBehaviour
         facade.CreateFunc(func2);
         facade.SelectFunc("g");
         string expectedResult = "1";
-        string result = facade.Solve(2, 0, 0).ToString();
+        string result = facade.Solve(new Vector3(2, 0, 0)).ToString();
 
         Debug.Log("expected:\t" + expectedResult);
         Debug.Log("got:\t\t" + result);

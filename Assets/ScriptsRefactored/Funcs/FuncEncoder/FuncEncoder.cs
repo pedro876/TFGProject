@@ -7,13 +7,14 @@ namespace FuncSpace
 {
     public class FuncEncoder : IFuncEncoder
     {
-        private IFuncFactory factory;
-        
         private const int memoryStart = 4;
-        Dictionary<IFuncNode, int> memoryNodes;
-        Bytecode bytecode;
-        int lastMemoryIndex;
-        HashSet<string> subFuncsRecord;
+
+        private IFuncFactory factory;
+        private Bytecode bytecode;
+        
+        private Dictionary<IFuncNode, int> memoryNodes;
+        private HashSet<string> subFuncsRecord;
+        private int lastMemoryIndex;
 
         public FuncEncoder(IFuncFactory factory)
         {
@@ -54,10 +55,8 @@ namespace FuncSpace
             {
                 var node = nodeIdx.Key;
                 var idx = nodeIdx.Value;
-                if (node is ConstantNode)
-                {
-                    bytecode.memory[idx] = ((ConstantNode)node).GetValue();
-                }
+                if (node is ConstantNode cNode)
+                    bytecode.memory[idx] = cNode.GetValue();
                 else
                     bytecode.memory[idx] = 0f;
             }
@@ -69,29 +68,29 @@ namespace FuncSpace
             {
                 int memoryIndex = 0;
 
-                if(node is LeafNode)
-                    memoryIndex = DeepEncodeLeafNode(varIdx, node);
-                else if(node is NonLeafNode)
-                    memoryIndex = DeepEncodeNonLeafNode(varIdx, node);
+                if(node is LeafNode leafNode)
+                    memoryIndex = DeepEncodeLeafNode(varIdx, leafNode);
+                else if(node is NonLeafNode nonLeafNode)
+                    memoryIndex = DeepEncodeNonLeafNode(varIdx, nonLeafNode);
                 
                 memoryNodes[node] = memoryIndex;
             }
         }
 
-        private int DeepEncodeLeafNode(int[] varIdx, IFuncNode node)
+        private int DeepEncodeLeafNode(int[] varIdx, LeafNode node)
         {
             int memoryIndex = 0;
-            if (node is VariableNode)
-                memoryIndex = DeepEncodeVariableNode(varIdx, node);
+            if (node is VariableNode vNode)
+                memoryIndex = DeepEncodeVariableNode(varIdx, vNode);
             else if (node is ConstantNode)
-                memoryIndex = DeepEncodeConstantNode(varIdx, node);
+                memoryIndex = DeepEncodeConstantNode();
             return memoryIndex;
         }
 
-        private int DeepEncodeVariableNode(int[] varIdx, IFuncNode node)
+        private int DeepEncodeVariableNode(int[] varIdx, VariableNode node)
         {
             int memoryIndex = 0;
-            switch (((VariableNode)node).Variable)
+            switch (node.Variable)
             {
                 case "x": memoryIndex = varIdx[0]; break;
                 case "y": memoryIndex = varIdx[1]; break;
@@ -100,34 +99,34 @@ namespace FuncSpace
             return memoryIndex;
         }
 
-        private int DeepEncodeConstantNode(int[] varIdx, IFuncNode node)
+        private int DeepEncodeConstantNode()
         {
             int memoryIndex = lastMemoryIndex;
             lastMemoryIndex++;
             return memoryIndex;
         }
 
-        private int DeepEncodeNonLeafNode(int[] varIdx, IFuncNode node)
+        private int DeepEncodeNonLeafNode(int[] varIdx, NonLeafNode node)
         {
             int memoryIndex = 0;
-            DeepEncodeChildren(varIdx, (NonLeafNode)node);
+            DeepEncodeChildren(varIdx, node);
             
-            if (node is SubFuncNode)
-                memoryIndex = DeepEncodeSubFunction(varIdx, (SubFuncNode)node);
-            else if (node is OperatorNode)
-                memoryIndex = DeepEncodeOperatorNode((OperatorNode)node);
+            if (node is SubFuncNode subFuncNode)
+                memoryIndex = DeepEncodeSubFunction(subFuncNode);
+            else if (node is OperatorNode opNode)
+                memoryIndex = DeepEncodeOperatorNode(opNode);
 
             return memoryIndex;
         }
 
-        private int DeepEncodeSubFunction(int[] varIdx, SubFuncNode node)
+        private int DeepEncodeSubFunction(SubFuncNode node)
         {
             int memoryIndex = 0;
             var subFuncVarIdx = GetSubFuncVarIndexes(node);
-            if (node is UserDefinedFuncNode)
-                memoryIndex = DeepEncodeUserDefinedFuncNode(subFuncVarIdx, (UserDefinedFuncNode)node);
-            else if (node is PredefinedFuncNode)
-                memoryIndex = DeepEncodePredefinedFuncNode(subFuncVarIdx, (PredefinedFuncNode)node);
+            if (node is UserDefinedFuncNode userDefinedNode)
+                memoryIndex = DeepEncodeUserDefinedFuncNode(subFuncVarIdx, userDefinedNode);
+            else if (node is PredefinedFuncNode predefinedNode)
+                memoryIndex = DeepEncodePredefinedFuncNode(subFuncVarIdx, predefinedNode);
             return memoryIndex;
         }
 
@@ -137,9 +136,7 @@ namespace FuncSpace
             var children = node.GetChildren();
             int top = Math.Min(3, children.Count);
             for (int i = 0; i < top; i++)
-            {
                 subFuncVarIdx[i] = memoryNodes[children[i]];
-            }
             return subFuncVarIdx;
         }
 

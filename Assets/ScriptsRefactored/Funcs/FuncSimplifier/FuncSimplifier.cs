@@ -10,11 +10,12 @@ namespace FuncSpace
             func.RootNode = DeepSimplify(func.RootNode);
         }
 
+        #region DeepSimplify
+
         private IFuncNode DeepSimplify(IFuncNode node)
         {
-            if(node is NonLeafNode)
+            if(node is NonLeafNode nonLeafNode)
             {
-                var nonLeafNode = (NonLeafNode)node;
                 var children = nonLeafNode.GetChildren();
                 for(int i = 0; i < children.Count; i++)
                 {
@@ -24,14 +25,15 @@ namespace FuncSpace
             return SimplifyNode(node);
         }
 
+        #endregion
+
+        #region AbstractNodeSimplify
+
         private IFuncNode SimplifyNode(IFuncNode node)
         {
-            //if (node is LeafNode) return node;
-            //if (node is SubFuncNode/* || (node.HasParent && node.Parent is SubFuncNode)*/) return node;
             IFuncNode simplifiedNode = node;
-            if(node is OperatorNode)
+            if(node is OperatorNode opNode)
             {
-                OperatorNode opNode = (OperatorNode)node;
                 simplifiedNode = SimplifyOp(opNode);
                 simplifiedNode.Parent = node.Parent;
             }
@@ -57,21 +59,19 @@ namespace FuncSpace
             return simplifiedNode;
         }
 
+        #endregion
+
+        #region ConcreteNodeSimplify
+
         private IFuncNode SimplifyOpMul(OperatorNode opNode)
         {
             IFuncNode simplifiedNode = opNode;
             if (ValueOfNodeIs(opNode.LeftChild, 0f) || ValueOfNodeIs(opNode.RightChild, 0f))
-            {
                 simplifiedNode = new ConstantNode(0);
-            }
             else if (ValueOfNodeIs(opNode.LeftChild, 1f))
-            {
                 simplifiedNode = opNode.RightChild;
-            }
             else if (ValueOfNodeIs(opNode.RightChild, 1f))
-            {
                 simplifiedNode = opNode.LeftChild;
-            }
             return simplifiedNode;
         }
 
@@ -79,17 +79,11 @@ namespace FuncSpace
         {
             IFuncNode simplifiedNode = opNode;
             if (ValueOfNodeIs(opNode.RightChild, 0f))
-            {
                 simplifiedNode = new ConstantNode("inf");
-            }
             else if (ValueOfNodeIs(opNode.LeftChild, 0f))
-            {
                 simplifiedNode = new ConstantNode(0f);
-            }
             else if (ValueOfNodeIs(opNode.RightChild, 1f))
-            {
                 simplifiedNode = opNode.LeftChild;
-            }
             return simplifiedNode;
         }
 
@@ -97,22 +91,16 @@ namespace FuncSpace
         {
             IFuncNode simplifiedNode = opNode;
             if (ValueOfNodeIs(opNode.RightChild, 0f))
-            {
                 simplifiedNode = opNode.LeftChild;
-            }
             else if (ValueOfNodeIs(opNode.LeftChild, 0f) && !(opNode.RightChild is OperatorNode))
             {
                 simplifiedNode = opNode.RightChild;
                 if (opNode is OperatorSubNode && !(simplifiedNode is OperatorNode))
                 {
-                    if (simplifiedNode is VariableNode)
-                    {
-                        ((VariableNode)simplifiedNode).IsPositive = false;
-                    }
-                    else if (simplifiedNode is ConstantNode)
-                    {
-                        ((ConstantNode)simplifiedNode).NegateValue();
-                    }
+                    if (simplifiedNode is VariableNode vNode)
+                        vNode.IsPositive = false;
+                    else if (simplifiedNode is ConstantNode cNode)
+                        cNode.NegateValue();
                 }
             }
             return simplifiedNode;
@@ -122,23 +110,20 @@ namespace FuncSpace
         {
             IFuncNode simplifiedNode = opNode;
             if (ValueOfNodeIs(opNode.RightChild, 0f))
-            {
                 simplifiedNode = new ConstantNode(1f);
-            }
             else if (ValueOfNodeIs(opNode.LeftChild, 0f))
-            {
                 simplifiedNode = new ConstantNode(0f);
-            }
             return simplifiedNode;
         }
 
         private bool ValueOfNodeIs(IFuncNode node, float value)
         {
-            if(node is ConstantNode)
-            {
-                return ((ConstantNode)node).GetValue() == value;
-            }
-            return false;
+            if(node is ConstantNode cNode)
+                return cNode.GetValue() == value;
+            else
+                return false;
         }
+
+        #endregion
     }
 }
