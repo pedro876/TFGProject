@@ -21,7 +21,7 @@ public class Installer : MonoBehaviour
         ServiceLocator.Instance.RegisterService<IViewFacade>(FindObjectOfType<ViewSpace.ViewFacade>());
         ServiceLocator.Instance.RegisterService<IRegionFacade>(new RegionSpace.RegionFacade());
         ServiceLocator.Instance.RegisterService<IMassFacade>(new MassSpace.MassFacade());
-        //render service
+        ServiceLocator.Instance.RegisterService<IRenderingFacade>(FindObjectOfType<RenderingSpace.RenderingFacade>());
         ServiceLocator.Instance.RegisterService<IPostProcessFacade>(FindObjectOfType<PostProcessSpace.PostProcessFacade>());
         ServiceLocator.Instance.RegisterService<ILightingFacade>(new LightingSpace.LightingFacade());
     }

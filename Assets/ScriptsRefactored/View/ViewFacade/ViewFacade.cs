@@ -5,6 +5,16 @@ namespace ViewSpace
 {
     public class ViewFacade : MonoBehaviour, IViewFacade
     {
+        public Vector3 NearTopLeft { get => nearTopLeft; set { if (!nearTopLeft.Equals(value)) { nearTopLeft = value; changed = true; } } }
+        public Vector3 NearTopRight { get => nearTopRight; set { if (!nearTopRight.Equals(value)) { nearTopRight = value; changed = true; } } }
+        public Vector3 NearBottomRight { get => nearBottomRight; set { if (!nearBottomRight.Equals(value)) { nearBottomRight = value; changed = true; } } }
+        public Vector3 NearBottomLeft { get => nearBottomLeft; set { if (!nearBottomLeft.Equals(value)) { nearBottomLeft = value; changed = true; } } }
+        public Vector3 FarTopLeft { get => farTopLeft; set { if (!farTopLeft.Equals(value)) { farTopLeft = value; changed = true; } } }
+        public Vector3 FarTopRight { get => farTopRight; set { if (!farTopRight.Equals(value)) { farTopRight = value; changed = true; } } }
+        public Vector3 FarBottomRight { get => farBottomRight; set { if (!farBottomRight.Equals(value)) { farBottomRight = value; changed = true; } } }
+        public Vector3 FarBottomLeft { get => farBottomLeft; set { if (!farBottomLeft.Equals(value)) { farBottomLeft = value; changed = true; } } }
+        public event Action onChanged;
+
         [Header("References")]
         [SerializeField] Camera cam;
 
@@ -12,7 +22,7 @@ namespace ViewSpace
         [SerializeField] float orbitSpeed = 100f;
         [SerializeField] float rotSpeed = 1f;
         [SerializeField] float moveSpeed = 1f;
-        private bool focused = false;
+        private bool canMove = false;
 
         private IViewMove viewMove;
         private OrbitMove orbitMove;
@@ -28,15 +38,16 @@ namespace ViewSpace
         private Vector3 farBottomLeft;
         private bool changed;
 
-        public Vector3 NearTopLeft { get => nearTopLeft; set { if (!nearTopLeft.Equals(value)) { nearTopLeft = value; changed = true; } } }
-        public Vector3 NearTopRight { get => nearTopRight; set { if (!nearTopRight.Equals(value)) { nearTopRight = value; changed = true; } } }
-        public Vector3 NearBottomRight { get => nearBottomRight; set { if (!nearBottomRight.Equals(value)) { nearBottomRight = value; changed = true; } } }
-        public Vector3 NearBottomLeft { get => nearBottomLeft; set { if (!nearBottomLeft.Equals(value)) { nearBottomLeft = value; changed = true; } } }
-        public Vector3 FarTopLeft { get => farTopLeft; set { if (!farTopLeft.Equals(value)) { farTopLeft = value; changed = true; } } }
-        public Vector3 FarTopRight { get => farTopRight; set { if (!farTopRight.Equals(value)) { farTopRight = value; changed = true; } } }
-        public Vector3 FarBottomRight { get => farBottomRight; set { if (!farBottomRight.Equals(value)) { farBottomRight = value; changed = true; } } }
-        public Vector3 FarBottomLeft { get => farBottomLeft; set { if (!farBottomLeft.Equals(value)) { farBottomLeft = value; changed = true; } } }
-        public event Action onChanged;
+        private IRenderingFacade renderingFacade;
+
+        public void SetCanMove(bool focus)
+        {
+            canMove = focus;
+        }
+        public bool CanMove()
+        {
+            return canMove;
+        }
 
         public void UseOrbitMove()
         {
@@ -47,7 +58,7 @@ namespace ViewSpace
             viewMove = flyMove;
         }
 
-        void Start()
+        private void Awake()
         {
             cam.transform.LookAt(Vector3.zero);
             orbitMove = new OrbitMove(orbitSpeed, cam.transform);
@@ -55,10 +66,18 @@ namespace ViewSpace
             viewMove = orbitMove;
         }
 
+        private void Start()
+        {
+            renderingFacade = ServiceLocator.Instance.GetService<IRenderingFacade>();
+        }
+
         private void LateUpdate()
         {
-            if (focused)
-                viewMove.TryMove();
+            if (canMove)
+            {
+                bool moved = viewMove.TryMove();
+                renderingFacade.UpdateInRealTime = moved;
+            }
 
             BeginModification();
             CalculatePlanes();

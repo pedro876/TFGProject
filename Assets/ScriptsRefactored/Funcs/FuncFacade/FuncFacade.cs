@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System;
 
 namespace FuncSpace
 {
@@ -9,10 +10,12 @@ namespace FuncSpace
         private IFuncSolver bytecodeSolver;
         private IFunc selectedFunc;
 
+        public event Action onChanged;
         public FuncFacade()
         {
             factory = new FuncFactory();
             bytecodeSolver = new FuncSolver();
+            selectedFunc = factory.GetDummy();
         }
 
         #region selection
@@ -32,6 +35,7 @@ namespace FuncSpace
             if (factory.IsFuncDefinedByUser(funcName))
             {
                 selectedFunc = factory.GetFunc(funcName);
+                onChanged?.Invoke();
                 return true;
             }
             else
@@ -50,6 +54,7 @@ namespace FuncSpace
         public void CreateFunc(string textFunc)
         {
             factory.CreateFunc(textFunc);
+            onChanged?.Invoke();
         }
 
         public bool RemoveFunc(string funcName)
@@ -60,6 +65,7 @@ namespace FuncSpace
                     selectedFunc = factory.GetDummy();
 
                 factory.RemoveFunc(funcName);
+                onChanged?.Invoke();
                 return true;
             }
             else
@@ -69,7 +75,8 @@ namespace FuncSpace
         public void Reset()
         {
             factory.RemoveAllFuncs();
-            selectedFunc = factory.GetDummy(); ;
+            selectedFunc = factory.GetDummy();
+            onChanged?.Invoke();
         }
 
         #endregion

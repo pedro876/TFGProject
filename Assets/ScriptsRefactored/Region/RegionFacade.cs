@@ -1,9 +1,12 @@
 ﻿using UnityEngine;
+using System;
 
 namespace RegionSpace
 {
     public class RegionFacade : IRegionFacade
     {
+        public event Action onChanged;
+
         private Vector2 regionX;
         private Vector2 regionY;
         private Vector2 regionZ;
@@ -58,6 +61,7 @@ namespace RegionSpace
 
             regionScale = new Vector3(regionX.y - regionX.x, regionY.y - regionY.x, regionZ.y - regionZ.x);
             regionCenter = new Vector3((regionX.x + regionX.y) * 0.5f, (regionY.x + regionY.y) * 0.5f, (regionZ.x + regionZ.y) * 0.5f);
+            onChanged?.Invoke();
         }
         public Vector3 TransformToRegion(ref Vector3 pos)
         {

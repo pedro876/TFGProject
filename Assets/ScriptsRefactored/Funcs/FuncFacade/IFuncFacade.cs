@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System;
 public interface IFuncFacade
 {
     string GetSelectedFunc();
@@ -17,4 +18,5 @@ public interface IFuncFacade
     List<int> GetBytecodeOperations();
     int GetBytecodeResultIndex();
     int GetMaxOperatorIndex();
+    event Action onChanged;
 }

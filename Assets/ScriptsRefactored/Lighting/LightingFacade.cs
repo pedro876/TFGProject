@@ -5,11 +5,11 @@ namespace LightingSpace
 {
     public class LightingFacade : ILightingFacade
     {
+        public event Action onChanged;
+
         private bool fog;
         private float fogPower;
         private Vector3 lightDir;
-
-        public event Action onChanged;
 
         public LightingFacade()
         {
@@ -24,12 +24,17 @@ namespace LightingSpace
             Vector3 projUp = Vector3.ProjectOnPlane(lightDir, Vector3.up).normalized;
             float rotation = Vector3.SignedAngle(Vector3.right, projUp, Vector3.up);
             rotation = rotation % 360f;
-            while (rotation < 0f) rotation += 360f;
+            while (rotation < 0f)
+                rotation += 360f;
 
             Vector3 axis = Vector3.Cross(lightDir, projUp);
             float inclination = Vector3.SignedAngle(projUp, lightDir, axis);
-            while (inclination > 90f) inclination -= 180f;
-            while (inclination < -90f) inclination += 180f;
+
+            while (inclination > 90f)
+                inclination -= 180f;
+            while (inclination < -90f)
+                inclination += 180f;
+
             return new Vector2(rotation, inclination);
         }
         public Vector3 GetLightDirVec()

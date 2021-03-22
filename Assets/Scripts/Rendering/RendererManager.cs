@@ -53,7 +53,7 @@ public class RendererManager : MonoBehaviour
     private void Start()
     {
         Instance = this;
-        GPURenderer.homogeneityDepth = gpuHomogeneityDepth;
+        GPURendererC.homogeneityDepth = gpuHomogeneityDepth;
         AbstractRenderer.explorationSamples = explorationSamples;
         AbstractRenderer.depthExplorationMultiplier = depthExplorationMultiplier;
         AbstractRenderer.normalExplorationMultiplier = normalExplorationMultiplier;
@@ -253,9 +253,6 @@ public class RendererManager : MonoBehaviour
     {
         new RendererQuality(RendererType.GPU, 512, 512),
         new RendererQuality(RendererType.GPU, 720, 1024),
-        /*new RendererQuality(RendererType.GPU, 176, 128),
-        new RendererQuality(RendererType.GPU, 128, 200),
-        new RendererQuality(RendererType.GPU, 176, 700),*/
     };
 
     private static List<RendererQuality> CPUSetting = new List<RendererQuality>()

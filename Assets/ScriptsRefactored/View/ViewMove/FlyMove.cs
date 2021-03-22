@@ -20,13 +20,14 @@ namespace ViewSpace
             this.camTransform = camTransform;
         }
 
-        public void TryMove()
+        public bool TryMove()
         {
             bool moved = GetInput();
             if (moved)
             {
                 Move();
             }
+            return moved;
         }
 
         private bool GetInput()

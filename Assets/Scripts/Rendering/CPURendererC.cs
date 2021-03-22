@@ -4,7 +4,7 @@ using UnityEngine;
 using System.Threading;
 //using System.Collections.Concurrent;
 
-public class CPURenderer : AbstractRenderer
+public class CPURendererC : AbstractRenderer
 {
 
     private Texture2D depthTex2D;
@@ -112,13 +112,13 @@ public class CPURenderer : AbstractRenderer
     private void RenderRegion(int minX, int minY, int maxX, int maxY)
     {
         
-        Vector3 right = (ViewControllerC.nearTopRight - ViewControllerC.nearTopLeft).normalized;
-        Vector3 up = (ViewControllerC.nearTopLeft - ViewControllerC.nearBottomLeft).normalized;
+        Vector3 right = (ViewControllerC.NearTopRight - ViewControllerC.NearTopLeft).normalized;
+        Vector3 up = (ViewControllerC.NearTopLeft - ViewControllerC.NearBottomLeft).normalized;
 
-        float nearSize = Vector3.Distance(ViewControllerC.nearTopLeft, ViewControllerC.nearTopRight);
-        float farSize = Vector3.Distance(ViewControllerC.farTopLeft, ViewControllerC.farTopRight);
-        Vector3 nearStart = Vector3.Lerp(ViewControllerC.nearTopLeft, ViewControllerC.nearTopRight, startX) - up * (1f - startY) * nearSize;
-        Vector3 farStart = Vector3.Lerp(ViewControllerC.farTopLeft, ViewControllerC.farTopRight, startX) - up * (1f - startY) * farSize;
+        float nearSize = Vector3.Distance(ViewControllerC.NearTopLeft, ViewControllerC.NearTopRight);
+        float farSize = Vector3.Distance(ViewControllerC.FarTopLeft, ViewControllerC.FarTopRight);
+        Vector3 nearStart = Vector3.Lerp(ViewControllerC.NearTopLeft, ViewControllerC.NearTopRight, startX) - up * (1f - startY) * nearSize;
+        Vector3 farStart = Vector3.Lerp(ViewControllerC.FarTopLeft, ViewControllerC.FarTopRight, startX) - up * (1f - startY) * farSize;
         FunctionC func = FunctionElement.selectedFunc.func;
         bytecodeMemory = func.CreateBytecodeMemory();
 

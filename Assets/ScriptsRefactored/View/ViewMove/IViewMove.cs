@@ -5,6 +5,6 @@ namespace ViewSpace
 {
     public interface IViewMove
     {
-        void TryMove();
+        bool TryMove();
     }
 }

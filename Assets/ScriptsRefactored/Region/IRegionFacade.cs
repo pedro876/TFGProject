@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-
+using System;
 
 public interface IRegionFacade
 {
@@ -13,4 +13,5 @@ public interface IRegionFacade
     void SetRegion(float minX, float maxX, float minY, float maxY, float minZ, float maxZ);
     Vector3 TransformToRegion(ref Vector3 pos);
     bool IsPosOutOfRegion(ref Vector3 pos);
+    event Action onChanged;
 }

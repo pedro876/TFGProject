@@ -11,6 +11,8 @@ public interface IViewFacade
     Vector3 FarTopRight { get; }
     Vector3 FarBottomRight { get; }
     Vector3 FarBottomLeft { get; }
+    void SetCanMove(bool focus);
+    bool CanMove();
 
     event Action onChanged;
     void UseOrbitMove();

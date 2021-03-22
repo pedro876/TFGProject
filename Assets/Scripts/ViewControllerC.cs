@@ -28,12 +28,12 @@ public class ViewControllerC : MonoBehaviour, IPointerDownHandler
     private static Vector3 regionCenter = Vector3.zero;
     private static bool clampToRegion = true;
 
-    public static Vector3 nearTopLeft = Vector3.zero;
-    public static Vector3 nearTopRight = Vector3.zero;
+    public static Vector3 NearTopLeft = Vector3.zero;
+    public static Vector3 NearTopRight = Vector3.zero;
     public static Vector3 nearBottomRight = Vector3.zero;
-    public static Vector3 nearBottomLeft = Vector3.zero;
-    public static Vector3 farTopLeft = Vector3.zero;
-    public static Vector3 farTopRight = Vector3.zero;
+    public static Vector3 NearBottomLeft = Vector3.zero;
+    public static Vector3 FarTopLeft = Vector3.zero;
+    public static Vector3 FarTopRight = Vector3.zero;
     public static Vector3 farBottomRight = Vector3.zero;
     public static Vector3 farBottomLeft = Vector3.zero;
 
@@ -133,14 +133,14 @@ public class ViewControllerC : MonoBehaviour, IPointerDownHandler
         Vector3 nearCenter = camTransform.position + camTransform.forward * near;
         if (ortographic)
         {
-            nearTopLeft = nearCenter - ortoSize * camTransform.right + camTransform.up * ortoSize;
-            nearTopRight = nearCenter + ortoSize * camTransform.right + camTransform.up * ortoSize;
+            NearTopLeft = nearCenter - ortoSize * camTransform.right + camTransform.up * ortoSize;
+            NearTopRight = nearCenter + ortoSize * camTransform.right + camTransform.up * ortoSize;
             nearBottomRight = nearCenter + ortoSize * camTransform.right - camTransform.up * ortoSize;
-            nearBottomLeft = nearCenter - ortoSize * camTransform.right - camTransform.up * ortoSize;
-            farTopLeft = nearTopLeft + camTransform.forward * (far-near);
-            farTopRight = nearTopRight + camTransform.forward * (far - near);
+            NearBottomLeft = nearCenter - ortoSize * camTransform.right - camTransform.up * ortoSize;
+            FarTopLeft = NearTopLeft + camTransform.forward * (far-near);
+            FarTopRight = NearTopRight + camTransform.forward * (far - near);
             farBottomRight = nearBottomRight + camTransform.forward * (far-near);
-            farBottomLeft = nearBottomLeft + camTransform.forward * (far - near);
+            farBottomLeft = NearBottomLeft + camTransform.forward * (far - near);
         }
         else
         {
@@ -148,12 +148,12 @@ public class ViewControllerC : MonoBehaviour, IPointerDownHandler
             float fovRad = fov * Mathf.PI / 180f;
             float nearSize = Mathf.Tan(fovRad * 0.5f) * near;
             float farSize = Mathf.Tan(fovRad * 0.5f) * far;
-            nearTopLeft = nearCenter - nearSize * camTransform.right + camTransform.up * nearSize;
-            nearTopRight = nearCenter + nearSize * camTransform.right + camTransform.up * nearSize;
+            NearTopLeft = nearCenter - nearSize * camTransform.right + camTransform.up * nearSize;
+            NearTopRight = nearCenter + nearSize * camTransform.right + camTransform.up * nearSize;
             nearBottomRight = nearCenter + nearSize * camTransform.right - camTransform.up * nearSize;
-            nearBottomLeft = nearCenter - nearSize * camTransform.right - camTransform.up * nearSize;
-            farTopLeft = farCenter - farSize * camTransform.right + camTransform.up * farSize;
-            farTopRight = farCenter + farSize * camTransform.right + camTransform.up * farSize;
+            NearBottomLeft = nearCenter - nearSize * camTransform.right - camTransform.up * nearSize;
+            FarTopLeft = farCenter - farSize * camTransform.right + camTransform.up * farSize;
+            FarTopRight = farCenter + farSize * camTransform.right + camTransform.up * farSize;
             farBottomRight = farCenter + farSize * camTransform.right - camTransform.up * farSize;
             farBottomLeft = farCenter - farSize * camTransform.right - camTransform.up * farSize;
         }
@@ -319,12 +319,12 @@ public class ViewControllerC : MonoBehaviour, IPointerDownHandler
         if (DEBUG)
         {
             Gizmos.color = Color.red;
-            Gizmos.DrawSphere(nearTopLeft, 1f);
-            Gizmos.DrawSphere(nearTopRight, 1f);
+            Gizmos.DrawSphere(NearTopLeft, 1f);
+            Gizmos.DrawSphere(NearTopRight, 1f);
             Gizmos.DrawSphere(nearBottomRight, 1f);
-            Gizmos.DrawSphere(nearBottomLeft, 1f);
-            Gizmos.DrawSphere(farTopLeft, 1f);
-            Gizmos.DrawSphere(farTopRight, 1f);
+            Gizmos.DrawSphere(NearBottomLeft, 1f);
+            Gizmos.DrawSphere(FarTopLeft, 1f);
+            Gizmos.DrawSphere(FarTopRight, 1f);
             Gizmos.DrawSphere(farBottomRight, 1f);
             Gizmos.DrawSphere(farBottomLeft, 1f);
         }

@@ -4,7 +4,7 @@ using UnityEngine;
 using System.Threading;
 //using System.Collections.Concurrent;
 
-public class GPURenderer : AbstractRenderer
+public class GPURendererC : AbstractRenderer
 {
     private class Coord
     {
@@ -51,7 +51,7 @@ public class GPURenderer : AbstractRenderer
         if (level == 0)
         {
             volumeShader = Resources.Load("Shaders/Volume/VolumeShader") as ComputeShader;
-            volumeKernel = volumeShader.FindKernel("CSMain");
+            volumeKernel = volumeShader.FindKernel("RayPlot");
             volumeShader.GetKernelThreadGroupSizes(volumeKernel, out var nx, out var ny, out var nz);
             numThreadsX = (int)nx;
             numThreadsY = (int)ny;
@@ -199,10 +199,10 @@ public class GPURenderer : AbstractRenderer
     private void PrepareCameraInfo()
     {
         //Debug.Log("Preparing camera info");
-        Vector3 right = (ViewControllerC.nearTopRight - ViewControllerC.nearTopLeft).normalized;
-        Vector3 up = (ViewControllerC.nearTopLeft - ViewControllerC.nearBottomLeft).normalized;
-        float nearSize = Vector3.Distance(ViewControllerC.nearTopLeft, ViewControllerC.nearTopRight);
-        float farSize = Vector3.Distance(ViewControllerC.farTopLeft, ViewControllerC.farTopRight);
+        Vector3 right = (ViewControllerC.NearTopRight - ViewControllerC.NearTopLeft).normalized;
+        Vector3 up = (ViewControllerC.NearTopLeft - ViewControllerC.NearBottomLeft).normalized;
+        float nearSize = Vector3.Distance(ViewControllerC.NearTopLeft, ViewControllerC.NearTopRight);
+        float farSize = Vector3.Distance(ViewControllerC.FarTopLeft, ViewControllerC.FarTopRight);
         volumeShader.SetFloats("camRight", new float[] { right.x, right.y, right.z });
         volumeShader.SetFloats("camUp", new float[] { up.x, up.y, up.z });
         volumeShader.SetFloat("nearSize", nearSize);
@@ -262,11 +262,11 @@ public class GPURenderer : AbstractRenderer
             else return;
         }
 
-        Vector3 up = (ViewControllerC.nearTopLeft - ViewControllerC.nearBottomLeft).normalized;
-        float nearSize = Vector3.Distance(ViewControllerC.nearTopLeft, ViewControllerC.nearTopRight);
-        float farSize = Vector3.Distance(ViewControllerC.farTopLeft, ViewControllerC.farTopRight);
-        Vector3 nearStart = Vector3.Lerp(ViewControllerC.nearTopLeft, ViewControllerC.nearTopRight, startX) - up * (1f - startY) * nearSize;
-        Vector3 farStart = Vector3.Lerp(ViewControllerC.farTopLeft, ViewControllerC.farTopRight, startX) - up * (1f - startY) * farSize;
+        Vector3 up = (ViewControllerC.NearTopLeft - ViewControllerC.NearBottomLeft).normalized;
+        float nearSize = Vector3.Distance(ViewControllerC.NearTopLeft, ViewControllerC.NearTopRight);
+        float farSize = Vector3.Distance(ViewControllerC.FarTopLeft, ViewControllerC.FarTopRight);
+        Vector3 nearStart = Vector3.Lerp(ViewControllerC.NearTopLeft, ViewControllerC.NearTopRight, startX) - up * (1f - startY) * nearSize;
+        Vector3 farStart = Vector3.Lerp(ViewControllerC.FarTopLeft, ViewControllerC.FarTopRight, startX) - up * (1f - startY) * farSize;
 
         /*if(ViewController.changed && level == 0)
         {
@@ -308,13 +308,13 @@ public class GPURenderer : AbstractRenderer
 
     private void RenderRegion()
     {
-        Vector3 right = (ViewControllerC.nearTopRight - ViewControllerC.nearTopLeft).normalized;
-        Vector3 up = (ViewControllerC.nearTopLeft - ViewControllerC.nearBottomLeft).normalized;
+        Vector3 right = (ViewControllerC.NearTopRight - ViewControllerC.NearTopLeft).normalized;
+        Vector3 up = (ViewControllerC.NearTopLeft - ViewControllerC.NearBottomLeft).normalized;
 
-        float nearSize = Vector3.Distance(ViewControllerC.nearTopLeft, ViewControllerC.nearTopRight);
-        float farSize = Vector3.Distance(ViewControllerC.farTopLeft, ViewControllerC.farTopRight);
-        Vector3 nearStart = Vector3.Lerp(ViewControllerC.nearTopLeft, ViewControllerC.nearTopRight, startX) - up * (1f - startY) * nearSize;
-        Vector3 farStart = Vector3.Lerp(ViewControllerC.farTopLeft, ViewControllerC.farTopRight, startX) - up * (1f - startY) * farSize;
+        float nearSize = Vector3.Distance(ViewControllerC.NearTopLeft, ViewControllerC.NearTopRight);
+        float farSize = Vector3.Distance(ViewControllerC.FarTopLeft, ViewControllerC.FarTopRight);
+        Vector3 nearStart = Vector3.Lerp(ViewControllerC.NearTopLeft, ViewControllerC.NearTopRight, startX) - up * (1f - startY) * nearSize;
+        Vector3 farStart = Vector3.Lerp(ViewControllerC.FarTopLeft, ViewControllerC.FarTopRight, startX) - up * (1f - startY) * farSize;
         FunctionC func = FunctionElement.selectedFunc.func;
         bytecodeMemory = func.CreateBytecodeMemory();
         for(int r = 0; r < 4; r++)

@@ -1,4 +1,4 @@
-﻿#pragma kernel CSMain
+﻿#pragma kernel RayPlot
 #include "RayCasting.compute"
 
 RWTexture2D<float4> DepthTex;
@@ -24,7 +24,7 @@ float4 FormatNormalColorFromHit(RayHit hit)
 }
 
 [numthreads(8,8,1)]
-void CSMain(uint3 id : SV_DispatchThreadID)
+void RayPlot(uint3 id : SV_DispatchThreadID)
 {
     Ray ray = CreateRayForId(id);
 	RayHit hit = RayCast(ray);

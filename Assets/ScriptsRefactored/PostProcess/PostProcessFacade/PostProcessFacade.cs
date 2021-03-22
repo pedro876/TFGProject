@@ -9,12 +9,13 @@ namespace PostProcessSpace
 
         private enum Display
         {
-            depth,
-            normals,
-            light,
+            Depth,
+            Normals,
+            Light,
         }
 
         private ILightingFacade lightingFacade;
+        private IRenderingFacade renderingFacade;
         private PostProcessEffect pp_light;
         private PostProcessEffect pp_fxaa;
         private PostProcessEffect pp_depth;
@@ -30,25 +31,26 @@ namespace PostProcessSpace
         private RenderTexture fxaaTex;
 
         
-        private Display display = Display.light;
+        private Display display = Display.Light;
 
         private void Start()
         {
             lightingFacade = ServiceLocator.Instance.GetService<ILightingFacade>();
+            renderingFacade = ServiceLocator.Instance.GetService<IRenderingFacade>();
 
             CreateEffects();
             CreateTextures();
-
-            lightingFacade.onChanged += PrepareLightShader;
-            /*AbstractRenderer.onTexApplied += () =>
-            {
-                mustRender = true;
-            };*/
-
             PrepareDepthShader();
             PrepareLightShader();
-            PrepareFXAAShader(lightTex);
+            PrepareFXAAShader();
             UpdateDisplay();
+
+            lightingFacade.onChanged += () =>
+            {
+                PrepareLightShader();
+                mustRender = true;
+            };
+            renderingFacade.onQuadRendered += () => mustRender = true;
         }
 
         private void Update()
@@ -64,17 +66,17 @@ namespace PostProcessSpace
 
         public void DisplayDepth()
         {
-            display = Display.depth;
+            display = Display.Depth;
             UpdateDisplay();
         }
         public void DisplayNormals()
         {
-            display = Display.normals;
+            display = Display.Normals;
             UpdateDisplay();
         }
         public void DisplayLighting()
         {
-            display = Display.light;
+            display = Display.Light;
             UpdateDisplay();
         }
 
@@ -83,11 +85,11 @@ namespace PostProcessSpace
             RenderTexture displayTex = displayDepthTex;
             switch (display)
             {
-                case Display.depth: displayTex = displayDepthTex; break;
-                case Display.normals: displayTex = normalTex; break;
-                case Display.light: displayTex = antialiasing ? fxaaTex : lightTex; break;
+                case Display.Depth: displayTex = displayDepthTex; break;
+                case Display.Normals: displayTex = normalTex; break;
+                case Display.Light: displayTex = antialiasing ? fxaaTex : lightTex; break;
             }
-            onDisplayUpdated(displayTex);
+            onDisplayUpdated?.Invoke(displayTex);
         }
 
         #endregion
@@ -96,18 +98,18 @@ namespace PostProcessSpace
 
         private void CreateTextures()
         {
-            RenderTexture CreateTex(string name)
-            {
-                RenderTexture rt = new RenderTexture(depthTex.width, depthTex.height, 24);
-                rt.name = name;
-                rt.enableRandomWrite = true;
-                rt.Create();
-                return rt;
-            }
-
             lightTex = CreateTex("lightTex");
             fxaaTex = CreateTex("fxaaTex");
             displayDepthTex = CreateTex("displayDepth");
+        }
+
+        private RenderTexture CreateTex(string name)
+        {
+            RenderTexture rt = new RenderTexture(depthTex.width, depthTex.height, 24);
+            rt.name = name;
+            rt.enableRandomWrite = true;
+            rt.Create();
+            return rt;
         }
 
         private void CreateEffects()
@@ -122,19 +124,15 @@ namespace PostProcessSpace
 
         #region ShaderPreparation
 
-        //bool fxaaShaderPrepared = false;
-        private void PrepareFXAAShader(RenderTexture inputTex)
+        private void PrepareFXAAShader()
         {
-            //fxaaShaderPrepared = true;
-            pp_fxaa.shader.SetTexture(pp_fxaa.kernel, "InputTex", inputTex);
+            pp_fxaa.shader.SetTexture(pp_fxaa.kernel, "InputTex", lightTex);
             pp_fxaa.shader.SetTexture(pp_fxaa.kernel, "ResultTex", fxaaTex);
             pp_fxaa.shader.SetInt("maxRes", fxaaTex.width);
         }
 
-        //bool lightShaderPrepared = false;
         private void PrepareLightShader()
         {
-            //lightShaderPrepared = true;
             pp_light.shader.SetFloat("fog", lightingFacade.IsFogActive() ? 1f : 0f);
             pp_light.shader.SetFloat("power", lightingFacade.GetFogPower());
             Vector3 lightDir = lightingFacade.GetLightDirVec();
@@ -156,16 +154,13 @@ namespace PostProcessSpace
 
         private void Render()
         {
-            /*if (!fxaaShaderPrepared || !lightShaderPrepared)
-                return;*/
-
-            if (display == Display.light || display == Display.depth)
+            if (display == Display.Light || display == Display.Depth)
                 RenderDepth();
 
-            if (display == Display.light || display == Display.normals)
+            if (display == Display.Light || display == Display.Normals)
                 RenderNormals();
 
-            if (display == Display.light)
+            if (display == Display.Light)
                 RenderLight();
         }
 
@@ -174,7 +169,7 @@ namespace PostProcessSpace
             RendererManager.DisplayDepth();
             quadTreeCam.targetTexture = depthTex;
             quadTreeCam.Render();
-            if (display == Display.depth)
+            if (display == Display.Depth)
             {
                 pp_depth.Render(displayDepthTex.width, displayDepthTex.height);
             }
