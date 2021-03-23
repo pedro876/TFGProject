@@ -20,6 +20,25 @@ namespace FuncSpace
 
         #region selection
 
+        public List<string> GetAllFuncNames()
+        {
+            List<string> allFuncs = new List<string>();
+            factory.ForEachFuncName((name) =>
+            {
+                var func = factory.GetFunc(name);
+                allFuncs.Add(func.ToString());
+            });
+            return allFuncs;
+        }
+
+        public string GetFuncByName(string name)
+        {
+            if (factory.IsFuncDefinedByUser(name))
+                return factory.GetFunc(name).ToString();
+            else
+                return "";
+        }
+
         public string GetSelectedFunc()
         {
             return selectedFunc.ToString();

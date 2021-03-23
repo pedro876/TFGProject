@@ -3,37 +3,73 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Text;
 
 public class FunctionElement : MonoBehaviour
 {
-    public static FunctionElement selectedFunc;
+    public bool IsBeingEdit => inputField.isFocused;
+    public bool IsSelected => funcFacade.IsFuncSelected(funcName);
+    public string FuncName => funcName;
 
     [SerializeField] Button selectBtn;
     [SerializeField] Image camImage;
     [SerializeField] TMP_InputField inputField;
-    public FunctionC func;
-    FunctionMenu panel;
 
-    public bool isBeingEdit { get => inputField.isFocused; }
-    public static bool HasValidFunc { get => selectedFunc != null && selectedFunc.func != null; }
+    private string func;
+    private string funcName;
+    private FunctionMenu panel;
+    private IFuncFacade funcFacade;
 
     private void Awake()
     {
         panel = GetComponentInParent<FunctionMenu>();
-        selectBtn.onClick.AddListener(() => panel.SelectFunction(this));
-        camImage.enabled = selectedFunc == this;
-        inputField.onValueChanged.AddListener((str)=>UpdateFunction());
-        inputField.onDeselect.AddListener((str)=>OnEndEdit());
+        selectBtn.onClick.AddListener(() => OnSelected());
+        inputField.onValueChanged.AddListener((str) => UpdateFunction());
+        inputField.onDeselect.AddListener((str) => OnEndEdit());
         inputField.onSubmit.AddListener((str) => OnEndEdit());
         inputField.onEndEdit.AddListener((str) => OnEndEdit());
     }
 
+    private void Start()
+    {
+        funcFacade = ServiceLocator.Instance.GetService<IFuncFacade>();
+        OnUnselected();
+        funcFacade.onChanged += CheckIsUnselected;
+    }
+
     private void OnEndEdit()
     {
-        if (inputField.text.Trim() == "")
+        var input = inputField.text.Trim();
+        if (input.Equals(""))
         {
             panel.RemoveFunctionElement(this);
-        } else if (func != null) inputField.text = func.ToString();
+        }
+        else
+        {
+            UpdateFunction();
+        }
+    }
+
+    private void UpdateFunction()
+    {
+        func = inputField.text.Trim().Replace(" ", "");
+        funcName = ExtractFuncName();
+        funcFacade.CreateFunc(func);
+        func = funcFacade.GetFuncByName(funcName);
+    }
+
+    private string ExtractFuncName()
+    {
+        StringBuilder name = new StringBuilder();
+        for(int i = 0; i < func.Length; i++)
+        {
+            if (func[i] != '(' && func[i] != '=')
+            {
+                name.Append(func[i]);
+            }
+            else break;
+        }
+        return name.ToString();
     }
 
     public void Focus()
@@ -41,42 +77,33 @@ public class FunctionElement : MonoBehaviour
         inputField.Select();
     }
 
-    public void SetFunction(FunctionC function)
+    private void CheckIsUnselected()
     {
-        if (func != null && !func.Equals(function))
+        if (!IsSelected)
         {
-            func = function;
-            FunctionMenu.OnChanged();
-        } else func = function;
-        if (!isBeingEdit)
-        {
-            inputField.onValueChanged.RemoveAllListeners();
-            inputField.text = func.ToString();
-            inputField.onValueChanged.AddListener((str) => UpdateFunction());
-        }
-        
-    }
-
-    public void UpdateFunction()
-    {
-        FunctionC f = FunctionManager.AddFunction(inputField.text);
-        if(f != null)
-        {
-            SetFunction(f);
+            OnUnselected();
         }
     }
-
-    public void OnSelected()
+    public void SetInput(string input)
     {
-        selectedFunc = this;
+        inputField.text = input;
+    }
+
+    public void Select()
+    {
+        OnSelected();
+    }
+    private void OnSelected()
+    {
+        funcFacade.SelectFunc(funcName);
         selectBtn.interactable = false;
         camImage.enabled = true;
     }
 
-    public void OnUnselected()
+    private void OnUnselected()
     {
         selectBtn.interactable = true;
         camImage.enabled = false;
-        if (func != null) inputField.text = func.ToString();
+        inputField.text = func;
     }
 }

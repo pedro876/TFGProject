@@ -86,6 +86,15 @@ namespace RenderingSpace
             AdjustChildrenPosition();
         }
 
+        public IRenderer GetChild(int index)
+        {
+            if (children != null && index >= 0 && index < children.Length)
+            {
+                return children[index];
+            }
+            else return null;
+        }
+
         #endregion
 
         #region Update

@@ -11,6 +11,7 @@ public interface IRenderingFacade
     event Action onGPUModeActivated;
     void RequestRender(bool forced);
     bool IsRendering { get; }
+    int MaxThreads { get; set; }
     int LiveThreads { get; }
     int QueuedThreads { get; }
     void DisplayDepth();
@@ -19,9 +20,11 @@ public interface IRenderingFacade
     void UseGPURenderMode();
     bool IsUsingGPUMode { get; }
     bool IsUsingCPUMode { get; }
+    int MaxLevel { get; }
     int GetLevelResolution(int level);
     int GetLevelDepth(int level);
     int GetFinalDepth();
     int GetFinalResolution();
     bool UpdateInRealTime { get; set; }
+    IRenderState GetRenderState();
 }

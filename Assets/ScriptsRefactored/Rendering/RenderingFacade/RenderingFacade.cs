@@ -33,6 +33,7 @@ namespace RenderingSpace
         private QuadLevel[] setting;
         private IRendererFactory factory;
         private IRenderer rootRenderer;
+        private RenderState renderState;
 
         private void Awake()
         {
@@ -42,7 +43,12 @@ namespace RenderingSpace
 
         private void Start()
         {
-            UseGPURenderMode();
+            #if UNITY_WEBGL
+                UseCPURenderMode();
+            #else
+                UseGPURenderMode();
+            #endif
+
             StartCoroutine(AttendRenderOrders());
             StartCoroutine(RenderInterval());
         }
@@ -54,6 +60,16 @@ namespace RenderingSpace
             rootRenderer.Update();
             CheckIfRenderFinished();
         }
+
+        #region RenderState
+
+        public IRenderState GetRenderState()
+        {
+            renderState.ExtractStateFromRenderer(rootRenderer);
+            return renderState;
+        }
+
+        #endregion
 
         #region Render
 
@@ -163,7 +179,7 @@ namespace RenderingSpace
         #endregion
 
         #region Threading
-
+        public int MaxThreads { get => RenderConfig.maxParallelThreads; set => RenderConfig.maxParallelThreads = value; }
         public int LiveThreads => liveThreads.Count;
         public int QueuedThreads => queuedThreads.Count;
 
@@ -224,6 +240,7 @@ namespace RenderingSpace
             rootRenderer?.Destroy();
             rootRenderer = factory.CreateCPURenderer();
             RequestRender(forced:true);
+            renderState = new RenderState(setting);
             onCPUModeActivated?.Invoke();
         }
         public void UseGPURenderMode()
@@ -232,6 +249,7 @@ namespace RenderingSpace
             rootRenderer?.Destroy();
             rootRenderer = factory.CreateGPURenderer();
             RequestRender(forced:true);
+            renderState = new RenderState(setting);
             onGPUModeActivated?.Invoke();
         }
 
@@ -242,6 +260,8 @@ namespace RenderingSpace
         #endregion
 
         #region Levels
+
+        public int MaxLevel => setting.Length;
 
         public int GetLevelResolution(int level)
         {

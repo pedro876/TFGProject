@@ -2,6 +2,8 @@
 using System;
 public interface IFuncFacade
 {
+    List<string> GetAllFuncNames();
+    string GetFuncByName(string name);
     string GetSelectedFunc();
     string GetSelectedFuncName();
     bool SelectFunc(string funcName);

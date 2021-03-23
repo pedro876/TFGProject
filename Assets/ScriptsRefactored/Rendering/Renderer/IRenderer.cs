@@ -24,5 +24,6 @@ namespace RenderingSpace
         void Render();
         void DisplayDepth();
         void DisplayNormals();
+        IRenderer GetChild(int childIndex);
     }
 }
