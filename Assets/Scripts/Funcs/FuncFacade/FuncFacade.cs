@@ -146,6 +146,11 @@ namespace FuncSpace
             return selectedFunc.BytecodeInfo.resultIndex;
         }
 
+        public int GetBytecodeMaxMemoryIndex()
+        {
+            return selectedFunc.BytecodeInfo.maxMemoryIndexUsed;
+        }
+
         public int GetMaxOperatorIndex()
         {
             return FuncGeneralInfo.MaxOperatorIndex;

@@ -28,6 +28,7 @@ namespace RegionSpace
         public void ActivateRegionClamp(bool active)
         {
             clampToRegion = active;
+            onChanged?.Invoke();
         }
         public bool IsRegionClamped()
         {

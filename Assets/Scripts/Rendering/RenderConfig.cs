@@ -13,7 +13,7 @@ namespace RenderingSpace
         #endregion
 
         #region Exploration
-        public static readonly int gpuHomogeneityDepth = 32;
+        public static readonly int gpuHomogeneityDepth = 90;
         public static readonly int explorationSamples = 10;
         public static readonly float depthExplorationMultiplier = 1.05f;
         public static readonly float normalExplorationMultiplier = 0.8f;
@@ -34,7 +34,7 @@ namespace RenderingSpace
             };
         public static readonly QuadLevel[] gpuSetting = new QuadLevel[]
             {
-                new QuadLevel(512, 512),
+                new QuadLevel(720, 400),
                 new QuadLevel(720, 1024),
             };
         #endregion

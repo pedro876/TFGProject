@@ -53,6 +53,7 @@ namespace PostProcessSpace
                 mustRender = true;
             };
             renderingFacade.onQuadRendered += () => mustRender = true;
+            Render();
         }
 
         private void Update()
@@ -117,6 +118,7 @@ namespace PostProcessSpace
                 case Display.Light: DisplayTexture = antialiasing ? fxaaTex : lightTex; break;
             }
             onDisplayUpdated?.Invoke();
+            mustRender = true;
         }
 
         #endregion

@@ -5,11 +5,44 @@ namespace ViewSpace
 {
     public class ViewFacade : MonoBehaviour, IViewFacade
     {
-        public float Fov { get=> cam.fieldOfView; set => cam.fieldOfView = value; }
-        public float OrtographicSize { get => cam.orthographicSize; set => cam.orthographicSize = value; }
-        public bool Ortographic { get => cam.orthographic; set => cam.orthographic = value; }
-        public float Near { get => cam.nearClipPlane; set => cam.nearClipPlane = value; }
-        public float Far { get => cam.farClipPlane; set => cam.farClipPlane = value; }
+        public float Fov { get => cam.fieldOfView; set {
+                cam.fieldOfView = value;
+                if (!cam.orthographic)
+                {
+                    CalculatePlanes();
+                    onPropertyChanged?.Invoke();
+                }
+            }
+        }
+        public float OrtographicSize { get => cam.orthographicSize; set { 
+                cam.orthographicSize = value;
+                if (cam.orthographic)
+                {
+                    CalculatePlanes();
+                    onPropertyChanged?.Invoke();
+                }
+            }
+        }
+        public bool Ortographic { get => cam.orthographic; set {
+                cam.orthographic = value;
+                CalculatePlanes();
+                onPropertyChanged?.Invoke();
+            }
+        }
+        public float Near { get => cam.nearClipPlane; set {
+                cam.nearClipPlane = value;
+                CalculatePlanes();
+                onPropertyChanged?.Invoke();
+            }
+        }
+        public float Far { get => cam.farClipPlane; set {
+                cam.farClipPlane = value;
+                CalculatePlanes();
+                onPropertyChanged?.Invoke();
+            }
+        }
+        //public event Action onPropertyChanged;
+
         public Vector3 NearTopLeft { get => nearTopLeft; set { if (!nearTopLeft.Equals(value)) { nearTopLeft = value; changed = true; } } }
         public Vector3 NearTopRight { get => nearTopRight; set { if (!nearTopRight.Equals(value)) { nearTopRight = value; changed = true; } } }
         public Vector3 NearBottomRight { get => nearBottomRight; set { if (!nearBottomRight.Equals(value)) { nearBottomRight = value; changed = true; } } }
@@ -19,6 +52,8 @@ namespace ViewSpace
         public Vector3 FarBottomRight { get => farBottomRight; set { if (!farBottomRight.Equals(value)) { farBottomRight = value; changed = true; } } }
         public Vector3 FarBottomLeft { get => farBottomLeft; set { if (!farBottomLeft.Equals(value)) { farBottomLeft = value; changed = true; } } }
         public event Action onChanged;
+        public event Action onPropertyChanged;
+        
 
 
         [Header("Move variables")]
@@ -82,11 +117,12 @@ namespace ViewSpace
             {
                 bool moved = viewMove.TryMove();
                 renderingFacade.UpdateInRealTime = moved;
+            } else
+            {
+                renderingFacade.UpdateInRealTime = false;
             }
-
-            BeginModification();
+            
             CalculatePlanes();
-            EndModification();
         }
 
         private void BeginModification()
@@ -102,6 +138,7 @@ namespace ViewSpace
 
         private void CalculatePlanes()
         {
+            BeginModification();
             float near = cam.nearClipPlane;
             float far = cam.farClipPlane;
             Vector3 nearCenter = cam.transform.position + cam.transform.forward * near;
@@ -109,6 +146,7 @@ namespace ViewSpace
                 CalculatePlanesOrtographic(near, far, nearCenter);
             else
                 CalculatePlanesPerspective(near, far, nearCenter);
+            EndModification();
         }
 
         private void CalculatePlanesOrtographic(float near, float far, Vector3 nearCenter)

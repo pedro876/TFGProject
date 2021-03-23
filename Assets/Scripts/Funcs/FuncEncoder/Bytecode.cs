@@ -9,6 +9,7 @@ public class Bytecode
 
     public List<int> operations;
     public float[] memory;
+    public int maxMemoryIndexUsed;
     public int resultIndex;
 
     public Bytecode()
@@ -16,5 +17,6 @@ public class Bytecode
         operations = new List<int>();
         memory = new float[maxMemorySize];
         resultIndex = 0;
+        maxMemoryIndexUsed = 0;
     }
 }

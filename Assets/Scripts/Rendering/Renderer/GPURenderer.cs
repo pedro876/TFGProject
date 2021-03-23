@@ -47,6 +47,7 @@ namespace RenderingSpace
                 bytecodeOperationsBuffer = new ComputeBuffer(funcFacade.GetMaxOperationsSize(), sizeof(int));
 
                 viewFacade.onChanged += PrepareCameraInfo;
+                //viewFacade.onPropertyChanged += PrepareCameraInfo;
                 funcFacade.onChanged += PrepareFunctionInfo;
                 regionFacade.onChanged += PrepareRegionInfo;
                 massFacade.onChanged += PrepareInterpretationInfo;
@@ -211,7 +212,7 @@ namespace RenderingSpace
             volumeShader.SetBuffer(volumeKernel, "operationsBuffer", bytecodeOperationsBuffer);
             volumeShader.SetInt("operationsSize", operations.Length);
             volumeShader.SetInt("maxOperatorIndex", funcFacade.GetMaxOperatorIndex());
-            volumeShader.SetInt("maxMemoryIndex", gpuBytecodeMemory.Length);
+            volumeShader.SetInt("maxMemoryIndex", funcFacade.GetBytecodeMaxMemoryIndex());
             volumeShader.SetInt("resultIndex", funcFacade.GetBytecodeResultIndex());
         }
 
@@ -238,7 +239,7 @@ namespace RenderingSpace
                     farPos = regionFacade.TransformToRegion(ref farPos);
 
                     ray.SetOriginAndDestiny(ref nearPos, ref farPos);
-                    float normDepth = ray.CastDepth();
+                    float normDepth = ray.CastDepth(out var landed);
                     depths[x, y] = normDepth;
                 }
             }

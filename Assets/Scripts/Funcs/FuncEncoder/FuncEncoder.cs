@@ -38,6 +38,7 @@ namespace FuncSpace
             FillByteCodeMemory();
 
             bytecode.resultIndex = memoryNodes[rootNode];
+            bytecode.maxMemoryIndexUsed = lastMemoryIndex;
             return bytecode;
         }
 
@@ -160,13 +161,13 @@ namespace FuncSpace
             int memoryIndex = 0;
             if ((Bytecode.maxOperationsSize - bytecode.operations.Count) >= 5)
             {
-                memoryIndex = lastMemoryIndex;
+                memoryIndex = FindSuitablePosition(node);
                 bytecode.operations.Add(GetPredefinedFuncIndex(node));
                 bytecode.operations.Add(varIdx[0]);
                 bytecode.operations.Add(varIdx[1]);
                 bytecode.operations.Add(varIdx[2]);
                 bytecode.operations.Add(memoryIndex);
-                lastMemoryIndex++;
+                //lastMemoryIndex++;
             }
             return memoryIndex;
         }
@@ -176,15 +177,40 @@ namespace FuncSpace
             int memoryIndex = 0;
             if ((Bytecode.maxOperationsSize - bytecode.operations.Count) >= 4)
             {
-                memoryIndex = lastMemoryIndex;
+                memoryIndex = FindSuitablePosition(node);
 
                 bytecode.operations.Add(GetOperationIndex(node));
                 bytecode.operations.Add(memoryNodes[node.LeftChild]);
                 bytecode.operations.Add(memoryNodes[node.RightChild]);
                 bytecode.operations.Add(memoryIndex);
 
-                lastMemoryIndex++;
+                //lastMemoryIndex++;
             }
+            return memoryIndex;
+        }
+
+        private int FindSuitablePosition(NonLeafNode parent)
+        {
+            Queue<IFuncNode> children = new Queue<IFuncNode>();
+
+            foreach (var child in parent.GetChildren())
+                children.Enqueue(child);
+
+            while(children.Count > 0)
+            {
+                var child = children.Dequeue();
+                if(!(child is LeafNode) && memoryNodes.ContainsKey(child))
+                {
+                    return memoryNodes[child];
+                }
+                if(child is NonLeafNode nonLeafNode)
+                {
+                    foreach (var subChild in nonLeafNode.GetChildren())
+                        children.Enqueue(subChild);
+                }
+            }
+            int memoryIndex = lastMemoryIndex;
+            lastMemoryIndex++;
             return memoryIndex;
         }
 

@@ -20,6 +20,7 @@ public interface IViewFacade
     bool CanMove();
 
     event Action onChanged;
+    event Action onPropertyChanged;
     void UseOrbitMove();
     void UseFlyMove();
 }

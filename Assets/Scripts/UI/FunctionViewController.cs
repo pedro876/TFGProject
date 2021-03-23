@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using System.Collections;
 
 public class FunctionViewController : MonoBehaviour, IPointerDownHandler
 {
@@ -20,6 +21,14 @@ public class FunctionViewController : MonoBehaviour, IPointerDownHandler
         image.texture = postProcessFacade.DisplayTexture;
         postProcessFacade.onDisplayUpdated += () => image.texture = postProcessFacade.DisplayTexture;
         Release();
+        image.enabled = false;
+        StartCoroutine(EnableViewCoroutine());
+    }
+
+    IEnumerator EnableViewCoroutine()
+    {
+        yield return new WaitForSeconds(0.7f);
+        image.enabled = true;
     }
 
     private void Update()

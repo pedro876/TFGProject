@@ -22,6 +22,7 @@ public interface IFuncFacade
     float[] GetBytecodeMemCopy();
     List<int> GetBytecodeOperations();
     int GetBytecodeResultIndex();
+    int GetBytecodeMaxMemoryIndex();
     int GetMaxOperatorIndex();
     int GetMaxMemorySize();
     int GetMaxOperationsSize();

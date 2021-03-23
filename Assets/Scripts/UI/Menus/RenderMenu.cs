@@ -48,7 +48,7 @@ public class RenderMenu : MonoBehaviour
         GetOriginalData();
         LinkData();
 
-        mustRender = true;
+        mustRender = renderingFacade.IsRendering;
         renderInitTime = DateTime.Now;
         UpdateAllInfo();
     }
@@ -122,6 +122,7 @@ public class RenderMenu : MonoBehaviour
         processImg.color = Color.white;
         homogeneityImg.texture = homogeneityTex;
         homogeneityImg.color = Color.white;
+        renderInitTime = DateTime.Now;
     }
 
     private Texture2D CreateTex()
@@ -190,8 +191,8 @@ public class RenderMenu : MonoBehaviour
             if (renderState.IsTextureApplied) col = texAppliedColor;
             else if (renderState.IsDone) col = doneColor;
             else if (renderState.IsRendering) col = renderingColor;
-            else if (renderState.IsQueued) col = queuedColor;
-            else col = Color.magenta;
+            else /*if (renderState.IsQueued)*/ col = queuedColor;
+            //else col = Color.queu;
 
             for(int x = minX; x < maxX; x++)
             {

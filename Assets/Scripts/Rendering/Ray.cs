@@ -30,8 +30,7 @@ namespace RenderingSpace
 
         public void Cast(out bool landed, out float normDepth, out Color normalColor)
         {
-            normDepth = CastDepth();
-            landed = normDepth > 1.5f;
+            normDepth = CastDepth(out landed);
             Vector3 pos = Vector3.Lerp(origin, destiny, normDepth);
             normalColor = Color.white;
             if (landed)
@@ -41,10 +40,10 @@ namespace RenderingSpace
             }
         }
 
-        public float CastDepth()
+        public float CastDepth(out bool landed)
         {
             float normDepth = 0f;
-            bool landed = false;
+            landed = false;
             for (int z = 0; z < samples && !landed; z++)
             {
                 normDepth = (float)z / (samples - 1);

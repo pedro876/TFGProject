@@ -54,7 +54,7 @@ namespace RenderingSpace
             massFacade = ServiceLocator.Instance.GetService<IMassFacade>();
             regionFacade = ServiceLocator.Instance.GetService<IRegionFacade>();
             
-            //viewFacade.onChanged += () => RequestRender();
+            viewFacade.onPropertyChanged += () => RequestRender();
             massFacade.onChanged += () => RequestRender();
             regionFacade.onChanged += () => RequestRender();
 
@@ -136,8 +136,6 @@ namespace RenderingSpace
                 onRenderFinished?.Invoke();
             }
         }
-
-        
 
         #endregion
 
@@ -269,7 +267,7 @@ namespace RenderingSpace
             rootRenderer?.Destroy();
             rootRenderer = factory.CreateGPURenderer();
             renderState = new RenderState(setting);
-            //RequestRender();
+            RequestRender();
             onGPUModeActivated?.Invoke();
         }
 
