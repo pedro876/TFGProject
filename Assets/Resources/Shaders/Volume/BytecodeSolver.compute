@@ -99,7 +99,7 @@ bool OperationIsSubfunction(int operation)
 }
 
 float SolveByteCode(float3 pos)
-{
+{   
     const static int clampedMaxMemoryIndex = clamp(maxMemoryIndex, 0, MAX_MEMORY_SIZE);
     const static int clampedOperationsSize = clamp(operationsSize, 0, MAX_OPERATIONS_SIZE);
 	
