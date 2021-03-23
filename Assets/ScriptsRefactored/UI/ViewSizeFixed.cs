@@ -7,9 +7,10 @@ using UnityEngine.UI;
 public class ViewSizeFixed : MonoBehaviour
 {
     [SerializeField] RectTransform functionPanel;
-    RectTransform rectTransform;
-    AspectRatioFitter fitter;
-    /*[SerializeField] */RectTransform parentRectTransform;
+
+    private RectTransform rectTransform;
+    private AspectRatioFitter fitter;
+    private RectTransform parentRectTransform;
 
     [ExecuteAlways]
     private void Start()
@@ -29,8 +30,6 @@ public class ViewSizeFixed : MonoBehaviour
 
         float xMax = functionPanel.rect.xMax;
         float width = parentWidth - xMax;
-
-        
 
         fitter.aspectMode = parentHeight > width ?
             AspectRatioFitter.AspectMode.HeightControlsWidth : 

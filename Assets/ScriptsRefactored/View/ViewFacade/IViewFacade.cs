@@ -3,6 +3,11 @@ using System;
 
 public interface IViewFacade
 {
+    float Fov { get; set; }
+    float OrtographicSize { get; set; }
+    bool Ortographic { get; set; }
+    float Near { get; set; }
+    float Far { get; set; }
     Vector3 NearTopLeft { get; }
     Vector3 NearTopRight { get; }
     Vector3 NearBottomRight { get; }

@@ -5,28 +5,32 @@ using TMPro;
 
 public class CoordSphere : MonoBehaviour
 {
-    Transform cam;
     [SerializeField] bool axisX;
     [SerializeField] bool axisY;
     [SerializeField] bool axisZ;
 
-    TextMeshProUGUI text;
+    private Transform cam;
+    private TextMeshProUGUI text;
+
+    private IViewFacade viewFacade;
+    private IRegionFacade regionFacade;
 
     private void Start()
     {
         cam = GameObject.FindGameObjectWithTag("3dCam").transform;
         text = GetComponentInChildren<TextMeshProUGUI>();
-        ViewControllerC.onChanged += () =>
-        {
-            LookAtCam();
-            UpdateInfo();
-        };
+
+        viewFacade = ServiceLocator.Instance.GetService<IViewFacade>();
+        regionFacade = ServiceLocator.Instance.GetService<IRegionFacade>();
+
+        viewFacade.onChanged += LookAtCam;
+        regionFacade.onChanged += UpdateInfo;
     }
 
     private void UpdateInfo()
     {
         Vector3 pos = transform.position;
-        Vector3 finalPos = ViewControllerC.TransformToRegion(ref pos);
+        Vector3 finalPos = regionFacade.TransformToRegion(ref pos);
 
         const float mult = 100f;
         if (axisX) text.text = "x: " + Mathf.RoundToInt(finalPos.x * mult) / mult;

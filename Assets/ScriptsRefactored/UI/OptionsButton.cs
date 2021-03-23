@@ -8,21 +8,22 @@ public class OptionsButton : MonoBehaviour
 {
     [SerializeField] GameObject panel;
     [SerializeField] bool selected = false;
-    [SerializeField] Color selectedTextColor = Color.white;
-    Color unselectedTextColor;
-    TextMeshProUGUI text;
-    Button btn;
 
+    [Header("Selected Colors")]
+    [SerializeField] Color selectedTextColor = Color.white;
+    [SerializeField] Color selectedNormalColor = Color.white;
+    [SerializeField] Color selectedHightlightedColor = Color.white;
+    [SerializeField] Color selectedPressedColor = Color.white;
+    [SerializeField] Color selectedSelectedColor = Color.white;
+
+    private Color unselectedTextColor;
     private Color unselectedNormalColor;
     private Color unselectedHightlightedColor;
     private Color unselectedPressedColor;
     private Color unselectedSelectedColor;
 
-    [Header("Selected Colors")]
-    [SerializeField] Color selectedNormalColor = Color.white;
-    [SerializeField] Color selectedHightlightedColor = Color.white;
-    [SerializeField] Color selectedPressedColor = Color.white;
-    [SerializeField] Color selectedSelectedColor = Color.white;
+    private TextMeshProUGUI text;
+    private Button btn;
 
     void Start()
     {
@@ -33,32 +34,44 @@ public class OptionsButton : MonoBehaviour
         unselectedHightlightedColor = btn.colors.highlightedColor;
         unselectedPressedColor = btn.colors.pressedColor;
         unselectedSelectedColor = btn.colors.selectedColor;
-        OnSelected();
+        UpdateVisibility();
     }
 
     public void ChangeSelect()
     {
         selected = !selected;
-        OnSelected();
+        UpdateVisibility();
     }
 
     public void Select()
     {
         selected = true;
-        OnSelected();
+        UpdateVisibility();
     }
 
     public void Deselect()
     {
         selected = false;
-        OnSelected();
+        UpdateVisibility();
     }
 
-    private void OnSelected()
+    private void UpdateVisibility()
+    {
+        UpdatePanelVisibility();
+        UpdateButtonColors();
+    }
+
+    private void UpdatePanelVisibility()
     {
         panel.SetActive(selected);
-        if (selected) panel.transform.SetAsFirstSibling();
+        if (selected)
+            panel.transform.SetAsFirstSibling();
+    }
+
+    private void UpdateButtonColors()
+    {
         text.color = selected ? selectedTextColor : unselectedTextColor;
+
         var colors = btn.colors;
         colors.normalColor = selected ? selectedNormalColor : unselectedNormalColor;
         colors.highlightedColor = selected ? selectedHightlightedColor : unselectedHightlightedColor;

@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Init : MonoBehaviour
+public class GarbageCollectorController : MonoBehaviour
 {
     [SerializeField] float garbageCollectionInterval = 30f;
 
     private void Start()
     {
-        QualitySettings.vSyncCount = 1;
         StartCoroutine(CollectGarbage());
     }
 

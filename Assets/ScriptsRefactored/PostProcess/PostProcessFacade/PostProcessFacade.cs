@@ -64,6 +64,32 @@ namespace PostProcessSpace
 
         #region Display
 
+        public bool IsUsingAntialiasing()
+        {
+            return antialiasing;
+        }
+
+        public bool IsDisplayinDepth()
+        {
+            return display == Display.Depth;
+        }
+
+        public bool IsDisplayinNormals()
+        {
+            return display == Display.Normals;
+        }
+
+        public bool IsDisplayinLighting()
+        {
+            return display == Display.Light;
+        }
+
+        public void UseAntialiasing(bool use)
+        {
+            antialiasing = use;
+            UpdateDisplay();
+        }
+
         public void DisplayDepth()
         {
             display = Display.Depth;

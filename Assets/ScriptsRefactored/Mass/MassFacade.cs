@@ -17,6 +17,14 @@ namespace MassSpace
         public int Criterion { get => (int)criterion; set { criterion = (CriterionType)(value); onChanged?.Invoke(); } }
         public int Variable { get => (int)variable; set { variable = (VariableType)(value); onChanged?.Invoke(); } }
 
+        public int GreaterCriterion => (int)CriterionType.Greater;
+        public int LessCriterion => (int)CriterionType.Less;
+        public int MinDifferenceCriterion => (int)CriterionType.MinDifference;
+        public int VariableX => (int)VariableType.X;
+        public int VariableY => (int)VariableType.Y;
+        public int VariableZ => (int)VariableType.Z;
+        public int VariableThreshold => (int)VariableType.Threshold;
+
         public string GetVariableStr()
         {
             return variable.ToString();

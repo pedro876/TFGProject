@@ -47,6 +47,11 @@ namespace FuncSpace
             return selectedFunc.Name.Equals(funcName);
         }
 
+        public bool SelectedFuncUsesVariable(string variable)
+        {
+            return selectedFunc.Variables.Contains(variable);
+        }
+
         #endregion
 
         #region creation and removal

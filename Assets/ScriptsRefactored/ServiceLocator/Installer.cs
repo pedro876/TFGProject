@@ -7,6 +7,8 @@ public class Installer : MonoBehaviour
     private static bool installed = false;
     private void Awake()
     {
+        QualitySettings.vSyncCount = 1;
+
         if (!installed)
         {
             installed = true;

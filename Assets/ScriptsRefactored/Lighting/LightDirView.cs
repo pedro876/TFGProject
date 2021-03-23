@@ -4,14 +4,17 @@ using UnityEngine;
 
 public class LightDirView : MonoBehaviour
 {
-    Camera cam;
     [SerializeField] Transform arrowTransform;
-    bool mustRender = true;
+    
+    private Camera cam;
+    private bool mustRender = true;
+    private ILightingFacade lightingFacade;
 
     private void Start()
     {
         cam = GameObject.FindGameObjectWithTag("lightDirCam").GetComponent<Camera>();
-        PostProcess.onLightDirChanged += ()=>mustRender = true;
+        lightingFacade = ServiceLocator.Instance.GetService<ILightingFacade>();
+        lightingFacade.onChanged += () => mustRender = true;
     }
 
     private void Update()
@@ -25,7 +28,7 @@ public class LightDirView : MonoBehaviour
 
     private void UpdateDir()
     {
-        arrowTransform.LookAt(arrowTransform.position + PostProcess.GetLightDirVec());
+        arrowTransform.LookAt(arrowTransform.position + lightingFacade.GetLightDirVec());
         cam.Render();
     }
 }

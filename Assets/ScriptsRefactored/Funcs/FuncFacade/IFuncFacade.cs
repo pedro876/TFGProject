@@ -6,6 +6,7 @@ public interface IFuncFacade
     string GetSelectedFuncName();
     bool SelectFunc(string funcName);
     bool IsFuncSelected(string funcName);
+    bool SelectedFuncUsesVariable(string variable);
 
     void CreateFunc(string textFunc);
     bool RemoveFunc(string funcName);

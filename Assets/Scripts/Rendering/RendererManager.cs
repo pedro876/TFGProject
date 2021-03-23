@@ -71,7 +71,7 @@ public class RendererManager : MonoBehaviour
 #endif
         //StartRender();
         ViewControllerC.onChanged += () => StartRender(false);
-        FunctionPanel.onChanged += () => StartRender(true);
+        FunctionMenu.onChanged += () => StartRender(true);
         VolumeInterpreter.onChanged += () => StartRender(true);
         RenderPanel.onRestartRender += () => StartRender(true);
         StartCoroutine(AttendRenderOrders());

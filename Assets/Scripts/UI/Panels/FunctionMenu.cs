@@ -5,17 +5,16 @@ using UnityEngine.UI;
 using TMPro;
 using System;
 
-public class FunctionPanel : MonoBehaviour
+public class FunctionMenu : MonoBehaviour
 {
-    //[SerializeField] float updateTime = 0.2f;
     [SerializeField] float removeTime = 3f;
 
-    List<FunctionElement> allFunctions;
     [SerializeField] GameObject elemPrefab;
     [SerializeField] Transform elemParent;
-
     [SerializeField] Button addBtn;
     [SerializeField] Transform addElement;
+    
+    private List<FunctionElement> allFunctions;
 
     public static event Action onPreChanged;
     public static event Action onChanged;

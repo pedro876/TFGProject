@@ -5,6 +5,11 @@ namespace ViewSpace
 {
     public class ViewFacade : MonoBehaviour, IViewFacade
     {
+        public float Fov { get=> cam.fieldOfView; set => cam.fieldOfView = value; }
+        public float OrtographicSize { get => cam.orthographicSize; set => cam.orthographicSize = value; }
+        public bool Ortographic { get => cam.orthographic; set => cam.orthographic = value; }
+        public float Near { get => cam.nearClipPlane; set => cam.nearClipPlane = value; }
+        public float Far { get => cam.farClipPlane; set => cam.farClipPlane = value; }
         public Vector3 NearTopLeft { get => nearTopLeft; set { if (!nearTopLeft.Equals(value)) { nearTopLeft = value; changed = true; } } }
         public Vector3 NearTopRight { get => nearTopRight; set { if (!nearTopRight.Equals(value)) { nearTopRight = value; changed = true; } } }
         public Vector3 NearBottomRight { get => nearBottomRight; set { if (!nearBottomRight.Equals(value)) { nearBottomRight = value; changed = true; } } }
@@ -15,13 +20,12 @@ namespace ViewSpace
         public Vector3 FarBottomLeft { get => farBottomLeft; set { if (!farBottomLeft.Equals(value)) { farBottomLeft = value; changed = true; } } }
         public event Action onChanged;
 
-        [Header("References")]
-        [SerializeField] Camera cam;
 
         [Header("Move variables")]
         [SerializeField] float orbitSpeed = 100f;
         [SerializeField] float rotSpeed = 1f;
         [SerializeField] float moveSpeed = 1f;
+        private Camera cam;
         private bool canMove = false;
 
         private IViewMove viewMove;
@@ -60,6 +64,7 @@ namespace ViewSpace
 
         private void Awake()
         {
+            cam = GameObject.FindGameObjectWithTag("3dCam").GetComponent<Camera>();
             cam.transform.LookAt(Vector3.zero);
             orbitMove = new OrbitMove(orbitSpeed, cam.transform);
             flyMove = new FlyMove(rotSpeed, moveSpeed, cam.transform);

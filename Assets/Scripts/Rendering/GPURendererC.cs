@@ -62,7 +62,7 @@ public class GPURendererC : AbstractRenderer
 
             ViewControllerC.onPreChanged += PrepareCameraInfo;
             ViewControllerC.onPreChanged += PrepareRegionInfo;
-            FunctionPanel.onPreChanged += PrepareFunctionInfo;
+            FunctionMenu.onPreChanged += PrepareFunctionInfo;
             VolumeInterpreter.onPreChanged += PrepareInterpretationInfo;
             PrepareInterpretationInfo();
             PrepareCameraInfo();

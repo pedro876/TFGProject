@@ -12,14 +12,14 @@ public class FunctionElement : MonoBehaviour
     [SerializeField] Image camImage;
     [SerializeField] TMP_InputField inputField;
     public FunctionC func;
-    FunctionPanel panel;
+    FunctionMenu panel;
 
     public bool isBeingEdit { get => inputField.isFocused; }
     public static bool HasValidFunc { get => selectedFunc != null && selectedFunc.func != null; }
 
     private void Awake()
     {
-        panel = GetComponentInParent<FunctionPanel>();
+        panel = GetComponentInParent<FunctionMenu>();
         selectBtn.onClick.AddListener(() => panel.SelectFunction(this));
         camImage.enabled = selectedFunc == this;
         inputField.onValueChanged.AddListener((str)=>UpdateFunction());
@@ -46,7 +46,7 @@ public class FunctionElement : MonoBehaviour
         if (func != null && !func.Equals(function))
         {
             func = function;
-            FunctionPanel.OnChanged();
+            FunctionMenu.OnChanged();
         } else func = function;
         if (!isBeingEdit)
         {
