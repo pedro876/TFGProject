@@ -8,6 +8,7 @@ public interface IViewFacade
     bool Ortographic { get; set; }
     float Near { get; set; }
     float Far { get; set; }
+    Vector3 Direction { get; }
     Vector3 NearTopLeft { get; }
     Vector3 NearTopRight { get; }
     Vector3 NearBottomRight { get; }
@@ -22,5 +23,7 @@ public interface IViewFacade
     event Action onChanged;
     event Action onPropertyChanged;
     void UseOrbitMove();
+    bool IsUsingOrbitMove();
     void UseFlyMove();
+    bool IsUsingFlyMove();
 }

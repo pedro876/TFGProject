@@ -5,15 +5,18 @@ namespace ViewSpace
 {
     public class OrbitMove : IViewMove
     {
+        private float orbitDistance;
         private float x, y;
         private Transform camTransform;
 
         public float OrbitSpeed { get; set; }
 
+
         public OrbitMove(float orbitSpeed, Transform camTransform)
         {
             OrbitSpeed = orbitSpeed;
             this.camTransform = camTransform;
+            orbitDistance = camTransform.position.magnitude;
         }
 
         public bool TryMove()
@@ -22,6 +25,7 @@ namespace ViewSpace
             if (moved)
             {
                 Move();
+                LimitDistance();
             }
             return moved;
         }
@@ -59,6 +63,11 @@ namespace ViewSpace
                 degreesToRot = -limit - currentDegrees;
             }
             return degreesToRot;
+        }
+
+        private void LimitDistance()
+        {
+            camTransform.position = camTransform.position.normalized * orbitDistance;
         }
     }
 }

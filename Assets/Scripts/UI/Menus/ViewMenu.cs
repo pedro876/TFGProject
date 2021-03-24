@@ -21,6 +21,8 @@ public class ViewMenu : MonoBehaviour
 
     [Header("Camera")]
     [SerializeField] Toggle perspectiveView;
+    [SerializeField] Toggle orbitToggle;
+    [SerializeField] Toggle flyToggle;
     [SerializeField] TMP_InputField nearField;
     [SerializeField] TMP_InputField farField;
     [SerializeField] TMP_InputField fovField;
@@ -63,6 +65,10 @@ public class ViewMenu : MonoBehaviour
         farField.text = viewFacade.Far.ToString();
         ortographicSizeField.text = viewFacade.OrtographicSize.ToString();
 
+        perspectiveView.SetIsOnWithoutNotify(!viewFacade.Ortographic);
+        orbitToggle.SetIsOnWithoutNotify(viewFacade.IsUsingOrbitMove());
+        flyToggle.SetIsOnWithoutNotify(viewFacade.IsUsingFlyMove());
+
         depthToggle.isOn = postProcessFacade.IsDisplayinDepth();
         normalToggle.isOn = postProcessFacade.IsDisplayinNormals();
         lightToggle.isOn = postProcessFacade.IsDisplayinLighting();
@@ -89,6 +95,18 @@ public class ViewMenu : MonoBehaviour
         );
 
         perspectiveView.onValueChanged.AddListener((val) => viewFacade.Ortographic = !val);
+
+        orbitToggle.onValueChanged.AddListener((val) =>
+        {
+            if (val)
+                viewFacade.UseOrbitMove();
+        });
+
+        flyToggle.onValueChanged.AddListener((val) =>
+        {
+            if (val)
+                viewFacade.UseFlyMove();
+        });
 
         nearField.onValueChanged.AddListener((val) =>
         {

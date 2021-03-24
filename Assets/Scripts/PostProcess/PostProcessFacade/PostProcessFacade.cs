@@ -18,6 +18,7 @@ namespace PostProcessSpace
 
         private ILightingFacade lightingFacade;
         private IRenderingFacade renderingFacade;
+        private IViewFacade viewFacade;
         private PostProcessEffect pp_light;
         private PostProcessEffect pp_fxaa;
         private PostProcessEffect pp_depth;
@@ -39,6 +40,7 @@ namespace PostProcessSpace
         {
             lightingFacade = ServiceLocator.Instance.GetService<ILightingFacade>();
             renderingFacade = ServiceLocator.Instance.GetService<IRenderingFacade>();
+            viewFacade = ServiceLocator.Instance.GetService<IViewFacade>();
 
             CreateEffects();
             CreateTextures();
@@ -50,6 +52,11 @@ namespace PostProcessSpace
             lightingFacade.onChanged += () =>
             {
                 PrepareLightShader();
+                mustRender = true;
+            };
+            viewFacade.onChanged += () =>
+            {
+                PrepareViewParams();
                 mustRender = true;
             };
             renderingFacade.onQuadRendered += () => mustRender = true;
@@ -169,6 +176,12 @@ namespace PostProcessSpace
             pp_light.shader.SetTexture(pp_light.kernel, "ResultTex", lightTex);
             pp_light.shader.SetTexture(pp_light.kernel, "DepthTex", depthTex);
             pp_light.shader.SetTexture(pp_light.kernel, "NormalTex", normalTex);
+        }
+
+        private void PrepareViewParams()
+        {
+            Vector3 viewDir = viewFacade.Direction;
+            pp_light.shader.SetFloats("viewDir", new float[] { viewDir.x, viewDir.y, viewDir.z });
         }
 
         private void PrepareDepthShader()

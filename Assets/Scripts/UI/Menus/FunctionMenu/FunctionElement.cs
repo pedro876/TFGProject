@@ -43,6 +43,7 @@ public class FunctionElement : MonoBehaviour
         else
         {
             UpdateFunction();
+            inputField.SetTextWithoutNotify(func);
         }
     }
 
@@ -98,8 +99,11 @@ public class FunctionElement : MonoBehaviour
 
     private void OnUnselected()
     {
-        selectBtn.interactable = true;
-        camImage.enabled = false;
-        inputField.text = func;
+        if(selectBtn)
+            selectBtn.interactable = true;
+        if(camImage)
+            camImage.enabled = false;
+        if(inputField)
+            inputField.text = func;
     }
 }

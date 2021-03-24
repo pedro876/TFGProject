@@ -6,7 +6,7 @@ namespace RenderingSpace
     public class RenderConfig
     {
         #region Performance
-        public static readonly float targetFramerate = 24f;
+        public static readonly float targetFramerate = 30f;
         public static readonly int displayOrdersPerFrame = 1;
         public static readonly float renderOrdersInterval = 0.05f;
         public static int maxParallelThreads = 10;
@@ -34,8 +34,9 @@ namespace RenderingSpace
             };
         public static readonly QuadLevel[] gpuSetting = new QuadLevel[]
             {
-                new QuadLevel(720, 400),
-                new QuadLevel(720, 1024),
+                new QuadLevel(512, 512),
+                new QuadLevel(512, 1024),
+                //new QuadLevel(360, 1024),
             };
         #endregion
     }

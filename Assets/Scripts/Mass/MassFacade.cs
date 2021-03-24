@@ -3,7 +3,7 @@ using System;
 
 namespace MassSpace
 {
-    public class MassFacade : IMassFacade
+    public class MassFacade : MonoBehaviour, IMassFacade
     {
         private enum CriterionType { Greater, Less, MinDifference }
         private enum VariableType { X, Y, Z, Threshold }
@@ -19,17 +19,27 @@ namespace MassSpace
         public int VariableY => (int)VariableType.Y;
         public int VariableZ => (int)VariableType.Z;
         public int VariableThreshold => (int)VariableType.Threshold;
+        public bool AutoMode { get; set; }
 
         private CriterionType criterion;
         private VariableType variable;
         private float minDifference;
         private float threshold;
 
-        public MassFacade()
+        private IFuncFacade funcFacade;
+
+        private void Awake()
         {
             threshold = 0.5f;
             minDifference = 0.4f;
-            variable = VariableType.Z;
+            Variable = VariableZ;
+            AutoMode = true;
+        }
+
+        private void Start()
+        {
+            funcFacade = ServiceLocator.Instance.GetService<IFuncFacade>();
+            funcFacade.onChanged += DecideModeAuto;
         }
 
         public string GetVariableStr()
@@ -62,6 +72,33 @@ namespace MassSpace
                 case CriterionType.MinDifference: return Mathf.Abs(eval - v) < minDifference;
             }
             return false;
+        }
+
+        private void DecideModeAuto()
+        {
+            if (AutoMode)
+            {
+                bool hasX = funcFacade.SelectedFuncUsesVariable("x");
+                bool hasY = funcFacade.SelectedFuncUsesVariable("y");
+                bool hasZ = funcFacade.SelectedFuncUsesVariable("z");
+
+                Criterion = GreaterCriterion;
+
+                if (hasX && hasY && hasZ)
+                    Variable = VariableThreshold;
+                else if (hasX && hasY)
+                    Variable = VariableZ;
+                else if (hasY && hasZ)
+                    Variable = VariableX;
+                else if (hasX && hasZ)
+                    Variable = VariableY;
+                else if (hasX)
+                    Variable = VariableZ;
+                else if (hasY)
+                    Variable = VariableZ;
+                else if (hasZ)
+                    Variable = VariableX;
+            }
         }
     }
 }

@@ -17,4 +17,5 @@ public interface IMassFacade
     int VariableY { get; }
     int VariableZ { get; }
     int VariableThreshold { get; }
+    bool AutoMode { get; set; }
 }

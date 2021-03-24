@@ -41,7 +41,6 @@ namespace ViewSpace
                 onPropertyChanged?.Invoke();
             }
         }
-        //public event Action onPropertyChanged;
 
         public Vector3 NearTopLeft { get => nearTopLeft; set { if (!nearTopLeft.Equals(value)) { nearTopLeft = value; changed = true; } } }
         public Vector3 NearTopRight { get => nearTopRight; set { if (!nearTopRight.Equals(value)) { nearTopRight = value; changed = true; } } }
@@ -79,6 +78,8 @@ namespace ViewSpace
 
         private IRenderingFacade renderingFacade;
 
+        public Vector3 Direction => cam.transform.forward;
+
         public void SetCanMove(bool focus)
         {
             canMove = focus;
@@ -92,9 +93,18 @@ namespace ViewSpace
         {
             viewMove = orbitMove;
         }
+
+        public bool IsUsingOrbitMove()
+        {
+            return viewMove == orbitMove;
+        }
         public void UseFlyMove()
         {
             viewMove = flyMove;
+        }
+        public bool IsUsingFlyMove()
+        {
+            return viewMove == flyMove;
         }
 
         private void Awake()

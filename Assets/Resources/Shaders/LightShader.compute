@@ -6,6 +6,7 @@ RWTexture2D<float4> ResultTex;
 float fog;
 float power;
 float3 lightDir;
+float3 viewDir;
 
 [numthreads(8,8,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
@@ -14,12 +15,20 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     const static float minLightIncidence = 0.1;
     const static float maxLightIncidence = 0.9;
     const static float lightIncidenceRange = maxLightIncidence - minLightIncidence;
+    const static float attenuation = 0.15;
     
     float4 depthColor = DepthTex[id.xy];
     float4 normalColor = NormalTex[id.xy];
     bool landed = depthColor.y > 0.5f;
     float3 normal = normalize(normalColor.xyz * 2 - 1);
     float lightIncidence = pow(clamp(dot(-normal, lightDir), 0, 1), 2);
+    
+    bool correctSide = dot(normal, -lightDir) > 0.05;
+    float specularReflection = attenuation * pow(dot(reflect(lightDir, normal), -viewDir), 1);
+    specularReflection = clamp(specularReflection, 0, 1) * correctSide;
+    lightIncidence += specularReflection;
+    
+    lightIncidence = clamp(lightIncidence, 0, 1);
     lightIncidence = lightIncidence * lightIncidenceRange + minLightIncidence;
     
     float4 finalColor = float4(lightIncidence, lightIncidence, lightIncidence, 1);
@@ -28,4 +37,5 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     finalColor = lerp(float4(1, 1, 1, 1), finalColor * surfaceColor, landed);
 
     ResultTex[id.xy] = finalColor;
+    //ResultTex[id.xy] = float4(specularReflection, specularReflection, specularReflection, 1);
 }

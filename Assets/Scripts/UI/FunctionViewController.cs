@@ -35,7 +35,7 @@ public class FunctionViewController : MonoBehaviour, IPointerDownHandler
     {
         if (blocked)
         {
-            if(Cursor.lockState != CursorLockMode.Locked || Input.GetKeyDown(KeyCode.Space))
+            if(Cursor.lockState != CursorLockMode.Locked || Cursor.visible || Input.GetKeyDown(KeyCode.Space))
             {
                 Release();
             }

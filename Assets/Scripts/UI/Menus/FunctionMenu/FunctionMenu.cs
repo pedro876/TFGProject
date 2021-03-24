@@ -18,6 +18,7 @@ public class FunctionMenu : MonoBehaviour
 
     private IFuncFacade funcFacade;
 
+
     private void Awake()
     {
         allFuncElements = new List<FunctionElement>();

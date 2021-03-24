@@ -15,6 +15,8 @@ public class OptionsButton : MonoBehaviour
     [SerializeField] Color selectedHightlightedColor = Color.white;
     [SerializeField] Color selectedPressedColor = Color.white;
     [SerializeField] Color selectedSelectedColor = Color.white;
+    [SerializeField] bool lastChild;
+    [SerializeField] bool firstChild;
 
     private Color unselectedTextColor;
     private Color unselectedNormalColor;
@@ -65,7 +67,16 @@ public class OptionsButton : MonoBehaviour
     {
         panel.SetActive(selected);
         if (selected)
-            panel.transform.SetAsFirstSibling();
+        {
+            if (lastChild)
+            {
+                panel.transform.SetAsLastSibling();
+            }
+            else if (firstChild)
+            {
+                panel.transform.SetAsFirstSibling();
+            }
+        }
     }
 
     private void UpdateButtonColors()

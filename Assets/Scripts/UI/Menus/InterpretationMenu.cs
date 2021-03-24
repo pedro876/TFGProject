@@ -20,34 +20,32 @@ public class InterpretationMenu : MonoBehaviour
 
     [SerializeField] Toggle useAuto;
 
-    private IFuncFacade funcFacade;
     private IMassFacade massFacade;
 
     private void Start()
     {
-        funcFacade = ServiceLocator.Instance.GetService<IFuncFacade>();
         massFacade = ServiceLocator.Instance.GetService<IMassFacade>();
-
+        massFacade.onChanged += GetOriginalData;
         GetOriginalData();
         LinkData();
-
-        funcFacade.onChanged += ChooseInterpretation;
     }
 
     private void GetOriginalData()
     {
-        greaterThanToggle.isOn = massFacade.Criterion == massFacade.GreaterCriterion;
-        lessThanToggle.isOn = massFacade.Criterion == massFacade.LessCriterion;
-        differenceToggle.isOn = massFacade.Criterion == massFacade.MinDifferenceCriterion;
+        greaterThanToggle.SetIsOnWithoutNotify(massFacade.Criterion == massFacade.GreaterCriterion);
+        lessThanToggle.SetIsOnWithoutNotify(massFacade.Criterion == massFacade.LessCriterion);
+        differenceToggle.SetIsOnWithoutNotify(massFacade.Criterion == massFacade.MinDifferenceCriterion);
 
-        xToggle.isOn = massFacade.Variable == massFacade.VariableX;
-        yToggle.isOn = massFacade.Variable == massFacade.VariableY;
-        zToggle.isOn = massFacade.Variable == massFacade.VariableZ;
-        thresholdToggle.isOn = massFacade.Variable == massFacade.VariableThreshold;
+        xToggle.SetIsOnWithoutNotify(massFacade.Variable == massFacade.VariableX);
+        yToggle.SetIsOnWithoutNotify(massFacade.Variable == massFacade.VariableY);
+        zToggle.SetIsOnWithoutNotify(massFacade.Variable == massFacade.VariableZ);
+        thresholdToggle.SetIsOnWithoutNotify(massFacade.Variable == massFacade.VariableThreshold);
 
-        differenceVal.text = "" + Mathf.RoundToInt(massFacade.MinDifference * 10f) / 10f;
-        differenceSlider.value = massFacade.MinDifference;
-        thresholdField.text = "" + massFacade.Threshold;
+        differenceVal.text = (Mathf.RoundToInt(massFacade.MinDifference * 10f) / 10f).ToString();
+        differenceSlider.SetValueWithoutNotify(massFacade.MinDifference);
+        thresholdField.SetTextWithoutNotify(massFacade.Threshold.ToString());
+
+        useAuto.isOn = massFacade.AutoMode;
     }
 
     private void LinkData()
@@ -88,7 +86,7 @@ public class InterpretationMenu : MonoBehaviour
 
         thresholdToggle.onValueChanged.AddListener((val) =>
         {
-            if (val) massFacade.Variable = massFacade.VariableZ;
+            if (val) massFacade.Variable = massFacade.VariableThreshold;
         });
 
         thresholdField.onValueChanged.AddListener((val) =>
@@ -103,6 +101,7 @@ public class InterpretationMenu : MonoBehaviour
         useAuto.onValueChanged.AddListener((val) =>
         {
             CheckToggleInteractivy();
+            massFacade.AutoMode = val;
         });
     }
 
@@ -116,31 +115,5 @@ public class InterpretationMenu : MonoBehaviour
         greaterThanToggle.interactable = !useAuto.isOn;
         lessThanToggle.interactable = !useAuto.isOn;
         differenceToggle.interactable = !useAuto.isOn;
-    }
-
-    private void ChooseInterpretation()
-    {
-        if (!useAuto.isOn) return;
-        
-        bool hasX = funcFacade.SelectedFuncUsesVariable("x");
-        bool hasY = funcFacade.SelectedFuncUsesVariable("y");
-        bool hasZ = funcFacade.SelectedFuncUsesVariable("z");
-
-        massFacade.Criterion = massFacade.GreaterCriterion;
-
-        if (hasX && hasY && hasZ)
-            thresholdToggle.isOn = true;
-        else if (hasX && hasY)
-            zToggle.isOn = true;
-        else if(hasY && hasZ)
-            xToggle.isOn = true;
-        else if (hasX && hasZ)
-            yToggle.isOn = true;
-        else if (hasX)
-            zToggle.isOn = true;
-        else if (hasY)
-            zToggle.isOn = true;
-        else if (hasZ)
-            xToggle.isOn = true;
     }
 }
