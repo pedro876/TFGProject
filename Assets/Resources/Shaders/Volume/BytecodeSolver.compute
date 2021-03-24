@@ -70,9 +70,9 @@ float SolveSubFunction(int op, float v0, float v1, float v2)
         case FUNC_RND:
             return Random(v0);
         case FUNC_RND2:
-            return Random(v0, v1);
+            return Random2(v0, v1);
         case FUNC_RND3:
-            return Random(v0, v1, v2);
+            return Random3(v0, v1, v2);
         case FUNC_ROUND:
             return round(v0);
         case FUNC_VOXEL:
@@ -80,9 +80,9 @@ float SolveSubFunction(int op, float v0, float v1, float v2)
         case FUNC_PERLIN1:
             return Perlin(v0);
         case FUNC_PERLIN2:
-            return Perlin(v0, v1);
+            return Perlin2(v0, v1);
         case FUNC_PERLIN3:
-            return Perlin(v0, v1, v2);
+            return Perlin3(v0, v1, v2);
         default:
             return 0.0f;
     }
