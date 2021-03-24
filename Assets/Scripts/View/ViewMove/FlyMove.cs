@@ -57,7 +57,7 @@ namespace ViewSpace
         private float LimitDegreesY(float degreesToRot)
         {
             const float limit = 89.5f;
-            float currentDegrees = Vector3.SignedAngle(camTransform.position, Vector3.ProjectOnPlane(camTransform.position, Vector3.up), -camTransform.right);
+            float currentDegrees = Vector3.SignedAngle(camTransform.forward, Vector3.ProjectOnPlane(camTransform.forward, Vector3.up), -camTransform.right);
             if (currentDegrees + degreesToRot >= limit && degreesToRot > 0f)
             {
                 degreesToRot = limit - currentDegrees;
