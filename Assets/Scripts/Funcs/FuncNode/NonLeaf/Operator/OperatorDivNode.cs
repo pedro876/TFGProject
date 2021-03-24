@@ -10,9 +10,5 @@ namespace FuncSpace
         {
             operatorSymbol = "/";
         }
-        protected override float SolveSelf(float[] values)
-        {
-            return values[0] / values[1];
-        }
     }
 }

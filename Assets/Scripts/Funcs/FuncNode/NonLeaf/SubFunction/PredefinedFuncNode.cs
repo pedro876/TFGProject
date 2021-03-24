@@ -10,16 +10,5 @@ namespace FuncSpace
         {
             this.functionName = function;
         }
-
-        protected override float SolveSelf(float[] values)
-        {
-            switch (functionName)
-            {
-                case "cos": return Mathf.Cos(values[0]);
-                case "sin": return Mathf.Sin(values[0]);
-                case "abs": return Mathf.Abs(values[0]);
-                default: return 0f;
-            }
-        }
     }
 }

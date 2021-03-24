@@ -44,9 +44,16 @@ namespace FuncSpace
         private IFuncNode SimplifyOp(OperatorNode opNode)
         {
             IFuncNode simplifiedNode = opNode;
-            if (opNode.LeftChild is ConstantNode && opNode.RightChild is ConstantNode)
+            if (opNode.LeftChild is ConstantNode childLeft && opNode.RightChild is ConstantNode childRight)
             {
-                float result = opNode.Solve(0, 0, 0);
+                float result = 0f;
+                float valueLeft = childLeft.GetValue();
+                float valueRight = childRight.GetValue();
+                if (opNode is OperatorAddNode) result = valueLeft + valueRight;
+                if (opNode is OperatorSubNode) result = valueLeft - valueRight;
+                if (opNode is OperatorMulNode) result = valueLeft * valueRight;
+                if (opNode is OperatorDivNode) result = valueLeft / valueRight;
+                if (opNode is OperatorPowNode) result = Mathf.Pow(valueLeft, valueRight);
                 simplifiedNode = new ConstantNode(result);
             }
             else if (opNode is OperatorMulNode)

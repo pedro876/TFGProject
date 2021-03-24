@@ -138,7 +138,7 @@ namespace RenderingSpace
 
         protected void MemoryToTex()
         {
-            image.enabled = true;
+            if(image)image.enabled = true;
             IsTextureApplied = true;
             RenderingFacade.Instance.TextureHasBeenApplied();
             MemoryToTexConcrete();
@@ -209,7 +209,7 @@ namespace RenderingSpace
             IsRendering = true;
             childRenderFinishedCount = 0;
 
-            if (level > 0) image.enabled = false;
+            if (level > 0 && image) image.enabled = false;
 
             CalculateHomogeneityPoints();
             if (level == 0)

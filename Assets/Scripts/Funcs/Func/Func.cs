@@ -20,11 +20,6 @@ namespace FuncSpace
             return RootNode.ToString();
         }
 
-        public float Solve(float x, float y, float z)
-        {
-            return RootNode.Solve(x, y, z);
-        }
-
         public override string ToString()
         {
             StringBuilder builder = new StringBuilder(FinalDeclaration);

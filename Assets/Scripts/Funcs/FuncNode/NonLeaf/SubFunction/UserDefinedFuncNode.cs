@@ -15,16 +15,5 @@ namespace FuncSpace
             this.func = func;
             this.preventRecursive = preventRecursive;
         }
-
-        protected override float SolveSelf(float[] values)
-        {
-            if (preventRecursive)
-            {
-                return 1f;
-            } else
-            {
-                return func.Solve(values[0], values[1], values[2]);
-            }
-        }
     }
 }

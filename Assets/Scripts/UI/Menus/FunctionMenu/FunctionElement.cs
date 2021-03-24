@@ -66,7 +66,7 @@ public class FunctionElement : MonoBehaviour
             }
             else break;
         }
-        return name.ToString();
+        return name.ToString().Trim();
     }
 
     public void Focus()

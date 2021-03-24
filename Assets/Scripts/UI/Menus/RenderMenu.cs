@@ -190,9 +190,8 @@ public class RenderMenu : MonoBehaviour
             Color col;
             if (renderState.IsTextureApplied) col = texAppliedColor;
             else if (renderState.IsDone) col = doneColor;
-            else if (renderState.IsRendering) col = renderingColor;
-            else /*if (renderState.IsQueued)*/ col = queuedColor;
-            //else col = Color.queu;
+            else if (renderState.IsQueued) col = queuedColor;
+            else col = renderingColor;
 
             for(int x = minX; x < maxX; x++)
             {

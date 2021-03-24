@@ -14,17 +14,6 @@ namespace FuncSpace
             positive = true;
         }
 
-        public override float Solve(float x, float y, float z)
-        {
-            switch (variable)
-            {
-                case "x": return x;
-                case "y": return y;
-                case "z": return z;
-                default: return 0f;
-            }
-        }
-
         public override bool NeedsRepresentation()
         {
             return true;
@@ -34,20 +23,6 @@ namespace FuncSpace
         {
             if (!HasParent) return false;
             else return !positive;
-            /*else
-            {
-                IFuncNode parent = GetParent();
-                if(parent is OperatorSubNode)
-                {
-                    OperatorSubNode parentOp = (OperatorSubNode)parent;
-                    if(parentOp.GetChildRight() == this)
-                    {
-                        return !positive;
-                    }
-                }
-                return !positive;
-            }*/
-
         }
 
         public override void ToStringDeep(StringBuilder builder)

@@ -30,22 +30,22 @@ namespace FuncSpace
             children.Add(child);
         }
 
-        public override float Solve(float x, float y, float z)
+        /*public override float Solve(float x, float y, float z)
         {
             SolveChildren(x, y, z);
             float result = SolveSelf(childrenResults);
             return result;
-        }
+        }*/
 
-        protected void SolveChildren(float x, float y, float z)
+        /*protected void SolveChildren(float x, float y, float z)
         {
             for(int i = 0; i < children.Count; i++)
             {
                 childrenResults[i] = children[i].Solve(x, y, z);
             }
-        }
+        }*/
 
-        protected abstract float SolveSelf(float[] values);
+        //protected abstract float SolveSelf(float[] values);
 
         public override bool NeedsRepresentation()
         {

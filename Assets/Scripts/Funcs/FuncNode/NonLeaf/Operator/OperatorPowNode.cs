@@ -10,10 +10,5 @@ namespace FuncSpace
         {
             operatorSymbol = "^";
         }
-
-        protected override float SolveSelf(float[] values)
-        {
-            return Mathf.Pow(values[0], values[1]);
-        }
     }
 }

@@ -41,9 +41,13 @@ namespace FuncSpace
         public string GetFuncByName(string name)
         {
             if (factory.IsFuncDefinedByUser(name))
+            {
                 return factory.GetFunc(name).ToString();
+            }
             else
+            {
                 return "";
+            }
         }
 
         public string GetSelectedFunc()

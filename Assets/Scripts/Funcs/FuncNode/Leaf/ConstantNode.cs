@@ -49,11 +49,6 @@ namespace FuncSpace
             value = -Mathf.Abs(value);
         }
 
-        public override float Solve(float x, float y, float z)
-        {
-            return value;
-        }
-
         public override bool NeedsRepresentation()
         {
             if(value == 0f)
@@ -70,19 +65,6 @@ namespace FuncSpace
         {
             if (!HasParent) return false;
             else return value < 0f;
-            /*else
-            {
-                IFuncNode parent = GetParent();
-                if (parent is OperatorSubNode)
-                {
-                    OperatorSubNode parentOp = (OperatorSubNode)parent;
-                    if (parentOp.GetChildRight() == this)
-                    {
-                        return value < 0f;
-                    }
-                }
-                return value < 0f;
-            }*/
         }
 
         public override void ToStringDeep(StringBuilder builder)
@@ -91,7 +73,7 @@ namespace FuncSpace
             {
                 bool needsParenthesis = NeedsParenthesis();
                 if (needsParenthesis) builder.Append('(');
-                builder.Append(value.ToString());
+                builder.Append(usesSymbol ? symbol : value.ToString());
                 if (needsParenthesis) builder.Append(')');
             }
         }
