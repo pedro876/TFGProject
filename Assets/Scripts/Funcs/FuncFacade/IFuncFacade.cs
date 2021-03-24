@@ -28,4 +28,10 @@ public interface IFuncFacade
     int GetMaxOperationsSize();
 
     event Action onChanged;
+
+    /*float GetAuxValueForRandom();
+    Vector2 GetAuxVec2ForRandom();
+    Vector3 GetAuxVec3ForRandom();*/
+    int GetRandomStreamSize();
+    float[] GetRandomStream();
 }

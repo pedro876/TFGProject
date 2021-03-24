@@ -23,6 +23,7 @@ namespace RenderingSpace
 
         private static ComputeBuffer bytecodeMemoryBuffer;
         private static ComputeBuffer bytecodeOperationsBuffer;
+        private static ComputeBuffer randomStreamBuffer;
 
         private IFuncFacade funcFacade;
         private IMassFacade massFacade;
@@ -45,6 +46,7 @@ namespace RenderingSpace
 
                 bytecodeMemoryBuffer = new ComputeBuffer(funcFacade.GetMaxMemorySize(), sizeof(float));
                 bytecodeOperationsBuffer = new ComputeBuffer(funcFacade.GetMaxOperationsSize(), sizeof(int));
+                randomStreamBuffer = new ComputeBuffer(funcFacade.GetRandomStreamSize(), sizeof(float));
 
                 viewFacade.onChanged += PrepareCameraInfo;
                 //viewFacade.onPropertyChanged += PrepareCameraInfo;
@@ -52,6 +54,7 @@ namespace RenderingSpace
                 regionFacade.onChanged += PrepareRegionInfo;
                 massFacade.onChanged += PrepareInterpretationInfo;
 
+                PrepareRandomInfo();
                 PrepareInterpretationInfo();
                 PrepareCameraInfo();
                 PrepareRegionInfo();
@@ -162,6 +165,13 @@ namespace RenderingSpace
 
         #region ShaderPreparation
 
+        private void PrepareRandomInfo()
+        {
+            float[] randomStream = funcFacade.GetRandomStream();
+            randomStreamBuffer.SetData(randomStream);
+            volumeShader.SetBuffer(volumeKernel, "randomStream", randomStreamBuffer);
+        }
+
         private void PrepareExplorationInfo()
         {
             volumeShader.SetFloat("depthExplorationMult", RenderConfig.depthExplorationMultiplier);
@@ -204,16 +214,21 @@ namespace RenderingSpace
 
         private void PrepareFunctionInfo()
         {
-            var gpuBytecodeMemory = funcFacade.GetBytecodeMemCopy();
-            int[] operations = funcFacade.GetBytecodeOperations().ToArray();
-            bytecodeMemoryBuffer.SetData(gpuBytecodeMemory);
-            bytecodeOperationsBuffer.SetData(operations);
-            volumeShader.SetBuffer(volumeKernel, "memoryBuffer", bytecodeMemoryBuffer);
-            volumeShader.SetBuffer(volumeKernel, "operationsBuffer", bytecodeOperationsBuffer);
-            volumeShader.SetInt("operationsSize", operations.Length);
-            volumeShader.SetInt("maxOperatorIndex", funcFacade.GetMaxOperatorIndex());
-            volumeShader.SetInt("maxMemoryIndex", funcFacade.GetBytecodeMaxMemoryIndex());
-            volumeShader.SetInt("resultIndex", funcFacade.GetBytecodeResultIndex());
+            try
+            {
+                var gpuBytecodeMemory = funcFacade.GetBytecodeMemCopy();
+                int[] operations = funcFacade.GetBytecodeOperations().ToArray();
+                bytecodeMemoryBuffer.SetData(gpuBytecodeMemory);
+                bytecodeOperationsBuffer.SetData(operations);
+                volumeShader.SetBuffer(volumeKernel, "memoryBuffer", bytecodeMemoryBuffer);
+                volumeShader.SetBuffer(volumeKernel, "operationsBuffer", bytecodeOperationsBuffer);
+                volumeShader.SetInt("operationsSize", operations.Length);
+                volumeShader.SetInt("maxOperatorIndex", funcFacade.GetMaxOperatorIndex());
+                volumeShader.SetInt("maxMemoryIndex", funcFacade.GetBytecodeMaxMemoryIndex());
+                volumeShader.SetInt("resultIndex", funcFacade.GetBytecodeResultIndex());
+            }
+            catch (ArgumentNullException) { }
+            
         }
 
         #endregion

@@ -10,13 +10,15 @@ namespace FuncSpace
         private IFuncFactory factory;
         private IFuncSolver bytecodeSolver;
         private IFunc selectedFunc;
+        private INoise noise;
 
         public event Action onChanged;
         public FuncFacade()
         {
+            noise = new Noise();
             factory = new FuncFactory();
             AddDefaultFuncs();
-            bytecodeSolver = new FuncSolver();
+            bytecodeSolver = new FuncSolver(noise);
             selectedFunc = factory.GetDummy();
         }
 
@@ -169,6 +171,12 @@ namespace FuncSpace
         {
             return Bytecode.maxOperationsSize;
         }
+
+        /*public float GetAuxValueForRandom() => noise.GetAuxValueForRandom();
+        public Vector2 GetAuxVec2ForRandom() => noise.GetAuxVec2ForRandom();
+        public Vector3 GetAuxVec3ForRandom() => noise.GetAuxVec3ForRandom();*/
+        public int GetRandomStreamSize() => noise.GetStreamSize();
+        public float[] GetRandomStream() => noise.GetRandomStream();
 
         #endregion
     }

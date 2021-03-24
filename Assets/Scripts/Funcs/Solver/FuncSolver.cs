@@ -5,6 +5,13 @@ namespace FuncSpace
 {
     public class FuncSolver : IFuncSolver
     {
+        private INoise noise;
+
+        public FuncSolver(INoise noise)
+        {
+            this.noise = noise;
+        }
+
         public float Solve(ref Vector3 pos, Bytecode code, float[] memory)
         {
             SetPositionToMemory(ref pos, memory);
@@ -76,9 +83,18 @@ namespace FuncSpace
 
         float SolveSubFunction(int op, float v0, float v1, float v2)
         {
+            // "cos", "sin", "abs", "rnd","rnd2", "rnd3", "round", "voxel", "perlin", "perlin2", "perlin3"
             const int FUNC_COS = 0;
             const int FUNC_SIN = 1;
             const int FUNC_ABS = 2;
+            const int FUNC_RND = 3;
+            const int FUNC_RND2 = 4;
+            const int FUNC_RND3 = 5;
+            const int FUNC_ROUND = 6;
+            const int FUNC_VOXEL = 7;
+            const int FUNC_PERLIN1 = 8;
+            const int FUNC_PERLIN2 = 9;
+            const int FUNC_PERLIN3 = 10;
             int subFunction = op - FuncGeneralInfo.MaxOperatorIndex;
             switch (subFunction)
             {
@@ -88,6 +104,22 @@ namespace FuncSpace
                     return Mathf.Sin(v0);
                 case FUNC_ABS:
                     return Mathf.Abs(v0);
+                case FUNC_RND:
+                    return noise.Random(v0);
+                case FUNC_RND2:
+                    return noise.Random(v0, v1);
+                case FUNC_RND3:
+                    return noise.Random(v0, v1, v2);
+                case FUNC_ROUND:
+                    return Mathf.Round(v0);
+                case FUNC_VOXEL:
+                    return noise.Voxel(v0, v1, v2);
+                case FUNC_PERLIN1:
+                    return noise.Perlin(v0);
+                case FUNC_PERLIN2:
+                    return noise.Perlin(v0, v1);
+                case FUNC_PERLIN3:
+                    return noise.Perlin(v0, v1, v2);
                 default:
                     return 0.0f;
             }

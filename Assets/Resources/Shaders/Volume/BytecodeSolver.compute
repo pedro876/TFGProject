@@ -1,3 +1,5 @@
+#include "Noise.compute"
+
 #define MAX_MEMORY_SIZE 256
 #define MAX_OPERATIONS_SIZE 256
 
@@ -6,7 +8,7 @@ int criterion;
 float threshold;
 float difference;
 
-RWBuffer<float> memoryBuffer;
+Buffer<float> memoryBuffer;
 Buffer<int> operationsBuffer;
 int operationsSize;
 int maxOperatorIndex;
@@ -46,6 +48,14 @@ float ChangeSignIf(float val, bool condition)
 #define FUNC_COS 0
 #define FUNC_SIN 1
 #define FUNC_ABS 2
+#define FUNC_RND 3
+#define FUNC_RND2 4
+#define FUNC_RND3 5
+#define FUNC_ROUND 6
+#define FUNC_VOXEL 7
+#define FUNC_PERLIN1 8
+#define FUNC_PERLIN2 9
+#define FUNC_PERLIN3 10
 float SolveSubFunction(int op, float v0, float v1, float v2)
 {
     int subFunction = op - maxOperatorIndex;
@@ -57,6 +67,22 @@ float SolveSubFunction(int op, float v0, float v1, float v2)
             return sin(v0);
         case FUNC_ABS:
             return abs(v0);
+        case FUNC_RND:
+            return Random(v0);
+        case FUNC_RND2:
+            return Random(v0, v1);
+        case FUNC_RND3:
+            return Random(v0, v1, v2);
+        case FUNC_ROUND:
+            return round(v0);
+        case FUNC_VOXEL:
+            return Voxel(v0, v1, v2);
+        case FUNC_PERLIN1:
+            return Perlin(v0);
+        case FUNC_PERLIN2:
+            return Perlin(v0, v1);
+        case FUNC_PERLIN3:
+            return Perlin(v0, v1, v2);
         default:
             return 0.0f;
     }
