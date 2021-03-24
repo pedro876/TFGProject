@@ -58,7 +58,7 @@ namespace FuncSpace
             x += 1000f;
             float fract = Fract(x);
             x = Mathf.Floor(x);
-            return Mathf.SmoothStep(Random(x), Random(x+1f), fract);
+            return Smooth(Random(x), Random(x+1f), fract);
         }
 
         public float Perlin(float x, float y)
@@ -78,10 +78,10 @@ namespace FuncSpace
             float c01 = Random(x0, y1);
             float c11 = Random(x1, y1);
 
-            float s00_10 = Mathf.SmoothStep(c00, c10, xFract);
-            float s01_11 = Mathf.SmoothStep(c01, c11, xFract);
+            float s00_10 = Smooth(c00, c10, xFract);
+            float s01_11 = Smooth(c01, c11, xFract);
 
-            float perlin2 = Mathf.SmoothStep(s00_10, s01_11, yFract);
+            float perlin2 = Smooth(s00_10, s01_11, yFract);
 
             return perlin2;
         }
@@ -112,17 +112,17 @@ namespace FuncSpace
             float c011 = Random(x0, y1, z1);
             float c111 = Random(x1, y1, z1);
 
-            float s000_100 = Mathf.SmoothStep(c000, c100, xFract);
-            float s010_110 = Mathf.SmoothStep(c010, c110, xFract);
+            float s000_100 = Smooth(c000, c100, xFract);
+            float s010_110 = Smooth(c010, c110, xFract);
 
-            float perlinZ0 = Mathf.SmoothStep(s000_100, s010_110, yFract);
+            float perlinZ0 = Smooth(s000_100, s010_110, yFract);
 
-            float s001_101 = Mathf.SmoothStep(c001, c101, xFract);
-            float s011_111 = Mathf.SmoothStep(c011, c111, xFract);
+            float s001_101 = Smooth(c001, c101, xFract);
+            float s011_111 = Smooth(c011, c111, xFract);
 
-            float perlinZ1 = Mathf.SmoothStep(s001_101, s011_111, yFract);
+            float perlinZ1 = Smooth(s001_101, s011_111, yFract);
 
-            float perlin3 = Mathf.SmoothStep(perlinZ0, perlinZ1, zFract);
+            float perlin3 = Smooth(perlinZ0, perlinZ1, zFract);
 
             return perlin3;
         }
@@ -130,6 +130,12 @@ namespace FuncSpace
         private float Fract(float f)
         {
             return f - Mathf.Floor(f);
+        }
+
+        private float Smooth(float min, float max, float v)
+        {
+            v = Mathf.Clamp(v * v * (3 - 2 * v), 0, 1);
+            return v * (max - min) + min;
         }
     }
 }
