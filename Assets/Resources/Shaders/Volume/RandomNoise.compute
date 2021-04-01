@@ -1,8 +1,9 @@
-#define AUX_VAL_RND 43758.54
-#define AUX_VEC_X 12.9898
-#define AUX_VEC_Y 78.233
-#define AUX_VEC_Z 43.7689
-#define STREAM_SIZE 1024;
+#define AUX_VAL_RND 1//43758.54
+#define AUX_VEC_X 10//12.9898
+#define AUX_VEC_Y 33//78.233
+#define AUX_VEC_Z 22//43.7689
+#define STREAM_SIZE 1024
+#define VALUES_PER_UNIT 64
 Buffer<float> randomStream;
 
 float Fract(float f)
@@ -18,8 +19,9 @@ float Smooth(float min, float max, float v)
 
 float Random(float x)
 {
-    uint index = abs(sin(x)) * 5000;
-    index = index % STREAM_SIZE;
+    int index = x * VALUES_PER_UNIT;
+    int displacement = (index / STREAM_SIZE) - (1 * (index < 0));
+    index -= displacement * STREAM_SIZE;
     return randomStream[index];
 }
 

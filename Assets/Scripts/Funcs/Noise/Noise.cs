@@ -8,6 +8,7 @@ namespace FuncSpace
         private const int seed = 69;
         private const int streamSize = 1024;
         private float[] randomStream;
+        private static readonly int VALUES_PER_UNIT = 64;
         private static readonly float auxValueForRandom = 43758.54f;
         private static readonly Vector2 auxVec2ForRandom = new Vector2(12.9898f, 78.233f);
         private static readonly Vector3 auxVec3ForRandom = new Vector3(12.9898f, 78.233f, 43.7689f);

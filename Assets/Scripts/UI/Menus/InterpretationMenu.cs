@@ -26,6 +26,7 @@ public class InterpretationMenu : MonoBehaviour
     {
         massFacade = ServiceLocator.Instance.GetService<IMassFacade>();
         massFacade.onChanged += GetOriginalData;
+        thresholdField.SetTextWithoutNotify(massFacade.Threshold.ToString());
         GetOriginalData();
         LinkData();
     }
@@ -43,7 +44,7 @@ public class InterpretationMenu : MonoBehaviour
 
         differenceVal.text = (Mathf.RoundToInt(massFacade.MinDifference * 10f) / 10f).ToString();
         differenceSlider.SetValueWithoutNotify(massFacade.MinDifference);
-        thresholdField.SetTextWithoutNotify(massFacade.Threshold.ToString());
+        
 
         useAuto.isOn = massFacade.AutoMode;
     }
@@ -91,7 +92,7 @@ public class InterpretationMenu : MonoBehaviour
 
         thresholdField.onValueChanged.AddListener((val) =>
         {
-            if (float.TryParse(val.Replace(".",","), out float v))
+            if (float.TryParse(val.Replace(",","."), out float v))
             {
                 massFacade.Threshold = v;
             }

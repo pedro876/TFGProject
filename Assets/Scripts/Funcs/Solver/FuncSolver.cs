@@ -83,7 +83,7 @@ namespace FuncSpace
 
         float SolveSubFunction(int op, float v0, float v1, float v2)
         {
-            // "cos", "sin", "abs", "rnd","rnd2", "rnd3", "round", "voxel", "perlin", "perlin2", "perlin3"
+            // "cos", "sin", "abs", "rnd","rnd2", "rnd3", "round", "voxel", "perlin", "perlin2", "perlin3", "mag"
             const int FUNC_COS = 0;
             const int FUNC_SIN = 1;
             const int FUNC_ABS = 2;
@@ -95,6 +95,7 @@ namespace FuncSpace
             const int FUNC_PERLIN1 = 8;
             const int FUNC_PERLIN2 = 9;
             const int FUNC_PERLIN3 = 10;
+            const int FUNC_MAG = 11;
             int subFunction = op - FuncGeneralInfo.MaxOperatorIndex;
             switch (subFunction)
             {
@@ -120,6 +121,8 @@ namespace FuncSpace
                     return noise.Perlin(v0, v1);
                 case FUNC_PERLIN3:
                     return noise.Perlin(v0, v1, v2);
+                case FUNC_MAG:
+                    return Mathf.Sqrt(v0*v0+v1*v1+v2*v2);
                 default:
                     return 0.0f;
             }

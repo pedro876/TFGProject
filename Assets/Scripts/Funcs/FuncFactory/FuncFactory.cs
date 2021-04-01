@@ -19,7 +19,7 @@ namespace FuncSpace
         {
             predefinedFuncs = new List<string>()
             {
-                "cos", "sin", "abs", "rnd","rnd2", "rnd3", "round", "voxel", "perlin", "perlin2", "perlin3"
+                "cos", "sin", "abs", "rnd","rnd2", "rnd3", "round", "voxel", "perlin", "perlin2", "perlin3", "mag"
             };
             allFuncNames = new HashSet<string>();
             foreach (var f in predefinedFuncs)
