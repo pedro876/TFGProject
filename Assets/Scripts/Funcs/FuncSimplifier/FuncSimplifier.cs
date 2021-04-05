@@ -100,10 +100,10 @@ namespace FuncSpace
             IFuncNode simplifiedNode = opNode;
             if (ValueOfNodeIs(opNode.RightChild, 0f))
                 simplifiedNode = opNode.LeftChild;
-            else if (ValueOfNodeIs(opNode.LeftChild, 0f) && !(opNode.RightChild is OperatorNode))
+            else if (ValueOfNodeIs(opNode.LeftChild, 0f) && !(opNode.RightChild is NonLeafNode))
             {
                 simplifiedNode = opNode.RightChild;
-                if (opNode is OperatorSubNode && !(simplifiedNode is OperatorNode))
+                if (opNode is OperatorSubNode/* && !(simplifiedNode is OperatorNode)*/)
                 {
                     if (simplifiedNode is VariableNode vNode)
                         vNode.IsPositive = false;

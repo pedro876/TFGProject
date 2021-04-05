@@ -30,7 +30,7 @@ namespace RenderingSpace
                 new QuadLevel(64, 90),
                 new QuadLevel(128, 128),
                 new QuadLevel(128, 200),
-                new QuadLevel(128, 1024),
+                new QuadLevel(180, 1024),
             };
         public static readonly QuadLevel[] gpuSetting = new QuadLevel[]
             {

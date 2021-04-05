@@ -8,8 +8,7 @@ namespace FuncSpace
         private const int seed = 69;
         private const int streamSize = 1024;
         private float[] randomStream;
-        private static readonly int VALUES_PER_UNIT = 64;
-        private static readonly float auxValueForRandom = 43758.54f;
+        private static readonly float auxValueForRandom = 437.54f;
         private static readonly Vector2 auxVec2ForRandom = new Vector2(12.9898f, 78.233f);
         private static readonly Vector3 auxVec3ForRandom = new Vector3(12.9898f, 78.233f, 43.7689f);
 
@@ -28,25 +27,23 @@ namespace FuncSpace
             }
         }
 
-        /*public float GetAuxValueForRandom() => auxValueForRandom;
-        public Vector2 GetAuxVec2ForRandom() => auxVec2ForRandom;
-        public Vector3 GetAuxVec3ForRandom() => auxVec3ForRandom;*/
         public int GetStreamSize() => streamSize;
         public float[] GetRandomStream() => randomStream;
 
         public float Random(float x)
         {
-            return randomStream[((int)(Mathf.Abs(Mathf.Sin(x)) * 5000)) % streamSize];
+            float dx = x * auxValueForRandom;
+            return randomStream[((int)(Mathf.Abs(Mathf.Sin(dx)) * 5000)) % streamSize];
         }
 
         public float Random(float x, float y)
         {
-            return Random((x * auxVec2ForRandom.x + y * auxVec2ForRandom.y) * auxValueForRandom);
+            return Random((x * auxVec2ForRandom.x + y * auxVec2ForRandom.y));
         }
 
         public float Random(float x, float y, float z)
         {
-            return Random((x * auxVec3ForRandom.x + y * auxVec3ForRandom.y + z * auxVec3ForRandom.z) * auxValueForRandom);
+            return Random((x * auxVec3ForRandom.x + y * auxVec3ForRandom.y + z * auxVec3ForRandom.z));
         }
 
         public float Voxel(float x, float y, float z)
@@ -56,7 +53,7 @@ namespace FuncSpace
 
         public float Perlin(float x)
         {
-            x += 1000f;
+            x += 10f;
             float fract = Fract(x);
             x = Mathf.Floor(x);
             return Smooth(Random(x), Random(x+1f), fract);
@@ -64,8 +61,8 @@ namespace FuncSpace
 
         public float Perlin(float x, float y)
         {
-            x += 1000f;
-            y += 1000f;
+            x += 10f;
+            y += 10f;
             float xFract = Fract(x);
             float yFract = Fract(y);
 
@@ -89,9 +86,9 @@ namespace FuncSpace
 
         public float Perlin(float x, float y, float z)
         {
-            x += 1000f;
-            y += 1000f;
-            z += 1000f;
+            x += 10f;
+            y += 10f;
+            z += 10f;
             float xFract = Fract(x);
             float yFract = Fract(y);
             float zFract = Fract(z);

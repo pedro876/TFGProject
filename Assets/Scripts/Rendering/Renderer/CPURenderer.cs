@@ -15,6 +15,8 @@ namespace RenderingSpace
 
         private Thread processorThread;
 
+        //ILightingFacade lightingFacade;
+
         #region Creation
 
         public CPURenderer(RawImage image, int level = 0, int childIndex = 0, QuadRenderer parent = null)
@@ -34,7 +36,7 @@ namespace RenderingSpace
 
         private Texture2D CreateTex()
         {
-            var tex = new Texture2D(QuadInfo.resolution, QuadInfo.resolution, TextureFormat.RGBA32, false);
+            var tex = new Texture2D(QuadInfo.resolution, QuadInfo.resolution, TextureFormat.RGB24, false);
             tex.filterMode = FilterMode.Bilinear;
             tex.wrapMode = TextureWrapMode.Clamp;
             return tex;
@@ -110,10 +112,9 @@ namespace RenderingSpace
 
                     ray.SetOriginAndDestiny(ref nearPos, ref farPos);
                     ray.Cast(out bool landed, out float normDepth, out Color normalColor);
-
                     depths[x, y] = landed ? normDepth : 2f;
                     int row = QuadInfo.resolution - y - 1;
-                    depthMemory[x + row * QuadInfo.resolution] = new Color(Mathf.Lerp(0f, 1f, normDepth), landed ? 1f : 0f, 0f, 1f);
+                    depthMemory[x + row * QuadInfo.resolution] = new Color(normDepth, landed ? 1f : 0f, 0f, 1f);
                     normalMemory[x + row * QuadInfo.resolution] = normalColor;
                 }
             }

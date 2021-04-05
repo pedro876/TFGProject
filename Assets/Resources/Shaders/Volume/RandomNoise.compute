@@ -1,9 +1,8 @@
-#define AUX_VAL_RND 1//43758.54
-#define AUX_VEC_X 10//12.9898
-#define AUX_VEC_Y 33//78.233
-#define AUX_VEC_Z 22//43.7689
+#define AUX_VAL_RND 437.54
+#define AUX_VEC_X 12.9898
+#define AUX_VEC_Y 78.233
+#define AUX_VEC_Z 43.7689
 #define STREAM_SIZE 1024
-#define VALUES_PER_UNIT 64
 Buffer<float> randomStream;
 
 float Fract(float f)
@@ -19,20 +18,20 @@ float Smooth(float min, float max, float v)
 
 float Random(float x)
 {
-    int index = x * VALUES_PER_UNIT;
-    int displacement = (index / STREAM_SIZE) - (1 * (index < 0));
-    index -= displacement * STREAM_SIZE;
+    double dx = x * AUX_VAL_RND;
+    uint index = abs(sin(dx)) * 5000;
+    index = index % STREAM_SIZE;
     return randomStream[index];
 }
 
 float Random2(float x, float y)
 {
-    return Random((x * AUX_VEC_X + y * AUX_VEC_Y) * AUX_VAL_RND);
+    return Random(x * AUX_VEC_X + y * AUX_VEC_Y);
 }
 
 float Random3(float x, float y, float z)
 {
-    return Random((x * AUX_VEC_X + y * AUX_VEC_Y + z * AUX_VEC_Z) * AUX_VAL_RND);
+    return Random(x * AUX_VEC_X + y * AUX_VEC_Y + z * AUX_VEC_Z);
 }
 
 float Voxel(float x, float y, float z)
@@ -42,7 +41,7 @@ float Voxel(float x, float y, float z)
 
 float Perlin(float x)
 {
-    x += 1000;
+    x += 10;
     float fract = Fract(x);
     x = floor(x);
     return Smooth(Random(x), Random(x + 1), fract);
@@ -50,8 +49,9 @@ float Perlin(float x)
 
 float Perlin2(float x, float y)
 {
-    x += 1000;
-    y += 1000;
+    return Random(x);
+    x += 10;
+    y += 10;
     float xFract = Fract(x);
     float yFract = Fract(y);
 
@@ -75,9 +75,9 @@ float Perlin2(float x, float y)
 
 float Perlin3(float x, float y, float z)
 {
-    x += 1000;
-    y += 1000;
-    z += 1000;
+    x += 10;
+    y += 10;
+    z += 10;
     float xFract = Fract(x);
     float yFract = Fract(y);
     float zFract = Fract(z);

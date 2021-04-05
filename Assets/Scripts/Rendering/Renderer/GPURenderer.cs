@@ -146,6 +146,17 @@ namespace RenderingSpace
 
         private void DispatchVolumeShader()
         {
+            /*if(level == 0)
+            {
+                PrepareRandomInfo();
+                PrepareInterpretationInfo();
+                PrepareCameraInfo();
+                PrepareRegionInfo();
+                PrepareExplorationInfo();
+                PrepareFunctionInfo();
+            }*/
+            
+
             GetCameraInfo(out var right, out var up, out var nearSize, out var farSize, out var nearStart, out var farStart);
 
             volumeShader.SetFloats("nearStart", new float[] { nearStart.x, nearStart.y, nearStart.z });
@@ -159,6 +170,8 @@ namespace RenderingSpace
             volumeShader.SetTexture(volumeKernel, "DepthTex", depthTex2D);
             volumeShader.SetTexture(volumeKernel, "NormalTex", normalTex2D);
             volumeShader.Dispatch(volumeKernel, QuadInfo.resolution / (int)numThreadsX, QuadInfo.resolution / (int)numThreadsY, (int)numThreadsZ);
+            /*bytecodeMemoryBuffer.Release();
+            bytecodeOperationsBuffer.Release();*/
         }
 
         #endregion
