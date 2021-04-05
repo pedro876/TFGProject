@@ -23,13 +23,11 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     float3 normal = normalize(normalColor.xyz * 2 - 1);
     float lightIncidence = pow(clamp(dot(-normal, lightDir), 0, 1), 2);
     
-    bool correctSide = dot(normal, -lightDir) > 0.05;
-    float specularReflection = attenuation * pow(abs(dot(reflect(lightDir, normal), viewDir)), 10);
-    specularReflection = clamp(specularReflection, 0, 1); // * correctSide;
-    lightIncidence += specularReflection * correctSide;
-    //lightIncidence = lightIncidence * 0.5 + specularReflection * 0.5;
+    float reflectDot = clamp(-dot(reflect(lightDir, normal), viewDir), 0, 1);
+    float specularReflection = attenuation * pow(reflectDot, 10);
+    specularReflection = clamp(specularReflection, 0, 1);
+    lightIncidence = lightIncidence + specularReflection;
     lightIncidence = lightIncidence / (1 + attenuation*0.5);
-    //clamp(lightIncidence, 0, 1);
     lightIncidence = lightIncidence * lightIncidenceRange + minLightIncidence;
     
     float4 finalColor = float4(lightIncidence, lightIncidence, lightIncidence, 1);
@@ -38,4 +36,6 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     finalColor = lerp(float4(1, 1, 1, 1), finalColor * surfaceColor, landed);
 
     ResultTex[id.xy] = finalColor;
+    /*float cause = lightIncidence;
+    ResultTex[id.xy] = float4(cause, cause, cause, 1);*/
 }

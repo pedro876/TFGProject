@@ -32,8 +32,8 @@ namespace FuncSpace
 
         public float Random(float x)
         {
-            float dx = x * auxValueForRandom;
-            return randomStream[((int)(Mathf.Abs(Mathf.Sin(dx)) * 5000)) % streamSize];
+            float dx = Mathf.Abs(Mathf.Sin(x)) * auxValueForRandom;
+            return randomStream[((int)(dx)) % streamSize];
         }
 
         public float Random(float x, float y)

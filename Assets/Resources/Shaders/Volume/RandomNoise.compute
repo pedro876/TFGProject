@@ -18,8 +18,9 @@ float Smooth(float min, float max, float v)
 
 float Random(float x)
 {
-    double dx = x * AUX_VAL_RND;
-    uint index = abs(sin(dx)) * 5000;
+    double dx = abs(sin(x));
+    dx *= AUX_VAL_RND;
+    uint index = dx;
     index = index % STREAM_SIZE;
     return randomStream[index];
 }
@@ -49,7 +50,6 @@ float Perlin(float x)
 
 float Perlin2(float x, float y)
 {
-    return Random(x);
     x += 10;
     y += 10;
     float xFract = Fract(x);

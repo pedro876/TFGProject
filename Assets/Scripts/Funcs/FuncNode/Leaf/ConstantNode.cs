@@ -73,7 +73,7 @@ namespace FuncSpace
             {
                 bool needsParenthesis = NeedsParenthesis();
                 if (needsParenthesis) builder.Append('(');
-                builder.Append(usesSymbol ? symbol : value.ToString());
+                builder.Append(usesSymbol ? symbol : value.ToString().Replace(",","."));
                 if (needsParenthesis) builder.Append(')');
             }
         }
