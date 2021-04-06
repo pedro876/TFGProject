@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Text;
 
 namespace FuncSpace
 {
@@ -234,11 +235,37 @@ namespace FuncSpace
 
         private List<IFuncNode> ProcessSubfunctionChildren(string content)
         {
-            string[] inputs = content.Split(',');
+            //string[] inputs = content.Split(',');
+            var inputs = SplitSubfunctionChildren(content);
             List<IFuncNode> children = new List<IFuncNode>();
             foreach (var input in inputs)
                 children.Add(ProcessDefinition(input));
             return children;
+        }
+
+        private List<string> SplitSubfunctionChildren(string content)
+        {
+            List<string> inputs = new List<string>();
+            int parenthesisLevel = 0;
+            StringBuilder currentInput = new StringBuilder();
+            for(int i = 0; i < content.Length; i++)
+            {
+                if (content[i] == '(')
+                    parenthesisLevel++;
+                else if (content[i] == ')')
+                    parenthesisLevel--;
+                
+                if(parenthesisLevel == 0 && content[i] == ',')
+                {
+                    inputs.Add(currentInput.ToString());
+                    currentInput.Clear();
+                }
+                else
+                    currentInput.Append(content[i]);
+            }
+            if (currentInput.Length > 0)
+                inputs.Add(currentInput.ToString());
+            return inputs;
         }
 
         #endregion
