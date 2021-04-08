@@ -8,6 +8,7 @@ using System;
 public class FunctionMenu : MonoBehaviour
 {
     [SerializeField] float removeTime = 3f;
+    [SerializeField] float removeDuplicatesTime = 0.5f;
 
     [SerializeField] GameObject elemPrefab;
     [SerializeField] Transform elemParent;
@@ -46,6 +47,7 @@ public class FunctionMenu : MonoBehaviour
     private void OnEnable()
     {
         StartCoroutine(RemoveUnusedFunctions());
+        StartCoroutine(RemoveDuplicates());
     }
 
     IEnumerator RemoveUnusedFunctions()
@@ -72,6 +74,27 @@ public class FunctionMenu : MonoBehaviour
         }
     }
 
+    IEnumerator RemoveDuplicates()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(removeDuplicatesTime);
+            var namesMap = new Dictionary<string, FunctionElement>();
+            var toRemove = new List<FunctionElement>();
+            foreach(var elem in allFuncElements)
+            {
+                if (namesMap.ContainsKey(elem.FuncName))
+                    toRemove.Add(elem);
+                else
+                    namesMap.Add(elem.FuncName, elem);
+            }
+            foreach(var elem in toRemove)
+            {
+                RemoveFunctionElement(elem);
+            }
+        }
+    }
+
     public FunctionElement AddFunctionElement(bool focus = false)
     {
         FunctionElement elem = Instantiate(elemPrefab, elemParent).GetComponent<FunctionElement>();
@@ -92,5 +115,10 @@ public class FunctionMenu : MonoBehaviour
             elem.Select();
         }
         Destroy(elem.gameObject);
+
+        if(allFuncElements.Count == 1)
+        {
+            allFuncElements[0].Select();
+        }
     }
 }

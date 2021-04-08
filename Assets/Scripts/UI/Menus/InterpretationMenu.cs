@@ -92,7 +92,7 @@ public class InterpretationMenu : MonoBehaviour
 
         thresholdField.onValueChanged.AddListener((val) =>
         {
-            if (float.TryParse(val.Replace(",","."), out float v))
+            if (float.TryParse(val.Replace(".",","), out float v))
             {
                 massFacade.Threshold = v;
             }

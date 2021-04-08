@@ -99,7 +99,7 @@ namespace FuncSpace
 
         public bool RemoveFunc(string funcName)
         {
-            if (factory.IsFuncDefinedByUser(funcName))
+            if (factory.IsFuncDefinedByUser(funcName) && funcName != factory.GetDummy().Name)
             {
                 if (selectedFunc.Name.Equals(funcName))
                     selectedFunc = factory.GetDummy();

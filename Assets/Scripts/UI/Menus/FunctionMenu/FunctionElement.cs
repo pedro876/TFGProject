@@ -49,10 +49,15 @@ public class FunctionElement : MonoBehaviour
 
     private void UpdateFunction()
     {
+        bool wasSelected = camImage.enabled;
         func = inputField.text.Trim();
         funcName = ExtractFuncName();
         funcFacade.CreateFunc(func);
         func = funcFacade.GetFuncByName(funcName);
+        if (wasSelected)
+        {
+            funcFacade.SelectFunc(funcName);
+        }
     }
 
     private string ExtractFuncName()

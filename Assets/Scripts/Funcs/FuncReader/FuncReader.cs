@@ -25,7 +25,7 @@ namespace FuncSpace
         private string CleanInput(string input)
         {
             input = input.Replace(" ", "");
-            input = input.ToLower();
+            //input = input.ToLower();
             return input;
         }
 
@@ -34,6 +34,7 @@ namespace FuncSpace
             string[] parts = input.Split('=');
             string originalDeclaration = parts[0];
             string originalDefinition = parts.Length > 1 ? parts[1] : "0";
+            originalDefinition = originalDefinition.ToLower();
             func.OriginalDeclaration = originalDeclaration;
             func.OriginalDefinition = originalDefinition;
         }
@@ -41,6 +42,10 @@ namespace FuncSpace
         private void ExtractNameFromDeclaration(IFunc func)
         {
             string name = func.OriginalDeclaration.Split('(')[0];
+            if(name.Length == 0)
+            {
+                name = "undefined";
+            }
             func.Name = name;
         }
 
