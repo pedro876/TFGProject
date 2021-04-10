@@ -9,7 +9,7 @@ public interface IPostProcessFacade
     void DisplayDepth();
     void DisplayNormals();
     void DisplayLighting();
-    Texture2D GetDisplayTextureCopy();
+    Texture2D GetDisplayTextureCopy(out double timeRequiredToCopy);
     void UseAntialiasing(bool use);
     bool IsUsingAntialiasing();
     bool IsDisplayinDepth();

@@ -117,15 +117,16 @@ namespace PostProcessSpace
             UpdateDisplay();
         }
 
-        public Texture2D GetDisplayTextureCopy()
+        public Texture2D GetDisplayTextureCopy(out double timeRequiredToCopy)
         {
             Render();
             mustRender = false;
+            DateTime init = DateTime.Now;
             var tex = new Texture2D(depthTex.width, depthTex.height, TextureFormat.RGBA32, false);
-            //Graphics.CopyTexture(DisplayTexture, tex);
             RenderTexture.active = DisplayTexture;
             tex.ReadPixels(new Rect(0, 0, tex.width, tex.height), 0, 0);
             tex.Apply();
+            timeRequiredToCopy = (DateTime.Now - init).TotalSeconds;
             return tex;
         }
 

@@ -270,7 +270,12 @@ public class RenderMenu : MonoBehaviour
 
     private void RegisterQuadInRecord()
     {
-        DateTime init = DateTime.Now;
+        var partialResultTex = postProcessFacade.GetDisplayTextureCopy(out var timeRequiredToCopy);
+        UpdateAllInfo();
+        mustRender = false;
+
+
+        DateTime init = DateTime.Now - TimeSpan.FromSeconds(timeRequiredToCopy);
         double time = (init - renderInitTime).TotalSeconds;
         Debug.Log($"RegisterQuadInRecord {currentStep} time");
         string path = $"{currentPath}/{currentStep}";
@@ -279,16 +284,13 @@ public class RenderMenu : MonoBehaviour
 
         List<string> infoLines = new List<string>();
         infoLines.Add($"time;{time}");
-        File.WriteAllLines($"{path}/info.txt", infoLines.ToArray());
-
-        byte[] partialResult = postProcessFacade.GetDisplayTextureCopy().EncodeToJPG();
-        File.WriteAllBytes($"{path}/partialResult.jpg", partialResult);
-
-        UpdateAllInfo();
-        mustRender = false;
         byte[] state = processTex.EncodeToJPG();
-        File.WriteAllBytes($"{path}/state.jpg", state);
         byte[] homogeneity = homogeneityTex.EncodeToJPG();
+        byte[] partialResult = partialResultTex.EncodeToJPG();
+
+        File.WriteAllLines($"{path}/info.txt", infoLines.ToArray());
+        File.WriteAllBytes($"{path}/partialResult.jpg", partialResult);
+        File.WriteAllBytes($"{path}/state.jpg", state);
         File.WriteAllBytes($"{path}/homogeneity.jpg", homogeneity);
 
         currentStep++;
