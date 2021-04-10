@@ -1,0 +1,182 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="FuncSpace.FuncFacade" Collapsed="true">
+    <Position X="0.75" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EQARAAgAAAAiBkEEAAAAgARIEAgAAEEAAgAgAAEAkQA=</HashCode>
+      <FileName>Assets\Scripts\Funcs\FuncFacade\FuncFacade.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="LightingSpace.LightingFacade" Collapsed="true">
+    <Position X="0.75" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QAAhAAAAAAAAAEAAAAAgAEAAAAACAgAAQAAAAAAAAQQ=</HashCode>
+      <FileName>Assets\Scripts\Lighting\LightingFacade.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassSpace.MassFacade" Collapsed="true">
+    <Position X="0.75" Y="5.75" Width="1.5" />
+    <NestedTypes>
+      <Enum Name="MassSpace.MassFacade.CriterionType" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Assets\Scripts\Mass\MassFacade.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+      <Enum Name="MassSpace.MassFacade.VariableType" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Assets\Scripts\Mass\MassFacade.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAAhCQAAMCAAAJAAAIAAAAAAAAYAACAAgAQgAAAECUA=</HashCode>
+      <FileName>Assets\Scripts\Mass\MassFacade.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="PostProcessSpace.PostProcessFacade" Collapsed="true">
+    <Position X="10.25" Y="4.5" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Properties" Collapsed="true" />
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <NestedTypes>
+      <Enum Name="PostProcessSpace.PostProcessFacade.Display" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Assets\Scripts\PostProcess\PostProcessFacade\PostProcessFacade.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+    </NestedTypes>
+    <AssociationLine Name="renderingFacade" Type="IRenderingFacade" FixedToPoint="true">
+      <Path>
+        <Point X="11" Y="4.5" />
+        <Point X="11" Y="4.125" />
+        <Point X="7.625" Y="4.125" />
+        <Point X="7.625" Y="3.5" />
+        <Point X="8" Y="3.5" />
+      </Path>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>gAQgBIABBSAAAAAAQYgAQACAQCEECIEAYLAFAoAAADE=</HashCode>
+      <FileName>Assets\Scripts\PostProcess\PostProcessFacade\PostProcessFacade.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="renderingFacade" />
+      <Field Name="viewFacade" />
+    </ShowAsAssociation>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="RegionSpace.RegionFacade" Collapsed="true">
+    <Position X="0.75" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgABAAAAEEABAgAAAgAEAAQIAAABAAAAAIAGAAAALAA=</HashCode>
+      <FileName>Assets\Scripts\Region\RegionFacade.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="RenderingSpace.RenderingFacade" Collapsed="true">
+    <Position X="2" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AuQhI6CAAjhgAgACQE8CAAFAACNBBYAASZgoAQCwAEA=</HashCode>
+      <FileName>Assets\Scripts\Rendering\RenderingFacade\RenderingFacade.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="viewFacade" />
+      <Field Name="regionFacade" />
+      <Field Name="massFacade" />
+      <Field Name="funcFacade" />
+    </ShowAsAssociation>
+    <Lollipop Position="0.21" />
+  </Class>
+  <Class Name="ServiceLocator" Collapsed="true">
+    <Position X="6.75" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAADAAAAAQAAAAIAAAEA=</HashCode>
+      <FileName>Assets\Scripts\ServiceLocator\ServiceLocator.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FunctionMenu" Collapsed="true">
+    <Position X="12.75" Y="2.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAIAAAACAAAAAMAAIAAAQAAAIRCQAAAIBAAAAACEA=</HashCode>
+      <FileName>Assets\Scripts\UI\Menus\FunctionMenu\FunctionMenu.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="InterpretationMenu" Collapsed="true">
+    <Position X="12.75" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CBABAAAAGCAAAIAAASAQAICAAAAAACAgAAAAAAAQAAQ=</HashCode>
+      <FileName>Assets\Scripts\UI\Menus\InterpretationMenu.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="LightMenu" Collapsed="true">
+    <Position X="12.75" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAACAAAAAAgEAAAIAAACAAAAAwABhABIAAAAA=</HashCode>
+      <FileName>Assets\Scripts\UI\Menus\LightMenu.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RenderMenu" Collapsed="true">
+    <Position X="12.75" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CAAIiCAAgCQAAGACIIARAIAEAACNABAyAAAAAAggiCE=</HashCode>
+      <FileName>Assets\Scripts\UI\Menus\RenderMenu.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ViewMenu" Collapsed="true">
+    <Position X="12.75" Y="6.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QABAAIhQAGgAEkSgEAkEAAAAAAAAASAgAAAEACAACAA=</HashCode>
+      <FileName>Assets\Scripts\UI\Menus\ViewMenu.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ViewSpace.ViewFacade" Collapsed="true">
+    <Position X="10.25" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gExhBCASsCAgECAAWDAggMQQoAAQCAAgAQAAICBCQGA=</HashCode>
+      <FileName>Assets\Scripts\View\ViewFacade\ViewFacade.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="renderingFacade" />
+    </ShowAsAssociation>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Interface Name="IRenderingFacade" Collapsed="true">
+    <Position X="8" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgAgIACAAAgAAgACQEYCAAAAACEBAYAAQAgAAACgAEA=</HashCode>
+      <FileName>Assets\Scripts\Rendering\RenderingFacade\IRenderingFacade.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="IViewFacade" Collapsed="true">
+    <Position X="8" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gAABACAQgAAgEAAACDAggIAQIAAQCAAgAQAAACBCAAA=</HashCode>
+      <FileName>Assets\Scripts\View\ViewFacade\IViewFacade.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="IRegionFacade" Collapsed="true">
+    <Position X="5.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgABAAAAAEABAAAAAgAAAAQIAAABAAAAAAAAAAAALAA=</HashCode>
+      <FileName>Assets\Scripts\Region\IRegionFacade.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="IMassFacade" Collapsed="true">
+    <Position X="7.25" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAhCQAAMAAAAIAAAIAAAAAAAAQAAAAAgAQgAAAAAQA=</HashCode>
+      <FileName>Assets\Scripts\Mass\IMassFacade.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="IFuncFacade" Collapsed="true">
+    <Position X="3.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAARAAAAAAACBkEEAAAAAARIEAgAAEAAAgAgAAEAkQA=</HashCode>
+      <FileName>Assets\Scripts\Funcs\FuncFacade\IFuncFacade.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

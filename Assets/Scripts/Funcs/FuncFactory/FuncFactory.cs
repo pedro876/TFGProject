@@ -31,7 +31,7 @@ namespace FuncSpace
             interpreter = new FuncInterpreter(factory: this);
             simplifier = new FuncSimplifier();
             encoder = new FuncEncoder(factory:this);
-            dummyFunc = CreateFunc("f(x) = cos(x) + cos(y)");
+            dummyFunc = CreateFunc("f(x) = cos(x)+cos(y)");
         }
 
         public IFunc GetDummy()

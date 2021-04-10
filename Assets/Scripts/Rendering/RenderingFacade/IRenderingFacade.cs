@@ -4,6 +4,7 @@ using System;
 
 public interface IRenderingFacade
 {
+    event Action onRenderCancelled;
     event Action onQuadRendered;
     event Action onRenderStarted;
     event Action onRenderFinished;

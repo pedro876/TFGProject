@@ -6,6 +6,7 @@ namespace PostProcessSpace
     public class PostProcessFacade : MonoBehaviour, IPostProcessFacade
     {
         public event Action onDisplayUpdated;
+        public event Action onRendered;
 
         public RenderTexture DisplayTexture { get; private set; }
 
@@ -116,6 +117,18 @@ namespace PostProcessSpace
             UpdateDisplay();
         }
 
+        public Texture2D GetDisplayTextureCopy()
+        {
+            Render();
+            mustRender = false;
+            var tex = new Texture2D(depthTex.width, depthTex.height, TextureFormat.RGBA32, false);
+            //Graphics.CopyTexture(DisplayTexture, tex);
+            RenderTexture.active = DisplayTexture;
+            tex.ReadPixels(new Rect(0, 0, tex.width, tex.height), 0, 0);
+            tex.Apply();
+            return tex;
+        }
+
         private void UpdateDisplay()
         {
             switch (display)
@@ -204,6 +217,8 @@ namespace PostProcessSpace
 
             if (display == Display.Light)
                 RenderLight();
+
+            onRendered?.Invoke();
         }
 
         private void RenderDepth()

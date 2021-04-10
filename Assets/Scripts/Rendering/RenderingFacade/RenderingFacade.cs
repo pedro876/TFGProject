@@ -20,6 +20,7 @@ namespace RenderingSpace
         public event Action onQuadRendered;
         public event Action onRenderStarted;
         public event Action onRenderFinished;
+        public event Action onRenderCancelled;
         public event Action onCPUModeActivated;
         public event Action onGPUModeActivated;
 
@@ -143,6 +144,10 @@ namespace RenderingSpace
 
         private void StopRender()
         {
+            if (!rootRenderer.IsDeepFinished)
+            {
+                onRenderCancelled?.Invoke();
+            }
             displayOrders.Clear();
             queuedThreads.Clear();
             renderOrders.Clear();

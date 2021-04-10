@@ -136,6 +136,8 @@ namespace FuncSpace
             const int PRODUCT = 2;
             const int DIVISION = 3;
             const int POWER = 4;
+            const int LESS = 5;
+            const int GREATER = 6;
             switch (operation)
             {
                 case SUBTRACT:
@@ -153,6 +155,10 @@ namespace FuncSpace
                     float p = Mathf.Pow(Mathf.Abs(v0), v1Int);
                     p = ChangeSignIf(p, !v0IsPositive && !v1IsEven);
                     return p;
+                case LESS:
+                    return v0 < v1 ? 1f : 0f;
+                case GREATER:
+                    return v0 > v1 ? 1f : 0f;
                 default:
                     return 0.0f;
             }

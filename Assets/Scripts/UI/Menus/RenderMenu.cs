@@ -4,6 +4,8 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using System;
+using System.IO;
+using UnityEditor;
 
 public class RenderMenu : MonoBehaviour
 {
@@ -14,6 +16,7 @@ public class RenderMenu : MonoBehaviour
 
     [Header("Process info")]
     [SerializeField] Button restartBtn;
+    [SerializeField] Button recordBtn;
     [SerializeField] TextMeshProUGUI finalResText;
     [SerializeField] TextMeshProUGUI finalDepthText;
     [SerializeField] TextMeshProUGUI timeText;
@@ -39,11 +42,21 @@ public class RenderMenu : MonoBehaviour
 
     private bool mustRender = false;
     private IRenderingFacade renderingFacade;
+    private IPostProcessFacade postProcessFacade;
+    private IFuncFacade funcFacade;
+
+    private string recordPath;
+    private string currentPath;
+    private int currentStep;
 
     private void Start()
     {
+        recordPath = Application.persistentDataPath;
         renderingFacade = ServiceLocator.Instance.GetService<IRenderingFacade>();
+        postProcessFacade = ServiceLocator.Instance.GetService<IPostProcessFacade>();
+        funcFacade = ServiceLocator.Instance.GetService<IFuncFacade>();
         restartBtn.onClick.AddListener(()=>renderingFacade.RequestRender());
+        recordBtn.onClick.AddListener(() => StartRecord());
 
         GetOriginalData();
         LinkData();
@@ -58,12 +71,9 @@ public class RenderMenu : MonoBehaviour
         threadsField.text = renderingFacade.MaxThreads.ToString();
         renderInitTime = DateTime.Now;
 
-        /*if (renderingFacade.IsRendering)
-        {*/
-            InitRenderMode();
-            cpuMode.isOn = renderingFacade.IsUsingCPUMode;
-            gpuMode.isOn = renderingFacade.IsUsingGPUMode;
-        //}
+        InitRenderMode();
+        cpuMode.isOn = renderingFacade.IsUsingCPUMode;
+        gpuMode.isOn = renderingFacade.IsUsingGPUMode;
 
         #if UNITY_WEBGL
                 gpuMode.interactable = false;
@@ -234,4 +244,70 @@ public class RenderMenu : MonoBehaviour
 
     #endregion
 
+
+    #region Record
+
+    private void StartRecord()
+    {
+        recordBtn.interactable = false;
+        currentStep = 0;
+        string funcName = funcFacade.GetSelectedFuncName();
+        currentPath = $"{recordPath}/{funcName}_{(renderingFacade.IsUsingCPUMode ? "CPU" : "GPU")}";
+        Debug.Log("Begin record: " + currentPath);
+        if (!Directory.Exists(currentPath))
+            Directory.CreateDirectory(currentPath);
+        
+        renderingFacade.onRenderStarted += AddRecordCallbacks;
+        renderingFacade.RequestRender();
+    }
+
+    private void AddRecordCallbacks()
+    {
+        renderingFacade.onQuadRendered += RegisterQuadInRecord;
+        renderingFacade.onRenderFinished += EndRecord;
+        renderingFacade.onRenderCancelled += EndRecord;
+    }
+
+    private void RegisterQuadInRecord()
+    {
+        DateTime init = DateTime.Now;
+        double time = (init - renderInitTime).TotalSeconds;
+        Debug.Log($"RegisterQuadInRecord {currentStep} time");
+        string path = $"{currentPath}/{currentStep}";
+        if (!Directory.Exists(path))
+            Directory.CreateDirectory(path);
+
+        List<string> infoLines = new List<string>();
+        infoLines.Add($"time;{time}");
+        File.WriteAllLines($"{path}/info.txt", infoLines.ToArray());
+
+        byte[] partialResult = postProcessFacade.GetDisplayTextureCopy().EncodeToJPG();
+        File.WriteAllBytes($"{path}/partialResult.jpg", partialResult);
+
+        UpdateAllInfo();
+        mustRender = false;
+        byte[] state = processTex.EncodeToJPG();
+        File.WriteAllBytes($"{path}/state.jpg", state);
+        byte[] homogeneity = homogeneityTex.EncodeToJPG();
+        File.WriteAllBytes($"{path}/homogeneity.jpg", homogeneity);
+
+        currentStep++;
+        renderInitTime +=(DateTime.Now - init);
+    }
+
+    private void EndRecord()
+    {
+        Debug.Log("End record");
+        recordBtn.interactable = true;
+        renderingFacade.onQuadRendered -= RegisterQuadInRecord;
+        renderingFacade.onRenderFinished -= EndRecord;
+        renderingFacade.onRenderCancelled -= EndRecord;
+        renderingFacade.onRenderStarted -= AddRecordCallbacks;
+
+        //System.Diagnostics.Process.Start("explorer.exe", "/select," + currentPath);
+        //EditorUtility.RevealInFinder(currentPath);
+        Application.OpenURL(currentPath);
+    }
+
+    #endregion
 }

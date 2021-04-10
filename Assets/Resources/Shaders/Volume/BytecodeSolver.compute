@@ -96,6 +96,8 @@ float SolveSubFunction(int op, float v0, float v1, float v2)
 #define PRODUCT 2
 #define DIVISION 3
 #define POWER 4
+#define LESS 5
+#define GREATER 6
 float SolveOperator(int operation, float v0, float v1)
 {
     switch (operation)
@@ -115,6 +117,10 @@ float SolveOperator(int operation, float v0, float v1)
             float p = pow(abs(v0), v1Int);
             p = ChangeSignIf(p, !v0IsPositive && !v1IsEven);
             return p;
+        case LESS:
+            return v0 < v1;
+        case GREATER:
+            return v0 > v1;
         default:
             return 0.0f;
     }

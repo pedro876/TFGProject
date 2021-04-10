@@ -54,6 +54,8 @@ namespace FuncSpace
                 if (opNode is OperatorMulNode) result = valueLeft * valueRight;
                 if (opNode is OperatorDivNode) result = valueLeft / valueRight;
                 if (opNode is OperatorPowNode) result = Mathf.Pow(valueLeft, valueRight);
+                if (opNode is OperatorLessNode) result = valueLeft < valueRight ? 1f : 0f;
+                if (opNode is OperatorGreaterNode) result = valueLeft > valueRight ? 1f : 0f;
                 simplifiedNode = new ConstantNode(result);
             }
             else if (opNode is OperatorMulNode)

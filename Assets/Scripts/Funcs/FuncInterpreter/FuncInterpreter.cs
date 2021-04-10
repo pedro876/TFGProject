@@ -58,8 +58,26 @@ namespace FuncSpace
             {
                 if (definition.StartsWith("(") && definition.EndsWith(")"))
                 {
-                    definition = definition.Substring(1, definition.Length - 2);
-                    return true;
+                    int depth = 1;
+                    bool closedAtEnd = true;
+                    for(int i = 1; i < definition.Length && closedAtEnd; i++)
+                    {
+                        if (definition[i] == '(')
+                            depth++;
+                        else if (definition[i] == ')')
+                        {
+                            depth--;
+                            if(depth == 0 && i < definition.Length - 1)
+                            {
+                                closedAtEnd = false;
+                            }
+                        }
+                    }
+                    if (closedAtEnd)
+                    {
+                        definition = definition.Substring(1, definition.Length - 2);
+                    }
+                    return closedAtEnd;
                 }
             }
             return false;
@@ -161,6 +179,8 @@ namespace FuncSpace
                 case "*": return new OperatorMulNode(children);
                 case "/": return new OperatorDivNode(children);
                 case "^": return new OperatorPowNode(children);
+                case "<": return new OperatorLessNode(children);
+                case ">": return new OperatorGreaterNode(children);
                 default: goto case "+";
             }
         }

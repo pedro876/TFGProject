@@ -11,12 +11,13 @@ namespace FuncSpace
         };
         private readonly static List<string> operators = new List<string>()
         {
-            "-", "+", "*", "/", "^",
+            "-", "+", "*", "/", "^", "<", ">"
         };
         private readonly static Dictionary<string, int> operatorPriorities = new Dictionary<string, int>()
         {
             { "-", 0 }, { "+", 0 },
             { "*", 1 }, { "/", 1 }, { "^", 1 },
+            { "<", 2 }, { ">", 2 },
         };
 
         #region Operators

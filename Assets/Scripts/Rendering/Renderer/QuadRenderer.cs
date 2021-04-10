@@ -140,8 +140,8 @@ namespace RenderingSpace
         {
             if(image)image.enabled = true;
             IsTextureApplied = true;
-            RenderingFacade.Instance.TextureHasBeenApplied();
             MemoryToTexConcrete();
+            RenderingFacade.Instance.TextureHasBeenApplied();
         }
 
         protected abstract void MemoryToTexConcrete();
