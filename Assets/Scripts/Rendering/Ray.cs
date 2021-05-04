@@ -116,6 +116,7 @@ namespace RenderingSpace
 
             for (int i = 0; i < points.Length - 1; i++)
                 n += Vector3.Cross(points[i], points[i + 1]);
+            n += Vector3.Cross(points[points.Length - 1], points[0]);
 
             n.Normalize();
 

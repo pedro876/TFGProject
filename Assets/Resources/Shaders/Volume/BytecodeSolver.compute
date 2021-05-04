@@ -127,7 +127,6 @@ float SolveOperator(int operation, float v0, float v1)
 }
 
 // BYTECODE INTERPRETATION
-
 bool OperationIsSubfunction(int operation)
 {
     return operation > maxOperatorIndex - 1;

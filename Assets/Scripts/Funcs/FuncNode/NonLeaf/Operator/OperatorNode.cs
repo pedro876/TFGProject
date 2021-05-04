@@ -38,7 +38,7 @@ namespace FuncSpace
                     if (!LeftChild.NeedsRepresentation() || !RightChild.NeedsRepresentation())
                         return false;
                     else
-                        return operatorPriority < parentOp.operatorPriority;
+                        return (operatorPriority < parentOp.operatorPriority) || IsInsideParenthesis;
                 }
                 else
                     return false;

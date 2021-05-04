@@ -45,6 +45,7 @@ RayHit CalculateNormal(Ray ray, RayHit hit)
     {
         crossSum += cross(points[j], points[j + 1]);
     }
+    crossSum += cross(points[3], points[0]);
     hit.normal = normalize(crossSum);
     return hit;
 }
