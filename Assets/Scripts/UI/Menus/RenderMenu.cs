@@ -294,7 +294,7 @@ public class RenderMenu : MonoBehaviour
         File.WriteAllBytes($"{path}/homogeneity.jpg", homogeneity);
 
         currentStep++;
-        renderInitTime +=(DateTime.Now - init);
+        //renderInitTime +=(DateTime.Now - init);
     }
 
     private void EndRecord()

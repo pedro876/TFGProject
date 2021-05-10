@@ -7,7 +7,7 @@ namespace RenderingSpace
     {
         #region Performance
         public static readonly float targetFramerate = 30f;
-        public static readonly int displayOrdersPerFrame = 1;
+        public static readonly int displayOrdersPerFrame = 3;
         public static readonly float renderOrdersInterval = 0.005f;
         public static int maxParallelThreads = 10;
         #endregion

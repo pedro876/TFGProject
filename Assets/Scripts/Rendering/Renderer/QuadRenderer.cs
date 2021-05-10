@@ -267,7 +267,7 @@ namespace RenderingSpace
 
         public float Homogeneity => parent != null ? parent.homogeneities[childIndex] : 0f;
         protected float Disparity => 1f - Homogeneity;
-        protected float Importance => Disparity + RenderingFacade.Instance.QuadTreeDepth - level;
+        protected float Importance => Disparity + (RenderingFacade.Instance.QuadTreeDepth - level);
 
         protected void GetSubRegion(int r, out int minX, out int minY, out int maxX, out int maxY)
         {
@@ -311,7 +311,7 @@ namespace RenderingSpace
             float totalDistances = 0f;
             for (int i = 0; i < RenderConfig.homogeneityPoints; i++)
             {
-                for (int j = 0; j < RenderConfig.homogeneityPoints; j++)
+                for (int j = i; j < RenderConfig.homogeneityPoints; j++)
                 {
                     homogeneities[0] += Mathf.Abs(randomDepths[0][i] - randomDepths[0][j]);
                     homogeneities[1] += Mathf.Abs(randomDepths[1][i] - randomDepths[1][j]);
