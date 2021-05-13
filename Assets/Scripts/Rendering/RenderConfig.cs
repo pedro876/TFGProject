@@ -25,6 +25,7 @@ namespace RenderingSpace
         #endregion
 
         #region Setting
+
         public static readonly QuadLevel[] cpuSetting = new QuadLevel[]
             {
                 new QuadLevel(64, 90),
@@ -32,7 +33,6 @@ namespace RenderingSpace
                 new QuadLevel(128, 200),
                 new QuadLevel(90, 500),
                 new QuadLevel(90, 1024),
-                //new QuadLevel(180, 1024),
             };
         public static readonly QuadLevel[] gpuSetting = new QuadLevel[]
             {

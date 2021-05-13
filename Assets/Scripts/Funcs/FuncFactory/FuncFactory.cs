@@ -32,6 +32,10 @@ namespace FuncSpace
             simplifier = new FuncSimplifier();
             encoder = new FuncEncoder(factory:this);
             dummyFunc = CreateFunc("f(x) = cos(x) +cos(y)");
+            CreateFunc("g(x,y,z) = perlin2(x,y)>z-(perlin3(x,y,z)*0.65)");
+            CreateFunc("p(x,y,z) = (mag(x,y,z)+perlin3(x,y,z)*0.3)<5-perlin3(x,y,z)");
+            CreateFunc("r(x,y) = round(perlin2(x,y)*10-4)");
+            CreateFunc("h(x,y,z) = perlin3(x,y,z)");
         }
 
         public IFunc GetDummy()

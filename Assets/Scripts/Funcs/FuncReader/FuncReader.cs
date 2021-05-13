@@ -112,9 +112,17 @@ namespace FuncSpace
         {
             bool startsWithSubFunc = false;
             string auxSub = "";
+            int i = 0;
+            StringBuilder b = new StringBuilder();
+            while(i < text.Length && text[i] != '(')
+            {
+                b.Append(text[i]);
+                i++;
+            }
+            string subF = b.ToString();
             factory.ForEachFuncName((name) =>
             {
-                if (text.StartsWith(name))
+                if (subF.Equals(name))
                 {
                     startsWithSubFunc = true;
                     auxSub = name;

@@ -213,7 +213,7 @@ namespace FuncSpace
             bool foundCoincidence = false;
             factory.ForEachFuncName((name) =>
             {
-                if (auxDef.StartsWith(name))
+                if (ExtractSubFuncName(ref auxDef).Equals(name))
                 {
                     auxSub = name;
                     foundCoincidence = true;
@@ -221,6 +221,18 @@ namespace FuncSpace
             });
             subfunction = auxSub;
             return foundCoincidence;
+        }
+
+        private string ExtractSubFuncName(ref string definition)
+        {
+            StringBuilder b = new StringBuilder();
+            int i = 0;
+            while(i < definition.Length && definition[i] != '(')
+            {
+                b.Append(definition[i]);
+                i++;
+            }
+            return b.ToString();
         }
 
         private IFuncNode ProcessSubfunction(ref string definition, ref string subfunction)
